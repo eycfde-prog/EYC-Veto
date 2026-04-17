@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VETO PROGRAM | Smart Board</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #c5a059;
+            --gold-dim: rgba(197,160,89,0.18);
+            --gold-glow: rgba(197,160,89,0.4);
+            --bg: #060810;
+            --border: rgba(197,160,89,0.22);
+            --text: #efefef;
+            --text-dim: rgba(255,255,255,0.45);
+            --banner: 100px;
+            --cyan: #00d4ff;
+            --cyan-dim: rgba(0,212,255,0.12);
+            --cyan-glow: rgba(0,212,255,0.4);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-user-select:none; user-select:none; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Barlow', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background-image:
+                radial-gradient(ellipse at 20% 50%, rgba(0,40,70,0.35) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 20%, rgba(70,35,0,0.25) 0%, transparent 50%);
+        }
+
+        /* ── BANNER ── */
+        .banner {
+            height: var(--banner);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 32px;
+            background: linear-gradient(180deg, #0c0f1e 0%, #080a14 100%);
+            border-bottom: 1.5px solid var(--gold);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.8);
+            position: relative; z-index: 10;
+        }
+        .banner::after {
+            content: '';
+            position: absolute; bottom: -2px; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--cyan), var(--gold), var(--cyan), transparent);
+            opacity: 0.35;
+        }
+        .banner-back {
+            background: transparent;
+            border: 1.5px solid var(--cyan); color: var(--cyan);
+            padding: 8px 16px; border-radius: 6px; cursor: pointer;
+            font-family: 'Orbitron', sans-serif; font-weight: 700;
+            font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s; flex-shrink: 0;
+        }
+        .banner-back:hover { background: var(--cyan); color: #000; box-shadow: 0 0 18px var(--cyan-glow); }
+        .banner-logo   { height: 56px; filter: drop-shadow(0 0 8px var(--gold-glow)); flex-shrink: 0; }
+        .banner-avatar { height: 76px; border-radius: 10px; border: 2px solid var(--gold); flex-shrink: 0; box-shadow: 0 0 14px var(--gold-glow); }
+        .banner-title  { text-align: center; flex: 1; padding: 0 20px; }
+        .banner-title h1 {
+            font-family: 'Orbitron', sans-serif; font-size: 1.9rem; font-weight: 900;
+            letter-spacing: 6px; color: #fff; line-height: 1;
+            text-shadow: 0 0 25px rgba(0,212,255,0.3);
+        }
+        .banner-title h1 span { color: var(--gold); text-shadow: 0 0 18px var(--gold-glow); }
+        .banner-title p {
+            font-size: 0.6rem; color: var(--cyan); letter-spacing: 3px;
+            text-transform: uppercase; margin-top: 5px; opacity: 0.65;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* ── GRID ── */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 22px; padding: 26px 30px;
+            overflow-y: auto;
+            height: calc(100vh - var(--banner));
+            align-content: start;
+        }
+        .grid::-webkit-scrollbar { width: 3px; }
+        .grid::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+
+        /* ── CARD ── */
+        .card-scene { perspective: 900px; cursor: pointer; }
+        .card {
+            position: relative; width: 100%; aspect-ratio: 3/4;
+            transform-style: preserve-3d;
+            transition: transform 0.55s cubic-bezier(0.23,1,0.32,1), box-shadow 0.3s;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,212,255,0.08);
+        }
+        .card-scene:hover .card {
+            box-shadow: 0 20px 50px rgba(0,0,0,0.85), 0 0 0 1.5px var(--cyan), 0 0 35px var(--cyan-dim);
+        }
+        .card-face {
+            position: absolute; inset: 0; border-radius: 16px; overflow: hidden;
+            display: flex; flex-direction: column; background: #0b0e1c; backface-visibility: hidden;
+        }
+        .card-face::before {
+            content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 3;
+            background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,212,255,0.018) 3px, rgba(0,212,255,0.018) 4px);
+        }
+        .card-img-wrap { flex: 0 0 68%; position: relative; overflow: hidden; }
+        .card-img-wrap img {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+            transition: transform 0.5s ease, filter 0.3s;
+            filter: saturate(0.88) contrast(1.05);
+        }
+        .card-scene:hover .card-img-wrap img { transform: scale(1.06); filter: saturate(1.1) contrast(1.1); }
+        .card-img-wrap::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(to bottom, transparent 30%, rgba(6,8,16,0.82) 100%);
+        }
+        .card-shine {
+            position: absolute; inset: 0; border-radius: 16px; pointer-events: none;
+            background: radial-gradient(circle at 30% 30%, rgba(0,212,255,0.07) 0%, transparent 60%);
+            opacity: 0; transition: opacity 0.3s; z-index: 5;
+        }
+        .card-scene:hover .card-shine { opacity: 1; }
+        .card-label {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 10px 12px;
+            background: linear-gradient(180deg, #0e1224 0%, #090c18 100%);
+            border-top: 1px solid rgba(0,212,255,0.18); gap: 5px;
+        }
+        .card-type {
+            font-size: 0.5rem; font-weight: 700; font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: var(--cyan); background: var(--cyan-dim);
+            padding: 2px 8px; border-radius: 3px; border: 1px solid rgba(0,212,255,0.25);
+        }
+        .card-name {
+            font-size: clamp(0.78rem, 1vw, 0.98rem); font-weight: 700;
+            color: #fff; text-align: center; line-height: 1.25;
+        }
+        .card-edge {
+            position: absolute; bottom: 0; left: 5%; right: 5%; height: 1.5px;
+            background: linear-gradient(90deg, transparent, var(--cyan), var(--gold), var(--cyan), transparent);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .card-scene:hover .card-edge { opacity: 1; }
+        .cc { position: absolute; width: 12px; height: 12px; z-index: 4; }
+        .cc.tl { top:5px; left:5px;  border-top:1.5px solid var(--cyan); border-left:1.5px solid var(--cyan); }
+        .cc.tr { top:5px; right:5px; border-top:1.5px solid var(--cyan); border-right:1.5px solid var(--cyan); }
+        .cc.bl { bottom:5px; left:5px;  border-bottom:1.5px solid var(--gold); border-left:1.5px solid var(--gold); }
+        .cc.br { bottom:5px; right:5px; border-bottom:1.5px solid var(--gold); border-right:1.5px solid var(--gold); }
+
+        /* ── STAGE ── */
+        #stage { position: fixed; inset: 0; background: #000; z-index: 8000; display: none; }
+        #stage-content { width: 100%; height: 100%; overflow: hidden; }
+        #stage-loader {
+            position: absolute; inset: 0; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 16px;
+            color: var(--cyan); font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem; letter-spacing: 4px;
+        }
+        .spinner {
+            width: 46px; height: 46px;
+            border: 2px solid rgba(0,212,255,0.2); border-top-color: var(--cyan);
+            border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .exit-btn {
+            position: fixed; top: 14px; right: 14px; z-index: 9999;
+            padding: 8px 16px; font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+            background: rgba(214,48,49,0.85); color: white;
+            border: 1.5px solid #ff4757; border-radius: 6px; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .exit-btn:hover { background: #d63031; }
+
+        /* ── NOTE ── */
+        #note-overlay {
+            position: fixed; inset: 0; z-index: 13000; display: none;
+            background: rgba(6,8,16,0.97);
+            flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+        }
+        #note-textarea {
+            width: 88%; min-height: 180px; background: transparent; border: none;
+            border-bottom: 2px solid var(--cyan); color: var(--cyan);
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem,7vw,5rem);
+            text-align: center; outline: none; resize: none;
+            -webkit-user-select: text; user-select: text;
+        }
+        #note-overlay p { color: var(--text-dim); font-size: 0.7rem; letter-spacing: 3px; font-family: 'Orbitron', sans-serif; }
+
+        /* ── LASER ── */
+        #laser {
+            position: fixed; width: 18px; height: 18px; border-radius: 50%;
+            background: radial-gradient(circle, #ff2020 0%, rgba(255,0,0,0) 70%);
+            box-shadow: 0 0 12px #f00, 0 0 24px #f00;
+            pointer-events: none; z-index: 14000; display: none;
+        }
+        #draw-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 8500; }
+
+        /* ── FREEZE ── */
+        #freeze-layer {
+            position: fixed; inset: 0; z-index: 11000; background: #000;
+            display: none; cursor: grab; overflow: hidden;
+        }
+        #freeze-layer:active { cursor: grabbing; }
+        #freeze-content { position: absolute; transform-origin: 0 0; will-change: transform; }
+
+        /* ── TOOLBOX ── */
+        .toolbox {
+            position: fixed; bottom: 26px; right: 26px; z-index: 12000;
+            display: flex; flex-direction: column-reverse; align-items: center; gap: 11px;
+        }
+        .tool-btn {
+            width: 52px; height: 52px; border-radius: 50%;
+            background: #0c0f1e; border: 1.5px solid var(--gold);
+            color: var(--gold); font-size: 1.25rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+            transition: opacity 0.3s, transform 0.35s cubic-bezier(0.68,-0.55,0.27,1.55), box-shadow 0.2s;
+            opacity: 0; transform: translateY(20px) scale(0); pointer-events: none;
+        }
+        .tool-btn.main {
+            opacity: 1; transform: none; pointer-events: auto;
+            background: var(--gold); color: #000; font-size: 1.35rem;
+            box-shadow: 0 0 18px var(--gold-glow);
+        }
+        .toolbox.open .tool-btn { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+        .toolbox.open .main { transform: rotate(135deg); background: #d63031; border-color: #ff4757; color: white; box-shadow: 0 0 18px rgba(255,71,87,0.5); }
+        .tool-btn:hover:not(.main) { transform: scale(1.12) translateY(0) !important; box-shadow: 0 0 16px var(--cyan-glow); border-color: var(--cyan); color: var(--cyan); }
+        .tool-btn.on { background: #ff4757; border-color: #fff; color: white; }
+
+        /* ══════════════════════════════════════════
+           VETO PORTAL — REDESIGNED
+        ══════════════════════════════════════════ */
+        #portal-overlay {
+            position: fixed; inset: 0; z-index: 15000;
+            display: none; flex-direction: column;
+            background: rgba(4,5,12,0.97);
+            overflow: hidden;
+        }
+        #portal-overlay.active { display: flex; }
+        #portal-overlay::before {
+            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,212,255,0.010) 3px, rgba(0,212,255,0.010) 4px);
+        }
+
+        /* TOPBAR */
+        .portal-topbar {
+            position: relative; z-index: 2;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 28px; height: 56px;
+            background: #080a14;
+            border-bottom: 1.5px solid var(--gold);
+            flex-shrink: 0;
+        }
+        .portal-title {
+            font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 900;
+            letter-spacing: 6px; color: var(--cyan);
+        }
+        .portal-title span { color: var(--gold); }
+        .portal-close {
+            background: transparent; border: 1.5px solid #ff4757; color: #ff4757;
+            padding: 7px 16px; border-radius: 6px; cursor: pointer;
+            font-family: 'Orbitron', sans-serif; font-size: 0.58rem; letter-spacing: 2px;
+            transition: background 0.2s;
+        }
+        .portal-close:hover { background: rgba(255,71,87,0.18); }
+
+        /* ── PORTAL SCROLL BODY ── */
+        .portal-body {
+            position: relative; z-index: 1;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 28px 24px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+        .portal-body::-webkit-scrollbar { width: 3px; }
+        .portal-body::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+
+        /* ── SEARCH ROW ── */
+        .portal-search-row {
+            width: 100%; max-width: 600px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .p-search-label {
+            font-family: 'Orbitron', sans-serif; font-size: 0.48rem;
+            letter-spacing: 3px; color: var(--cyan); opacity: 0.65;
+        }
+        .p-search-input-row { display: flex; gap: 10px; }
+        #portal-code-input {
+            flex: 1; background: rgba(0,212,255,0.05);
+            border: 1.5px solid rgba(0,212,255,0.25); border-radius: 10px;
+            color: var(--cyan); font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem; font-weight: 700; letter-spacing: 4px;
+            padding: 13px 18px; outline: none; text-transform: uppercase;
+            -webkit-user-select: text; user-select: text;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        #portal-code-input:focus { border-color: var(--cyan); box-shadow: 0 0 18px var(--cyan-dim); }
+        #portal-fetch-btn {
+            background: var(--cyan); border: none; color: #000;
+            font-family: 'Orbitron', sans-serif; font-size: 0.7rem; font-weight: 900;
+            letter-spacing: 3px; padding: 13px 22px; border-radius: 10px; cursor: pointer;
+            transition: box-shadow 0.2s, transform 0.1s;
+            white-space: nowrap;
+        }
+        #portal-fetch-btn:hover { box-shadow: 0 0 24px var(--cyan-glow); transform: translateY(-1px); }
+
+        #portal-status {
+            text-align: center; font-family: 'Orbitron', sans-serif;
+            font-size: 0.62rem; letter-spacing: 2px;
+            padding: 9px 12px; border-radius: 8px; display: none;
+        }
+        #portal-status.success { background: rgba(0,255,136,0.08); color: #00ff88; border: 1px solid rgba(0,255,136,0.25); }
+        #portal-status.error   { background: rgba(255,71,87,0.08);  color: #ff4757; border: 1px solid rgba(255,71,87,0.25); }
+        #portal-status.loading { background: rgba(0,212,255,0.08);  color: var(--cyan); border: 1px solid rgba(0,212,255,0.25); }
+
+        /* ── BIG STUDENT CARD ── */
+        #portal-student-card {
+            display: none;
+            width: 100%; max-width: 900px;
+            background: linear-gradient(145deg, #0a0d1e 0%, #060810 100%);
+            border: 1px solid rgba(0,212,255,0.2);
+            border-radius: 20px; overflow: hidden; position: relative;
+        }
+        #portal-student-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--gold), var(--cyan));
+        }
+        #portal-student-card.locked { pointer-events: none; }
+
+        /* CARD HERO SECTION */
+        .psc-hero {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 28px;
+            padding: 32px 32px 24px;
+            background: linear-gradient(135deg, rgba(0,212,255,0.06) 0%, transparent 60%);
+            border-bottom: 1px solid rgba(0,212,255,0.12);
+            position: relative;
+        }
+
+        /* Avatar */
+        .psc-avatar-wrap {
+            position: relative; width: 130px; height: 130px; flex-shrink: 0;
+        }
+        #portal-avatar {
+            width: 130px; height: 130px; border-radius: 16px;
+            border: 2.5px solid var(--gold); object-fit: cover;
+            box-shadow: 0 0 40px var(--gold-glow), 0 0 80px rgba(197,160,89,0.1);
+            display: block;
+        }
+        .psc-avatar-ring {
+            position: absolute; inset: -6px; border-radius: 20px;
+            border: 1px solid rgba(197,160,89,0.2);
+            pointer-events: none;
+        }
+
+        /* Hero info */
+        .psc-info {
+            display: flex; flex-direction: column; justify-content: center; gap: 10px;
+        }
+        #portal-name {
+            font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: 900;
+            color: #fff; letter-spacing: 2px; line-height: 1.1;
+        }
+        .psc-group-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.2);
+            border-radius: 6px; padding: 4px 12px;
+            font-family: 'Orbitron', sans-serif; font-size: 0.5rem;
+            letter-spacing: 3px; color: var(--cyan);
+            width: fit-content;
+        }
+
+        /* STATS ROW inside hero */
+        .psc-stats-row {
+            display: flex; gap: 16px; flex-wrap: wrap; margin-top: 4px;
+        }
+        .psc-stat-pill {
+            display: flex; flex-direction: column; align-items: center;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px; padding: 12px 20px; gap: 4px;
+            min-width: 90px;
+        }
+        .psc-stat-label {
+            font-family: 'Orbitron', sans-serif; font-size: 0.42rem;
+            letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase;
+        }
+        .psc-stat-value {
+            font-family: 'Orbitron', sans-serif; font-size: 1.6rem; font-weight: 900;
+            line-height: 1; color: var(--gold);
+        }
+        .psc-stat-value.cyan-val { color: var(--cyan); }
+
+        /* Stars row */
+        .psc-stars-strip {
+            display: flex; align-items: center; gap: 3px; margin-top: 2px;
+        }
+        .psc-star { font-size: 1rem; filter: drop-shadow(0 0 4px var(--gold-glow)); }
+        .psc-star.empty { opacity: 0.15; filter: none; }
+
+        /* Rank badge top-right */
+        .psc-rank-badge {
+            position: absolute; top: 20px; right: 24px;
+            background: rgba(0,0,0,0.5); border: 1px solid var(--gold);
+            border-radius: 10px; padding: 8px 16px; text-align: center;
+        }
+        .psc-rank-label { font-family: 'Orbitron', sans-serif; font-size: 0.38rem; letter-spacing: 2px; color: var(--text-dim); display: block; }
+        .psc-rank-value { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; font-weight: 900; color: var(--gold); }
+
+        /* ── GRADES SECTION ── */
+        .psc-grades {
+            padding: 24px 32px 28px;
+        }
+        .psc-grades-title {
+            font-family: 'Orbitron', sans-serif; font-size: 0.52rem;
+            letter-spacing: 4px; color: var(--gold);
+            margin-bottom: 18px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .psc-grades-title::after {
+            content: ''; flex: 1; height: 1px;
+            background: linear-gradient(90deg, rgba(197,160,89,0.3), transparent);
+        }
+
+        /* Grades grid */
+        .grades-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .grade-cell {
+            background: rgba(0,212,255,0.04); border: 1px solid rgba(0,212,255,0.12);
+            border-radius: 10px; padding: 12px 14px;
+            display: flex; flex-direction: column; gap: 7px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        .grade-cell.locked-cell {
+            opacity: 0.35; pointer-events: none;
+        }
+        .grade-cell:focus-within { border-color: rgba(0,212,255,0.5); box-shadow: 0 0 12px var(--cyan-dim); }
+        .grade-cell.bonus-cell { border-color: rgba(197,160,89,0.22); background: rgba(197,160,89,0.04); }
+        .grade-cell.bonus-cell:focus-within { border-color: var(--gold); box-shadow: 0 0 12px var(--gold-glow); }
+
+        .grade-label {
+            font-family: 'Orbitron', sans-serif; font-size: 0.44rem;
+            letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase;
+        }
+        .grade-label.bonus-lbl { color: var(--gold); }
+
+        .grade-input {
+            background: transparent; border: none;
+            border-bottom: 1.5px solid rgba(0,212,255,0.2);
+            color: var(--cyan); font-family: 'Orbitron', sans-serif;
+            font-size: 1.15rem; font-weight: 700;
+            width: 100%; outline: none; padding: 3px 0;
+            transition: border-color 0.2s; text-align: center;
+            -webkit-user-select: text; user-select: text;
+        }
+        .grade-input:focus { border-color: var(--cyan); }
+        .grade-input.bonus-inp { color: var(--gold); border-bottom-color: rgba(197,160,89,0.25); }
+        .grade-input.bonus-inp:focus { border-color: var(--gold); }
+        .grade-input:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* SUBMIT BTN */
+        #portal-submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #071a0f 0%, #04100a 100%);
+            border: 1.5px solid #00cc70; color: #00ff88;
+            font-family: 'Orbitron', sans-serif; font-size: 0.85rem; font-weight: 700;
+            letter-spacing: 4px; padding: 18px; border-radius: 12px;
+            cursor: pointer; text-transform: uppercase;
+            transition: box-shadow 0.2s, transform 0.1s;
+        }
+        #portal-submit-btn:hover { box-shadow: 0 0 32px rgba(0,255,136,0.25); transform: translateY(-1px); }
+        #portal-submit-btn:active { transform: translateY(0); }
+        #portal-submit-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* ── LOCKED OVERLAY MSG ── */
+        #portal-lock-msg {
+            display: none;
+            width: 100%; max-width: 900px;
+            text-align: center;
+            padding: 28px;
+            background: rgba(0,212,255,0.04);
+            border: 1px dashed rgba(0,212,255,0.2);
+            border-radius: 14px;
+            font-family: 'Orbitron', sans-serif; font-size: 0.65rem;
+            letter-spacing: 3px; color: var(--text-dim);
+        }
+        #portal-lock-msg.visible { display: block; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .banner { padding: 0 12px; height: 70px; }
+            .banner-logo { height: 34px; } .banner-avatar { height: 48px; }
+            .banner-title h1 { font-size: 1rem; letter-spacing: 3px; }
+            .banner-back { padding: 6px 10px; font-size: 0.58rem; }
+            .grid { padding: 10px; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(145px,1fr)); }
+            .toolbox { bottom: 14px; right: 14px; }
+            .tool-btn { width: 46px; height: 46px; font-size: 1.1rem; }
+            .psc-hero { grid-template-columns: 1fr; gap: 16px; padding: 20px; }
+            .psc-avatar-wrap { width: 90px; height: 90px; margin: 0 auto; }
+            #portal-avatar { width: 90px; height: 90px; }
+            .psc-rank-badge { position: static; align-self: flex-start; }
+            .psc-info { align-items: center; text-align: center; }
+            .psc-stats-row { justify-content: center; }
+            .psc-grades { padding: 16px 16px 24px; }
+            .grades-grid { grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 8px; }
+            .portal-body { padding: 16px 12px 32px; }
+            #portal-name { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="banner">
+    <button class="banner-back" onclick="window.location.href='vetoof.html'">← Back</button>
+    <img src="https://raw.githubusercontent.com/eycfde-prog/EYCVetoProgram/main/logo.png"
+         class="banner-logo" alt="VETO" onerror="this.style.display='none'">
+    <div class="banner-title">
+        <h1 id="title-text">VETO <span>BOARD</span></h1>
+        <p id="title-sub">Select an activity to begin</p>
+    </div>
+    <img src="https://raw.githubusercontent.com/eycfde-prog/EYCVetoProgram/main/MrEzz.png"
+         class="banner-avatar" alt="Mr. Ezz" onerror="this.style.display='none'">
+</header>
+
+<main class="grid" id="grid"></main>
+
+<div id="stage">
+    <button class="exit-btn" onclick="closeStage()">✖ Exit</button>
+    <div id="stage-loader"><div class="spinner"></div><span>INITIALIZING...</span></div>
+    <div id="stage-content"></div>
+</div>
+
+<div id="note-overlay">
+    <textarea id="note-textarea" placeholder="TYPE HERE..."></textarea>
+    <p>ESC TO CLOSE</p>
+</div>
+
+<div id="freeze-layer"><div id="freeze-content"></div></div>
+<div id="laser"></div>
+<canvas id="draw-canvas"></canvas>
+
+<!-- ════════════════════════════════════════
+     VETO PORTAL — REDESIGNED
+════════════════════════════════════════ -->
+<div id="portal-overlay">
+
+    <div class="portal-topbar">
+        <div class="portal-title">VETO <span>PORTAL</span></div>
+        <button class="portal-close" onclick="closePortal()">✖ CLOSE</button>
+    </div>
+
+    <div class="portal-body">
+
+        <!-- SEARCH ROW -->
+        <div class="portal-search-row">
+            <div class="p-search-label">AGENT OFFLINE CODE</div>
+            <div class="p-search-input-row">
+                <input type="text" id="portal-code-input" placeholder="V-0000"
+                       maxlength="12" autocomplete="off"
+                       onkeydown="if(event.key==='Enter')fetchStudent()">
+                <button id="portal-fetch-btn" onclick="fetchStudent()">⟳ SCAN</button>
+            </div>
+            <div id="portal-status"></div>
+        </div>
+
+        <!-- LOCK MSG (shown when no student loaded) -->
+        <div id="portal-lock-msg" class="visible">
+            SCAN AN AGENT CODE FIRST — SCORES ARE LOCKED UNTIL A STUDENT IS LOADED
+        </div>
+
+        <!-- BIG STUDENT CARD -->
+        <div id="portal-student-card">
+
+            <!-- HERO -->
+            <div class="psc-hero">
+                <div class="psc-avatar-wrap">
+                    <img id="portal-avatar" src="" alt="Agent" onerror="this.style.opacity='0'">
+                    <div class="psc-avatar-ring"></div>
+                </div>
+
+                <div class="psc-info">
+                    <div id="portal-name">—</div>
+                    <div class="psc-group-badge">
+                        <span>●</span>
+                        <span id="portal-group">GROUP —</span>
+                    </div>
+                    <div class="psc-stats-row">
+                        <div class="psc-stat-pill">
+                            <div class="psc-stat-label">TOKENS</div>
+                            <div class="psc-stat-value" id="portal-tokens">0</div>
+                        </div>
+                        <div class="psc-stat-pill">
+                            <div class="psc-stat-label">STARS</div>
+                            <div class="psc-stat-value cyan-val" id="portal-stars-count">0</div>
+                        </div>
+                        <div class="psc-stat-pill" style="gap:6px;">
+                            <div class="psc-stat-label">STAR RANK</div>
+                            <div class="psc-stars-strip" id="portal-stars-row"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="psc-rank-badge">
+                    <span class="psc-rank-label">GLOBAL RANK</span>
+                    <div class="psc-rank-value" id="portal-rank-full">—</div>
+                </div>
+            </div>
+
+            <!-- GRADES -->
+            <div class="psc-grades">
+                <div class="psc-grades-title">MISSION SCORES</div>
+                <div class="grades-grid" id="portal-grades-grid"></div>
+                <button id="portal-submit-btn" onclick="submitGrades()">▶ UPLOAD SCORES TO SYSTEM</button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- TOOLBOX -->
+<div class="toolbox" id="toolbox">
+    <button class="tool-btn main" onclick="toggleToolbox()" title="Tools">⚙</button>
+    <button class="tool-btn" id="btn-portal" onclick="openPortal()" title="Veto Portal">🎯</button>
+    <button class="tool-btn" id="btn-laser"  onclick="toggleLaser()"  title="Laser">🔦</button>
+    <button class="tool-btn" id="btn-freeze" onclick="toggleFreeze()" title="Freeze">❄️</button>
+    <button class="tool-btn" id="btn-reload" onclick="location.reload()" title="Reload">🔄</button>
+    <button class="tool-btn" id="btn-note"   onclick="toggleNote()"   title="Note">📝</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+// ════════════════════════════════════════════
+// SESSION DATA
+// ════════════════════════════════════════════
+const sessionData = {
+  "1-1": ["Grammar"],
+  "1-2": ["Listening", "Grammar"],
+  "1-3": ["Listening", "Vocab", "Grammar"],
+  "1-4": ["Listening", "Vocab", "Grammar"],
+  "2-1": ["Listening", "Grammar"],
+  "2-2": ["Listening", "Reading", "One Shot"],
+  "2-3": ["Listening", "Vocab", "Reading"],
+  "2-4": ["Listening", "Vocab", "Grammar", "Reading", "Tonge Twister", "One Shot"],
+  "3-1": ["Listening", "Grammar", "Reading", "Tonge Twister"],
+  "3-2": ["Listening", "Reading", "Tonge Twister", "One Shot"],
+  "3-3": ["Listening", "Vocab", "Reading", "Tonge Twister"],
+  "3-4": ["Listening", "Vocab", "Grammar", "Reading", "Tonge Twister", "One Shot"],
+  "4-1": ["Listening", "Grammar", "Reading", "Tonge Twister", "Squeezer"],
+  "4-2": ["Listening", "Reading", "Tonge Twister", "One Shot"],
+  "4-3": ["Listening", "Vocab", "Reading", "Tonge Twister"],
+  "4-4": ["Listening", "Vocab", "Grammar", "Reading", "Tonge Twister", "One Shot"],
+  "5-1": ["Listening", "Grammar", "Reading", "Tonge Twister", "Squeezer"],
+  "5-2": ["Listening", "Reading", "Tonge Twister", "One Shot"],
+  "5-3": ["Listening", "Vocab", "Reading", "Tonge Twister", "DMT"],
+  "5-4": ["Listening", "Vocab", "Grammar", "Reading", "Tonge Twister", "One Shot"],
+  "6-1": ["Listening", "Grammar", "Reading", "Tonge Twister", "Squeezer"],
+  "6-2": ["Listening", "Reading", "Tonge Twister", "One Shot"],
+  "6-3": ["Listening", "Vocab", "Reading", "Tonge Twister", "Wish"],
+  "6-4": ["Listening", "Vocab", "Grammar", "Reading", "Tonge Twister", "One Shot"],
+  "7-1": ["Listening", "Grammar", "Reading", "Tonge Twister", "Squeezer"],
+  "7-2": ["Listening", "Reading", "Tonge Twister", "One Shot"],
+  "7-3": ["Listening", "Vocab", "Reading", "Tonge Twister", "DMT"],
+  "7-4": ["Listening", "Vocab", "Grammar", "Reading", "Tonge Twister", "One Shot"],
+  "8-1": ["Listening", "Grammar", "Reading", "Tonge Twister", "Squeezer"],
+  "8-2": ["Listening", "Reading", "Tonge Twister", "One Shot"],
+  "8-3": ["Listening", "Vocab", "Reading", "Tonge Twister", "Project"],
+  "8-4": ["Listening", "Vocab", "Grammar", "Reading", "Tonge Twister", "One Shot"],
+  "9-1": ["Listening", "Reading", "Tonge Twister", "Squeezer"],
+  "9-2": ["Listening", "Reading", "Tonge Twister", "One Shot"],
+  "9-3": ["Listening", "Vocab", "Reading", "Tonge Twister", "Wish"],
+  "9-4": ["Listening", "Vocab", "Grammar", "Reading", "Tonge Twister", "One Shot"],
+  "10-1": ["Listening", "Reading", "Tonge Twister", "Squeezer"],
+  "10-2": ["Listening", "Reading", "Tonge Twister", "One Shot"],
+  "10-3": ["Listening", "Vocab", "Reading", "Tonge Twister", "DMT"],
+  "10-4": ["Listening", "Vocab", "Reading", "Tonge Twister", "One Shot"],
+  "11-1": ["Listening", "Reading", "Tonge Twister", "Graduation Project"],
+  "11-2": ["Listening", "Reading", "Tonge Twister", "One Shot", "Graduation Project"],
+  "11-3": ["Listening", "Reading", "Tonge Twister", "DMT", "Graduation Project"],
+  "11-4": ["Listening", "Reading", "Tonge Twister", "One Shot", "Graduation Project"],
+  "12-1": ["Listening", "Reading", "Tonge Twister", "Graduation Project"],
+  "12-2": ["Listening", "Reading", "Tonge Twister", "Graduation Project"],
+  "12-3": ["Listening", "Reading", "Tonge Twister", "DMT", "Graduation Project"],
+  "12-4": ["Listening", "Reading", "Tonge Twister", "Graduation Project"],
+};
+
+const IMG_MAP = [
+    { match:/grammar/i,      img:'Grammar'            },
+    { match:/listening/i,    img:'Listening'          },
+    { match:/reading/i,      img:'Reading'            },
+    { match:/vocab/i,        img:'Vocabulary'         },
+    { match:/tongue/i,       img:'Tongue-twister'     },
+    { match:/one.?shot/i,    img:'One-shot'           },
+    { match:/squeezer/i,     img:'Squeezer'           },
+    { match:/dmt/i,          img:'DMT'                },
+    { match:/wish/i,         img:'Wish'               },
+    { match:/graduation/i,   img:'Graduation-project' },
+    { match:/project/i,      img:'Project'            },
+    { match:/oral/i,         img:'Interview'          },
+    { match:/presentation/i, img:'Graduation-project' },
+];
+const BADGE_MAP = [
+    { match:/grammar/i,      label:'Grammar'        },
+    { match:/listening/i,    label:'Listening'      },
+    { match:/reading/i,      label:'Reading'        },
+    { match:/vocab/i,        label:'Vocabulary'     },
+    { match:/tongue/i,       label:'Tongue Twister' },
+    { match:/one.?shot/i,    label:'One Shot'       },
+    { match:/squeezer/i,     label:'Squeezer'       },
+    { match:/dmt/i,          label:'DMT'            },
+    { match:/wish/i,         label:'Wish'           },
+    { match:/project/i,      label:'Project'        },
+    { match:/graduation/i,   label:'Graduation'     },
+    { match:/oral/i,         label:'Oral Exam'      },
+];
+
+function getImgSrc(n) {
+    for (const m of IMG_MAP) if (m.match.test(n)) return `data/Actirobo/${m.img}.png`;
+    return 'data/Actirobo/Grammar.png';
+}
+function getBadge(n) {
+    for (const m of BADGE_MAP) if (m.match.test(n)) return m.label;
+    return 'Activity';
+}
+
+function resolveFilePath(name, lvl, sess) {
+    const n = name.toUpperCase(), s = n.includes('TEST') ? 't' : '';
+    if (n.includes('ORAL'))         return `data/L-${lvl}-S-${sess}-Ora.js`;
+    if (n.includes('PRESENTATION')) return `data/L-${lvl}-S-${sess}-Grp.js`;
+    if (n.includes('GRAMMAR'))      return `data/L-${lvl}-S-${sess}-Gra.js`;
+    if (n.includes('LISTENING'))    return `data/L-${lvl}-S-${sess}-Lis${s}.js`;
+    if (n.includes('READING'))      return `data/L-${lvl}-S-${sess}-Rea${s}.js`;
+    if (n.includes('VOCAB'))        return `data/L-${lvl}-S-${sess}-Voc${s}.js`;
+    if (n.includes('TONGUE'))       return `data/L-${lvl}-S-${sess}-Ton${s}.js`;
+    if (n.includes('ONE')&&n.includes('SHOT')) return `data/L-${lvl}-S-${sess}-One${s}.js`;
+    if (n.includes('SQUEEZER'))     return `data/L-${lvl}-S-${sess}-Squ${s}.js`;
+    if (n.includes('DMT'))          return `data/L-${lvl}-S-${sess}-Dmt${s}.js`;
+    if (n.includes('WISH'))         return `data/L-${lvl}-S-${sess}-Wis${s}.js`;
+    if (n.includes('GRADUATION'))   return `data/L-${lvl}-S-${sess}-Gra${s}.js`;
+    if (n.includes('PROJECT'))      return `data/L-${lvl}-S-${sess}-Pro${s}.js`;
+    const fw = name.trim().split(/\s+/)[0];
+    return `data/L-${lvl}-S-${sess}-${fw[0].toUpperCase()+fw.slice(1,3).toLowerCase()}${s}.js`;
+}
+
+// 3D Tilt
+function setupTilt(scene) {
+    const card = scene.querySelector('.card'), MAX = 15;
+    const apply = (rx,ry) => { card.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg) translateZ(8px)`; };
+    scene.addEventListener('mousemove', e=>{
+        const r=scene.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+        apply(-y*MAX,x*MAX);
+        scene.querySelector('.card-shine').style.background=`radial-gradient(circle at ${(x+.5)*100}% ${(y+.5)*100}%,rgba(0,212,255,0.08) 0%,transparent 60%)`;
+    });
+    scene.addEventListener('mouseleave',()=>{ card.style.transform='rotateX(0)rotateY(0)translateZ(0)'; card.style.transition='transform .6s cubic-bezier(.23,1,.32,1)'; });
+    scene.addEventListener('mouseenter',()=>{ card.style.transition='transform .12s ease-out'; });
+    scene.addEventListener('touchmove',e=>{
+        const t=e.touches[0],r=scene.getBoundingClientRect();
+        apply(-((t.clientY-r.top)/r.height-.5)*MAX*.6,((t.clientX-r.left)/r.width-.5)*MAX*.6);
+    },{passive:true});
+    scene.addEventListener('touchend',()=>{ card.style.transform='rotateX(0)rotateY(0)translateZ(0)'; });
+}
+
+// Init
+const params=new URLSearchParams(window.location.search), SESSION=params.get('session')||'';
+function init(){
+    if(SESSION){
+        const[lvl,sess]=SESSION.split('-');
+        document.getElementById('title-text').innerHTML=`LEVEL <span>${lvl}</span> &nbsp;·&nbsp; CLASS <span>${sess}</span>`;
+    }
+    if(!SESSION||!sessionData[SESSION]){
+        document.getElementById('grid').innerHTML=`<p style="color:var(--text-dim);padding:40px;grid-column:1/-1;text-align:center;font-size:.9rem;font-family:'Orbitron',sans-serif;letter-spacing:3px;">SESSION NOT FOUND: <strong style="color:var(--cyan)">${SESSION||'?'}</strong></p>`;
+        return;
+    }
+    const grid=document.getElementById('grid');
+    sessionData[SESSION].forEach(item=>{
+        const imgSrc=getImgSrc(item),badge=getBadge(item),scene=document.createElement('div');
+        scene.className='card-scene'; scene.onclick=()=>openActivity(item);
+        scene.innerHTML=`<div class="card"><div class="card-face"><div class="card-img-wrap"><img src="${imgSrc}" alt="${badge}" onerror="this.style.opacity='0'"></div><div class="card-label"><span class="card-type">${badge}</span><span class="card-name">${item}</span></div></div><div class="card-shine"></div><div class="card-edge"></div><div class="cc tl"></div><div class="cc tr"></div><div class="cc bl"></div><div class="cc br"></div></div>`;
+        grid.appendChild(scene); setupTilt(scene);
+    });
+    const cv=document.getElementById('draw-canvas');
+    cv.width=window.innerWidth; cv.height=window.innerHeight;
+    window.addEventListener('resize',()=>{cv.width=window.innerWidth;cv.height=window.innerHeight;});
+    setupFreeze(); setupLaser();
+}
+
+function openActivity(name){
+    if(!SESSION)return;
+    const[lvl,sess]=SESSION.split('-'),path=resolveFilePath(name,lvl,sess);
+    const stage=document.getElementById('stage'),loader=document.getElementById('stage-loader'),content=document.getElementById('stage-content');
+    stage.style.display='block'; loader.style.display='flex'; content.innerHTML='';
+    document.querySelectorAll('script[data-activity]').forEach(s=>s.remove());
+    const scr=document.createElement('script'); scr.setAttribute('data-activity','true'); scr.src=path;
+    scr.onload=()=>{loader.style.display='none';};
+    scr.onerror=()=>{
+        loader.style.display='none';
+        content.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;color:var(--cyan);font-family:'Orbitron',sans-serif;"><span style="font-size:2.5rem;">⚠</span><span style="font-size:1.2rem;letter-spacing:4px;">FILE NOT FOUND</span><span style="font-size:.75rem;color:var(--text-dim);letter-spacing:2px;">${path}</span></div>`;
+    };
+    document.head.appendChild(scr);
+}
+function closeStage(){
+    document.getElementById('stage').style.display='none';
+    document.getElementById('stage-content').innerHTML='';
+    document.getElementById('stage-loader').style.display='none';
+}
+
+// Toolbox
+function toggleToolbox(){document.getElementById('toolbox').classList.toggle('open');}
+
+// Laser
+let laserOn=false;
+const laser=document.getElementById('laser'),canvas=document.getElementById('draw-canvas'),ctx=canvas.getContext('2d');
+function toggleLaser(){
+    laserOn=!laserOn; document.getElementById('btn-laser').classList.toggle('on',laserOn);
+    canvas.style.pointerEvents=laserOn?'auto':'none';
+    if(!laserOn){laser.style.display='none';ctx.clearRect(0,0,canvas.width,canvas.height);}
+}
+function setupLaser(){
+    canvas.addEventListener('mousedown',e=>{
+        if(!laserOn)return; laser.style.display='block';
+        ctx.clearRect(0,0,canvas.width,canvas.height); ctx.beginPath();
+        ctx.strokeStyle='#ff2020'; ctx.lineWidth=3; ctx.lineCap='round'; ctx.moveTo(e.clientX,e.clientY);
+        const draw=m=>{ctx.lineTo(m.clientX,m.clientY);ctx.stroke();laser.style.left=(m.clientX-9)+'px';laser.style.top=(m.clientY-9)+'px';};
+        const stop=()=>{laser.style.display='none';ctx.clearRect(0,0,canvas.width,canvas.height);canvas.removeEventListener('mousemove',draw);canvas.removeEventListener('mouseup',stop);};
+        canvas.addEventListener('mousemove',draw); canvas.addEventListener('mouseup',stop);
+    });
+}
+
+// Freeze
+let freezeOn=false,fscale=1,fpx=0,fpy=0,fdrag=false,fsx=0,fsy=0;
+function toggleFreeze(){
+    const ly=document.getElementById('freeze-layer'),fc=document.getElementById('freeze-content'),btn=document.getElementById('btn-freeze');
+    if(!freezeOn){
+        const tgt=document.getElementById('stage').style.display==='block'?document.getElementById('stage'):document.body;
+        html2canvas(tgt,{useCORS:true,allowTaint:true}).then(snap=>{
+            fc.innerHTML='';fc.appendChild(snap);fscale=1;fpx=0;fpy=0;applyFT();
+            ly.style.display='block';freezeOn=true;btn.classList.add('on');
+        });
+    }else{ly.style.display='none';freezeOn=false;btn.classList.remove('on');}
+}
+function applyFT(){document.getElementById('freeze-content').style.transform=`translate(${fpx}px,${fpy}px)scale(${fscale})`;}
+function setupFreeze(){
+    const ly=document.getElementById('freeze-layer');
+    ly.addEventListener('wheel',e=>{if(!freezeOn)return;e.preventDefault();fscale=Math.min(5,Math.max(.4,fscale*(e.deltaY>0?.9:1.1)));applyFT();},{passive:false});
+    const sd=e=>{if(!freezeOn)return;fdrag=true;const t=e.touches?e.touches[0]:e;fsx=t.clientX-fpx;fsy=t.clientY-fpy;};
+    const md=e=>{if(!fdrag||!freezeOn)return;const t=e.touches?e.touches[0]:e;fpx=t.clientX-fsx;fpy=t.clientY-fsy;applyFT();};
+    ly.addEventListener('mousedown',sd); ly.addEventListener('touchstart',sd,{passive:true});
+    window.addEventListener('mousemove',md); window.addEventListener('touchmove',md,{passive:true});
+    window.addEventListener('mouseup',()=>{fdrag=false;}); window.addEventListener('touchend',()=>{fdrag=false;});
+}
+
+// Note
+function toggleNote(){
+    const ov=document.getElementById('note-overlay'),open=ov.style.display==='flex';
+    ov.style.display=open?'none':'flex';
+    if(!open)setTimeout(()=>document.getElementById('note-textarea').focus(),80);
+}
+
+// ════════════════════════════════════════════
+// VETO PORTAL
+// ════════════════════════════════════════════
+const API = 'https://script.google.com/macros/s/AKfycby11YMgkbT1wjRtR6BzUgYvTQ7oSMDb5QL86f98tM92DZSznxWB30Yovr0CQaFqdXoSEA/exec';
+let currentEmail = null;
+
+const PORTAL_ACTIVITIES = [
+    { label: 'Attendance',         col: 'Attendence'        },
+    { label: 'ICA',                col: 'ICA'               },
+    { label: 'Listening',          col: 'Listening'         },
+    { label: 'Grammar',            col: 'Grammar'           },
+    { label: 'Reading',            col: 'Reading'           },
+    { label: 'Tongue Twister',     col: 'Tongue Twister'    },
+    { label: 'One Shot',           col: 'One Shot'          },
+    { label: 'Games',              col: 'Games'             },
+    { label: 'Squeezer',           col: 'Squeezer'          },
+    { label: 'DMT',                col: 'DMT'               },
+    { label: 'Wish',               col: 'Wish'              },
+    { label: 'Project',            col: 'Project'           },
+    { label: 'Graduation Project', col: 'Graduation Project'},
+];
+
+function setGradesLocked(locked) {
+    const inputs = document.querySelectorAll('.grade-input');
+    const submitBtn = document.getElementById('portal-submit-btn');
+    const cells = document.querySelectorAll('.grade-cell');
+    inputs.forEach(inp => { inp.disabled = locked; });
+    submitBtn.disabled = locked;
+    cells.forEach(c => {
+        if (locked) c.classList.add('locked-cell');
+        else c.classList.remove('locked-cell');
+    });
+}
+
+function openPortal(){
+    document.getElementById('portal-overlay').classList.add('active');
+    document.getElementById('toolbox').classList.remove('open');
+    buildGradesGrid();
+    setGradesLocked(true); // lock until student loaded
+    document.getElementById('portal-lock-msg').classList.add('visible');
+    document.getElementById('portal-student-card').style.display = 'none';
+    setTimeout(()=>document.getElementById('portal-code-input').focus(),200);
+}
+
+function closePortal(){
+    document.getElementById('portal-overlay').classList.remove('active');
+    resetPortal();
+}
+
+function resetPortal(){
+    currentEmail=null;
+    document.getElementById('portal-code-input').value='';
+    document.getElementById('portal-student-card').style.display='none';
+    document.getElementById('portal-lock-msg').classList.add('visible');
+    setStatus('','');
+    buildGradesGrid();
+    setGradesLocked(true);
+}
+
+function buildGradesGrid(){
+    const grid=document.getElementById('portal-grades-grid');
+    grid.innerHTML='';
+    PORTAL_ACTIVITIES.forEach(act=>{
+        const cell=document.createElement('div');
+        cell.className='grade-cell';
+        cell.innerHTML=`<div class="grade-label">${act.label.toUpperCase()}</div>
+            <input class="grade-input" type="number" min="0" max="100" step="0.5"
+                   placeholder="—" data-col="${act.col}" disabled>`;
+        grid.appendChild(cell);
+    });
+    const bc=document.createElement('div');
+    bc.className='grade-cell bonus-cell';
+    bc.innerHTML=`<div class="grade-label bonus-lbl">BONUS</div>
+        <input class="grade-input bonus-inp" type="number" min="0" max="9999" step="1"
+               placeholder="—" data-col="Bonus" disabled>`;
+    grid.appendChild(bc);
+}
+
+function setStatus(msg,type){
+    const el=document.getElementById('portal-status');
+    if(!msg){el.style.display='none';return;}
+    el.textContent=msg; el.className=type; el.style.display='block';
+}
+
+function renderStars(n){
+    let h='';
+    for(let i=0;i<10;i++) h+=`<span class="psc-star ${i<n?'':'empty'}">★</span>`;
+    return h;
+}
+
+async function fetchStudent(){
+    const code=document.getElementById('portal-code-input').value.trim().toUpperCase();
+    if(!code){setStatus('ENTER AGENT CODE','error');return;}
+    setStatus('SCANNING AGENT...','loading');
+    document.getElementById('portal-student-card').style.display='none';
+    document.getElementById('portal-lock-msg').classList.add('visible');
+    currentEmail=null;
+    setGradesLocked(true);
+    try{
+        const cleanCode = code.replace(/^V-/i, '');
+        const res = await fetch(`${API}?action=getStudentByOfflineCode&offlineCode=${encodeURIComponent(cleanCode)}`);
+        const data=await res.json();
+        if(data.status!=='success'){setStatus('AGENT NOT FOUND — CHECK CODE','error');return;}
+        const s=data.data;
+        currentEmail=s.email;
+        document.getElementById('portal-name').textContent=s.name||'—';
+        document.getElementById('portal-group').textContent=s.group||'—';
+        document.getElementById('portal-tokens').textContent=(s.tokens||0).toLocaleString();
+        document.getElementById('portal-stars-count').textContent=(s.stars||0);
+        document.getElementById('portal-stars-row').innerHTML=renderStars(s.stars||0);
+        document.getElementById('portal-rank-full').textContent='#'+(s.globalRank||'—');
+        const av=document.getElementById('portal-avatar');
+        av.src=s.avatar||''; av.style.opacity='1';
+        av.onerror=()=>{av.style.opacity='0';};
+        // Show card, hide lock msg, unlock grades
+        document.getElementById('portal-student-card').style.display='block';
+        document.getElementById('portal-lock-msg').classList.remove('visible');
+        setStatus('','');
+        buildGradesGrid();
+        setGradesLocked(false); // UNLOCK after student loaded
+        const first=document.querySelector('.grade-input');
+        if(first)setTimeout(()=>first.focus(),100);
+    }catch(err){setStatus('CONNECTION ERROR','error');}
+}
+
+async function submitGrades() {
+    if (!currentEmail) { setStatus('SCAN AGENT FIRST', 'error'); return; }
+    
+    const inputs = [...document.querySelectorAll('.grade-input')];
+    const payload = inputs
+        .filter(inp => inp.value.trim() !== '' && !isNaN(parseFloat(inp.value)))
+        .map(inp => ({ col: inp.getAttribute('data-col'), grade: parseFloat(inp.value) }));
+    
+    if (payload.length === 0) { setStatus('NO SCORES ENTERED', 'error'); return; }
+
+    const btn = document.getElementById('portal-submit-btn');
+    btn.disabled = true;
+    setStatus('SENDING...', 'loading');
+
+    try {
+        const res = await fetch(`${API}?action=updateGrades&email=${encodeURIComponent(currentEmail)}&grades=${encodeURIComponent(JSON.stringify(payload))}`);
+        const data = await res.json();
+        setStatus('✓ SCORES UPLOADED — READY FOR NEXT AGENT', 'success');
+        btn.disabled = false;
+        setTimeout(() => {
+            resetPortal();
+            document.getElementById('portal-code-input').focus();
+        }, 2200);
+    } catch (err) {
+        setStatus('CONNECTION ERROR', 'error');
+        btn.disabled = false;
+    }
+}
+
+// Keyboard
+window.addEventListener('keydown',e=>{
+    if(e.key!=='Escape')return;
+    if(document.getElementById('portal-overlay').classList.contains('active')){closePortal();return;}
+    if(document.getElementById('note-overlay').style.display==='flex'){document.getElementById('note-overlay').style.display='none';return;}
+    if(freezeOn){toggleFreeze();return;}
+    if(document.getElementById('stage').style.display==='block'){closeStage();}
+});
+
+window.addEventListener('load',()=>init());
+</script>
+</body>
+</html>
