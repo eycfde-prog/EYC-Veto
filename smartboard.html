@@ -799,19 +799,79 @@ function init(){
     setupFreeze(); setupLaser();
 }
 
-function openActivity(name){
-    if(!SESSION)return;
-    const[lvl,sess]=SESSION.split('-'),path=resolveFilePath(name,lvl,sess);
-    const stage=document.getElementById('stage'),loader=document.getElementById('stage-loader'),content=document.getElementById('stage-content');
-    stage.style.display='block'; loader.style.display='flex'; content.innerHTML='';
-    document.querySelectorAll('script[data-activity]').forEach(s=>s.remove());
-    const scr=document.createElement('script'); scr.setAttribute('data-activity','true'); scr.src=path;
-    scr.onload=()=>{loader.style.display='none';};
-    scr.onerror=()=>{
-        loader.style.display='none';
-        content.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;color:var(--cyan);font-family:'Orbitron',sans-serif;"><span style="font-size:2.5rem;">⚠</span><span style="font-size:1.2rem;letter-spacing:4px;">FILE NOT FOUND</span><span style="font-size:.75rem;color:var(--text-dim);letter-spacing:2px;">${path}</span></div>`;
-    };
-    document.head.appendChild(scr);
+/**
+ * WOLF D - Activity Dispatcher
+ * وظيفة الدالة: التعرف على نوع النشاط، تحميل المحرك، وجلب البيانات
+ */
+async function openActivity(name) {
+    if (!SESSION) return;
+    
+    const [lvl, sess] = SESSION.split('-');
+    const stage = document.getElementById('stage');
+    const loader = document.getElementById('stage-loader');
+    const content = document.getElementById('stage-content');
+    
+    // 1. إظهار اللودر وتجهيز المسرح
+    stage.style.display = 'block';
+    loader.style.display = 'flex';
+    content.innerHTML = '';
+
+    try {
+        // 2. تحديد المحرك والبيانات بناءً على اسم النشاط
+        // لنفترض أن name يأتي بقيمة 'listening' أو 'grammar' إلخ
+        const activityType = name.toLowerCase();
+        const enginePath = `engines/${activityType}-engine.js`;
+        const dataPath = `data/${activityType}_data.json`;
+
+        // 3. تحميل المحرك (لو مش موجود)
+        if (!window[`${activityType.charAt(0).toUpperCase() + activityType.slice(1)}Engine`]) {
+            await loadScript(enginePath);
+        }
+
+        // 4. جلب البيانات من الـ JSON
+        const response = await fetch(dataPath);
+        if (!response.ok) throw new Error('Data file not found');
+        const allData = await response.json();
+
+        // 5. استخراج بيانات المحاضرة المحددة (Session)
+        // هيكلة الـ JSON: level_1 -> class_1
+        const classKey = `class_${sess}`;
+        const levelKey = `level_${lvl}`;
+        const sessionData = allData[levelKey][classKey];
+
+        if (sessionData) {
+            // 6. تشغيل المحرك بالبيانات
+            if (activityType === 'listening') {
+                ListeningEngine.init(sessionData);
+            } 
+            // هنا تقدر تضيف شروط للـ Grammar أو غيره مستقبلاً
+            
+            loader.style.display = 'none';
+        } else {
+            throw new Error('Class data missing');
+        }
+
+    } catch (error) {
+        console.error("WOLF System Error:", error);
+        loader.style.display = 'none';
+        content.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;color:#ff4757;font-family:'Orbitron',sans-serif;">
+                <span style="font-size:2.5rem;">⚠</span>
+                <span style="font-size:1.2rem;letter-spacing:4px;">ACTIVITY ERROR</span>
+                <span style="font-size:.75rem;color:rgba(255,255,255,0.5);letter-spacing:2px;">${error.message}</span>
+            </div>`;
+    }
+}
+
+// دالة مساعدة لتحميل ملفات الـ JS برمجياً
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
 }
 function closeStage(){
     document.getElementById('stage').style.display='none';
