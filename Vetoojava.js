@@ -64,7 +64,7 @@ const PORTAL_DATA = {
     color: "rgba(0,212,255,0.9)",
     items: [
       { icon: "🤖", label: "Create your English Friend", sub: "AI conversation partner", url: "studyp.html", cls: "study-ico" },
-      { icon: "📝", label: "لخص مادتك",                 sub: "Summarize your lesson",  url: "studyp.html", cls: "study-ico" },
+      { icon: "📝", label: "Summarize your lesson",          sub: "AI-powered summary",    url: "studyp.html", cls: "study-ico" },
     ]
   },
   business: {
@@ -91,11 +91,11 @@ const SCARDLINE_ACTIVITIES = [
 ];
 
 const ACT_ARABIC = {
-  "Attendence":"الحضور","ICA":"ICA","Listening":"الاستماع",
-  "Grammar":"القواعد","Reading":"القراءة","Tongue Twister":"التلفظ",
-  "One Shot":"One Shot","Games":"الألعاب","Squeezer":"Squeezer",
-  "DMT":"DMT","Wish":"Wish","Project":"المشروع",
-  "Graduation Project":"مشروع التخرج","Bonus":"المكافأة"
+  "Attendence":"Attendance","ICA":"ICA","Listening":"Listening",
+  "Grammar":"Grammar","Reading":"Reading","Tongue Twister":"Tongue Twister",
+  "One Shot":"One Shot","Games":"Games","Squeezer":"Squeezer",
+  "DMT":"DMT","Wish":"Wish","Project":"Project",
+  "Graduation Project":"Graduation Project","Bonus":"Bonus"
 };
 
 // ─── DOM REFS ────────────────────────────────────────────────
@@ -313,7 +313,6 @@ function openSession(lvl, sess, btn) {
         </div>
         <div class="activity-card-body">
           <div class="activity-card-name">${name}</div>
-          <div class="activity-card-file">${filename}</div>
         </div>
         ${tkHTML}
         <span class="activity-badge ${badge}">${badgeLabel}</span>`;
@@ -437,11 +436,11 @@ function pgBuildCard(actKey, scores, cardIndex) {
   const trend   = pgCalcTrend(scores);
   const hasData = scores.length > 0;
   const arrowMap = { up:"↑", down:"↓", flat:"→" };
-  const pctStr  = trend.dir==="flat" ? "مستقر" : (trend.dir==="up"?"+":"")+trend.pct+"%";
+  const pctStr  = trend.dir==="flat" ? "Stable" : (trend.dir==="up"?"+":"")+trend.pct+"%";
   const visible = hasData ? scores.slice(-6) : [];
   const pillsHTML = visible.length>0
     ? visible.map((s,i) => `<span class="pg-score-pill${i===visible.length-1?" latest":""}">${s}</span>`).join("")
-    : `<span class="pg-score-pill">لا بيانات بعد</span>`;
+    : `<span class="pg-score-pill">No data yet</span>`;
 
   const card = document.createElement("div");
   card.className = `pg-card trend-${trend.dir}`;
@@ -449,7 +448,7 @@ function pgBuildCard(actKey, scores, cardIndex) {
     <div class="pg-card-top">
       <div>
         <div class="pg-act-name">${label}</div>
-        <div class="pg-act-counter">${hasData ? scores.length+" جلسة" : "لا توجد بيانات"}</div>
+        <div class="pg-act-counter">${hasData ? scores.length+" sessions" : "No data yet"}</div>
       </div>
       <div class="pg-trend-block">
         <div class="pg-arrow ${trend.dir}">${arrowMap[trend.dir]}</div>
@@ -457,7 +456,7 @@ function pgBuildCard(actKey, scores, cardIndex) {
       </div>
     </div>
     <div class="pg-chart-area">
-      <canvas id="pg-canvas-${cardIndex}" role="img" aria-label="رسم بياني لأداء ${label}"></canvas>
+      <canvas id="pg-canvas-${cardIndex}" role="img" aria-label="Performance chart for ${label}"></canvas>
     </div>
     <div class="pg-scores">${pillsHTML}</div>`;
   return card;
@@ -474,7 +473,7 @@ function pgDrawChart(canvasId, scores, dir) {
     type:"line",
     data:{ labels, datasets:[{ data, borderColor:lineColor, borderWidth:2, backgroundColor:fillColor, fill:true, tension:0.4, pointBackgroundColor:lineColor, pointRadius:data.length===1?5:3, pointHoverRadius:6 }] },
     options:{ responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>"درجة: "+ctx.raw } } },
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>"Score: "+ctx.raw } } },
       scales:{ x:{grid:{color:"rgba(0,212,255,0.06)"},ticks:{color:"#5a7090",font:{size:10}},border:{color:"transparent"}}, y:{grid:{color:"rgba(0,212,255,0.06)"},ticks:{color:"#5a7090",font:{size:10},maxTicksLimit:4},border:{color:"transparent"}} }
     }
   });
@@ -487,7 +486,7 @@ function pgBuildGallery(rowData) {
   PG.charts.forEach(c => { try{c.destroy();}catch(e){} });
   PG.charts=[]; PG.currentIndex=0;
   PG.activities = SCARDLINE_ACTIVITIES.filter(k => pgParseScores(rowData[k]).length>0);
-  if (PG.activities.length===0) { gallery.innerHTML=`<div class="pg-no-data">لا توجد بيانات أداء بعد 🎯</div>`; return; }
+  if (PG.activities.length===0) { gallery.innerHTML=`<div class="pg-no-data">No performance data yet 🎯</div>`; return; }
   gallery.innerHTML="";
 
   const sliderWrap = document.createElement("div"); sliderWrap.className="pg-slider-wrap";
@@ -547,7 +546,7 @@ function renderProgressLocked() {
   gallery.innerHTML=`
     <div class="pg-locked">
       <div class="pg-lock-icon">🔒</div>
-      <p class="pg-locked-txt">سجّل دخولك لعرض<br>تقدمك في الأنشطة</p>
+      <p class="pg-locked-txt">Log in to view<br>your performance</p>
       <button class="pg-login-btn" onclick="showLogin('progress')">LOG IN</button>
     </div>`;
 }
@@ -559,7 +558,7 @@ function renderProgressLoading() {
 
 function renderProgressError(msg) {
   const gallery=document.getElementById("progressGallery"); if(!gallery)return;
-  gallery.innerHTML=`<div class="pg-error">${msg||"تعذّر تحميل البيانات"}</div>`;
+  gallery.innerHTML=`<div class="pg-error">${msg||"Unable to load data"}</div>`;
 }
 
 async function initProgressGallery() {
@@ -570,6 +569,6 @@ async function initProgressGallery() {
     const res=await fetch(url);
     const data=await res.json();
     if(data.status==="success"&&data.row){pgBuildGallery(data.row);PG.isLoaded=true;}
-    else renderProgressError(data.message||"لا توجد بيانات لهذا الطالب");
-  } catch(e){renderProgressError("خطأ في الاتصال بالسيرفر");}
+    else renderProgressError(data.message||"No data found for this student");
+  } catch(e){renderProgressError("Connection error. Please try again.");}
 }
