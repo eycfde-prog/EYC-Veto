@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Placement Test | Mr. Ezz</title>
+    <style>
+        :root { --bg: #121212; --card: #1e1e26; --accent: #00adb5; --text: #eeeeee; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        #quiz-container { background: var(--card); padding: 40px; border-radius: 20px; width: 90%; max-width: 600px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); text-align: center; }
+        .option-btn { display: block; width: 100%; padding: 15px; margin: 12px 0; border: 2px solid #393e46; border-radius: 10px; background: transparent; color: white; cursor: pointer; transition: 0.3s; font-size: 17px; text-align: left; }
+        .option-btn:hover { border-color: var(--accent); background: rgba(0, 173, 181, 0.1); }
+        .correct { background: #2ecc71 !important; border-color: #2ecc71 !important; }
+        .wrong { background: #e74c3c !important; border-color: #e74c3c !important; }
+        #timer { font-size: 28px; color: var(--accent); margin-bottom: 15px; font-weight: bold; }
+        .hidden { display: none; }
+        input[type="email"] { width: 90%; padding: 15px; margin-bottom: 20px; border-radius: 8px; border: none; background: #393e46; color: white; }
+        .btn-main { background: var(--accent); color: white; padding: 15px 40px; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <div id="start-screen">
+        <h1>Grammar Placement Test</h1>
+        <p>50 Questions | 30 Seconds per question</p>
+        <p style="color: #00adb5;">⚠️ You have only 1 attempt</p>
+        <input type="email" id="email" placeholder="Enter your email address" required><br>
+        <button class="btn-main" onclick="startQuiz()">START EXAM</button>
+    </div>
+
+    <div id="quiz-screen" class="hidden">
+        <div id="timer">30</div>
+        <h3 id="question-text"></h3>
+        <div id="options-container"></div>
+    </div>
+
+    <div id="result-screen" class="hidden">
+        <h2 id="final-status">Processing...</h2>
+        <h1 id="level-display" style="font-size: 48px; color: #00adb5;"></h1>
+        <p id="score-display"></p>
+    </div>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbydH3QgH_RxssBTPWOrtnBrba08GwzQU_9x45NN8RGE4xxB-5SpJL-FBZO-72DgEn2y/exec";
+
+const allQuestions = [
+   [
+  {q: "She is a great doctor. _____ works at the city hospital.", o: ["Him", "Her", "She", "He"], id: 1},
+  {q: "This is not my book. It is _____.", o: ["your", "yours", "you", "mine's"], id: 2},
+  {q: "Can you give _____ the pen, please? I need to write.", o: ["I", "my", "mine", "me"], id: 3},
+  {q: "These are my _____ toys. They play with them every day.", o: ["children's", "childrens'", "childs", "children"], id: 4},
+  {q: "I saw _____ old man walking with _____ umbrella.", o: ["a / a", "an / an", "a / an", "an / a"], id: 5},
+  {q: "Those bags belong to Sara. They are _____ bags.", o: ["hers", "her", "she", "his"], id: 6},
+  {q: "The cat is cleaning _____ paws.", o: ["it's", "its'", "its", "his"], id: 7},
+  {q: "There are three _____ on the table.", o: ["boxs", "boxes", "box", "boxies"], id: 8},
+  {q: "_____ are many students in the classroom today.", o: ["There", "Their", "They're", "This"], id: 9},
+  {q: "He is _____ university student from London.", o: ["an", "a", "the", "some"], id: 10},
+  {q: "Look! The baby _____ right now.", o: ["sleeps", "sleep", "is sleeping", "slept"], id: 11},
+  {q: "He usually _____ to the gym on Fridays.", o: ["go", "goes", "is going", "has gone"], id: 12},
+  {q: "They _____ to Paris last summer.", o: ["travel", "traveling", "have traveled", "traveled"], id: 13},
+  {q: "While I _____ TV, the phone rang.", o: ["watched", "was watching", "watch", "am watching"], id: 14},
+  {q: "I promise I _____ you with your homework tomorrow.", o: ["help", "helping", "will help", "would help"], id: 15},
+  {q: "This time next week, we _____ on a beach in Spain.", o: ["will lie", "will be lying", "lie", "are lying"], id: 16},
+  {q: "I _____ my keys. I can't find them anywhere.", o: ["lost", "have lost", "lose", "was losing"], id: 17},
+  {q: "She _____ for three hours before she finally finished the report.", o: ["has been working", "had been working", "is working", "works"], id: 18},
+  {q: "By the time the police arrived, the thief _____.", o: ["escaped", "has escaped", "had escaped", "escapes"], id: 19},
+  {q: "How long _____ English?", o: ["do you learn", "have you been learning", "are you learning", "you have learned"], id: 20},
+  {q: "Water _____ at 100 degrees Celsius.", o: ["boil", "is boiling", "boils", "boiled"], id: 21},
+  {q: "I _____ a movie when you called me yesterday.", o: ["watch", "was watching", "have watched", "will watch"], id: 22},
+  {q: "Listen! Someone _____ the piano upstairs.", o: ["plays", "is playing", "played", "play"], id: 23},
+  {q: "We _____ each other since we were children.", o: ["know", "have known", "are knowing", "knew"], id: 24},
+  {q: "I _____ to the dentist at 5 PM tomorrow. I have an appointment.", o: ["go", "am going", "went", "have gone"], id: 25},
+  {q: "They _____ their lunch when the guest arrived.", o: ["already finished", "had already finished", "have already finished", "finish"], id: 26},
+  {q: "Scientists believe that robots _____ most of our work in the future.", o: ["do", "will do", "are doing", "did"], id: 27},
+  {q: "It _____ for two days without stopping.", o: ["rains", "is raining", "has been raining", "was rain"], id: 28},
+  {q: "When I was young, I _____ to be an astronaut.", o: ["want", "wanted", "have wanted", "was wanting"], id: 29},
+  {q: "He _____ the movie twice already.", o: ["saw", "sees", "has seen", "seeing"], id: 30},
+  {q: "If it rains, we _____ at home.", o: ["stay", "would stay", "will stay", "stayed"], id: 31},
+  {q: "If I _____ a million dollars, I would buy a palace.", o: ["have", "had", "will have", "had had"], id: 32},
+  {q: "If you had studied harder, you _____ the exam.", o: ["would pass", "will pass", "would have passed", "passed"], id: 33},
+  {q: "If you heat ice, it _____.", o: ["melts", "will melt", "melted", "would melt"], id: 34},
+  {q: "The window _____ by the boy yesterday.", o: ["is broken", "was broken", "breaks", "broke"], id: 35},
+  {q: "New schools _____ in our city every year.", o: ["build", "are built", "were built", "are building"], id: 36},
+  {q: "The car _____ at the moment.", o: ["is repaired", "is being repaired", "repairs", "was repaired"], id: 37},
+  {q: "The letter _____ before I arrived.", o: ["was written", "had been written", "has been written", "wrote"], id: 38},
+  {q: "Dinner _____ by 8 PM tonight.", o: ["will be cooked", "will cooked", "is cooked", "will have cooked"], id: 39},
+  {q: "English _____ all over the world.", o: ["speaks", "is speaking", "is spoken", "spoke"], id: 40},
+  {q: "If she _____ early, she will catch the bus.", o: ["leave", "leaves", "left", "will leave"], id: 41},
+  {q: "A new bridge _____ next year.", o: ["will build", "is built", "will be built", "was built"], id: 42},
+  {q: "The pyramids _____ by the ancient Egyptians.", o: ["built", "were built", "are built", "have built"], id: 43},
+  {q: "Many songs _____ by this singer since 2010.", o: ["have been sung", "were sung", "are sung", "have sung"], id: 44},
+  {q: "If I _____ you, I would tell the truth.", o: ["am", "was", "were", "will be"], id: 45},
+  {q: "The room _____ every day.", o: ["is cleaned", "cleans", "is cleaning", "was cleaned"], id: 46},
+  {q: "The cake _____ when I entered the kitchen.", o: ["was made", "was being made", "is made", "has been made"], id: 47},
+  {q: "The results _____ next week.", o: ["will announce", "are announced", "will be announced", "were announced"], id: 48},
+  {q: "If they _____ more time, they would have finished the project.", o: ["have", "had", "had had", "will have"], id: 49},
+  {q: "Rice _____ in China.", o: ["grows", "is grown", "grow", "is growing"], id: 50}
+]
+let questions = [];
+let currentIndex = 0;
+let score = 0;
+let timer;
+let timeLeft = 30;
+let studentAnswers = [];
+
+function startQuiz() {
+    const email = document.getElementById('email').value;
+    if(!email.includes('@')) return alert("Valid Email Required");
+    questions = allQuestions.sort(() => Math.random() - 0.5);
+    document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('quiz-screen').classList.remove('hidden');
+    showQuestion();
+}
+
+function showQuestion() {
+    if(currentIndex >= questions.length) return finishQuiz();
+    
+    timeLeft = 30;
+    document.getElementById('timer').innerText = timeLeft;
+    
+    const q = questions[currentIndex];
+    document.getElementById('question-text').innerText = q.q;
+    const container = document.getElementById('options-container');
+    container.innerHTML = '';
+
+    q.o.forEach((opt, i) => {
+        const letter = String.fromCharCode(65 + i);
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = `${letter}) ${opt}`;
+        btn.onclick = () => checkAnswer(letter, btn);
+        container.appendChild(btn);
+    });
+
+    clearInterval(timer);
+    timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timer').innerText = timeLeft;
+        if(timeLeft <= 0) checkAnswer(null, null);
+    }, 1000);
+}
+
+function checkAnswer(choice, btn) {
+    clearInterval(timer);
+    const correct = questions[currentIndex].a;
+    studentAnswers.push({ qIndex: questions[currentIndex].id, selected: choice || "No Answer" });
+
+    if(btn) {
+        btn.classList.add(choice === correct ? 'correct' : 'wrong');
+    }
+
+    setTimeout(() => {
+        currentIndex++;
+        showQuestion();
+    }, 1000);
+}
+
+function finishQuiz() {
+    document.getElementById('quiz-screen').classList.add('hidden');
+    document.getElementById('result-screen').classList.remove('hidden');
+    
+    fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            email: document.getElementById('email').value,
+            answers: studentAnswers
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === 'success') {
+            document.getElementById('final-status').innerText = "Test Completed!";
+            document.getElementById('level-display').innerText = data.level;
+            document.getElementById('score-display').innerText = `Score: ${data.score} / 50`;
+        } else {
+            document.getElementById('final-status').innerText = data.message;
+        }
+    });
+}
+</script>
+</body>
+</html>
