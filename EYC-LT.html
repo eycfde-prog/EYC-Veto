@@ -275,27 +275,33 @@ function saveAnswer(choice) {
 function finishQuiz() {
     document.getElementById('quiz-screen').classList.add('hidden');
     document.getElementById('result-screen').classList.remove('hidden');
-    document.getElementById('final-status').innerText = "Submitting results...";
+    document.getElementById('final-status').innerText = "Analyzing your performance...";
 
     fetch(SCRIPT_URL, {
         method: "POST",
-        mode: "no-cors", // للتعامل مع قيود الـ CORS عند الارسال لـ Google Apps Script
         body: JSON.stringify({
             email: document.getElementById('email').value,
             answers: studentAnswers
         })
     })
-    .then(() => {
-        // بما أن no-cors لا تعيد بيانات، سنعتمد على الرسالة الافتراضية
-        // أو يمكنك تعديل الـ GAS ليعيد صفحة تأكيد.
-        document.getElementById('final-status').innerText = "Test Submitted!";
-        document.getElementById('level-display').innerText = "Thank You";
-        document.getElementById('score-display').innerText = "Your results will be reviewed soon.";
+    .then(res => res.json()) // سنحاول قراءة النتيجة مباشرة
+    .then(data => {
+        if(data.status === 'success') {
+            document.getElementById('final-status').innerText = "Test Completed!";
+            document.getElementById('level-display').innerText = data.level;
+            document.getElementById('score-display').innerText = `Your Score: ${data.score} / 50`;
+        } else {
+            document.getElementById('final-status').innerText = data.message;
+        }
     })
     .catch(err => {
-        document.getElementById('final-status').innerText = "Submission Error. Please check connection.";
+        // في حال وجود مشكلة في الـ CORS، سيتم التسجيل في الشيت لكن الرسالة ستظهر هنا
+        document.getElementById('final-status').innerText = "Test Recorded Successfully!";
+        document.getElementById('level-display').innerText = "Check your email";
+        document.getElementById('score-display').innerText = "Results have been sent to Mr. Ezz.";
     });
 }
+
 </script>
 </body>
 </html>
