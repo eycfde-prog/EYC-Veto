@@ -23,7 +23,7 @@
             align-items: center; 
             min-height: 100vh; 
             margin: 0; 
-            padding: 20px 0; /* مساحة أمان للجوال */
+            padding: 20px 0; 
         }
 
         #quiz-container { 
@@ -39,7 +39,11 @@
             overflow: hidden;
         }
 
-        /* شريط التقدم */
+        .logo {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+
         #progress-container {
             width: 100%;
             height: 6px;
@@ -66,9 +70,9 @@
             color: white; 
             cursor: pointer; 
             transition: 0.2s; 
-            font-size: 16px; /* لمنع الزووم في الآيفون */
+            font-size: 16px; 
             text-align: left; 
-            touch-action: manipulation; /* استجابة أسرع للمس */
+            touch-action: manipulation; 
         }
 
         .option-btn:active, .option-btn:hover { 
@@ -93,7 +97,7 @@
             border: none; 
             background: #393e46; 
             color: white; 
-            font-size: 16px; /* ضروري للجوال */
+            font-size: 16px; 
             box-sizing: border-box;
         }
 
@@ -106,7 +110,7 @@
             cursor: pointer; 
             font-size: 18px; 
             font-weight: bold; 
-            width: 100%; /* عرض كامل في الجوال لسهولة الضغط */
+            width: 100%; 
         }
 
         h3#question-text {
@@ -115,7 +119,6 @@
             margin-bottom: 20px;
         }
 
-        /* تحسينات الهواتف الصغيرة جداً */
         @media (max-width: 380px) {
             #quiz-container { padding: 20px 15px; }
             h1 { font-size: 1.5rem; }
@@ -126,6 +129,7 @@
 <body>
 
 <div id="quiz-container">
+    <img src="logo.png" alt="Mr. Ezz Logo" class="logo">
     <div id="progress-container" class="hidden">
         <div id="progress-bar"></div>
     </div>
@@ -152,7 +156,7 @@
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzVGZSa6L3kpFcBdpwNful4mFHdXgzfpxiOe4FUjy8vuz4Sq_3lwdcDNtwdf__NSxg/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9VVOPhncSjH681ruHB1-gohHKiIOvbQub-QbJCZ84spmWU6YGxrYVIREXIw5Bl-EO/exec";
 
 const questions = [
   {q: "She is a great doctor. _____ works at the city hospital.", o: ["Him", "Her", "She", "He"], id: 1},
@@ -214,15 +218,36 @@ let studentAnswers = [];
 let shuffledQuestions = [];
 
 function startQuiz() {
-    const email = document.getElementById('email').value;
+    const emailInput = document.getElementById('email');
+    const email = emailInput.value.trim();
+    const startBtn = document.querySelector('.btn-main');
+
     if(!email.includes('@')) return alert("Please enter a valid email");
-    
-    shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
-    
-    document.getElementById('start-screen').classList.add('hidden');
-    document.getElementById('progress-container').classList.remove('hidden');
-    document.getElementById('quiz-screen').classList.remove('hidden');
-    showQuestion();
+
+    startBtn.innerText = "Checking...";
+    startBtn.disabled = true;
+
+    fetch(`${SCRIPT_URL}?email=${encodeURIComponent(email)}`)
+    .then(res => res.json())
+    .then(data => {
+        if (data.exists) {
+            alert("⚠️ This email has already taken the exam. You cannot repeat it.");
+            startBtn.innerText = "START EXAM";
+            startBtn.disabled = false;
+        } else {
+            shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('progress-container').classList.remove('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            showQuestion();
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Connection error. Please try again.");
+        startBtn.innerText = "START EXAM";
+        startBtn.disabled = false;
+    });
 }
 
 function updateProgressBar() {
@@ -232,7 +257,7 @@ function updateProgressBar() {
 
 function showQuestion() {
     if(currentIndex >= shuffledQuestions.length) {
-        updateProgressBar(); // 100%
+        updateProgressBar();
         return finishQuiz();
     }
     
@@ -284,7 +309,7 @@ function finishQuiz() {
             answers: studentAnswers
         })
     })
-    .then(res => res.json()) // سنحاول قراءة النتيجة مباشرة
+    .then(res => res.json())
     .then(data => {
         if(data.status === 'success') {
             document.getElementById('final-status').innerText = "Test Completed!";
@@ -295,13 +320,11 @@ function finishQuiz() {
         }
     })
     .catch(err => {
-        // في حال وجود مشكلة في الـ CORS، سيتم التسجيل في الشيت لكن الرسالة ستظهر هنا
         document.getElementById('final-status').innerText = "Test Recorded Successfully!";
         document.getElementById('level-display').innerText = "Check your email";
         document.getElementById('score-display').innerText = "Results have been sent to Mr. Ezz.";
     });
 }
-
 </script>
 </body>
 </html>
