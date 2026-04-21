@@ -42,11 +42,10 @@
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxpCloMbwqAQ25RwGJlW4fil7QvMe2uJ85f1PrfwTNoLOhK4qYntq6tvrBxcR4GbyTq/exec"; // تأكد من وضع رابط الـ Exec الخاص بك هنا
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxpCloMbwqAQ25RwGJlW4fil7QvMe2uJ85f1PrfwTNoLOhK4qYntq6tvrBxcR4GbyTq/exec";
 
-// تم إصلاح هيكل المصفوفة هنا
+// تم التأكد من إغلاق المصفوفة بشكل سليم هنا
 const questions = [
-[
   {q: "She is a great doctor. _____ works at the city hospital.", o: ["Him", "Her", "She", "He"], id: 1},
   {q: "This is not my book. It is _____.", o: ["your", "yours", "you", "mine's"], id: 2},
   {q: "Can you give _____ the pen, please? I need to write.", o: ["I", "my", "mine", "me"], id: 3},
@@ -97,7 +96,7 @@ const questions = [
   {q: "The results _____ next week.", o: ["will announce", "are announced", "will be announced", "were announced"], id: 48},
   {q: "If they _____ more time, they would have finished the project.", o: ["have", "had", "had had", "will have"], id: 49},
   {q: "Rice _____ in China.", o: ["grows", "is grown", "grow", "is growing"], id: 50}
-]
+];
 
 let currentIndex = 0;
 let timer;
@@ -109,7 +108,6 @@ function startQuiz() {
     const email = document.getElementById('email').value;
     if(!email.includes('@')) return alert("Valid Email Required");
     
-    // خلط الأسئلة عند البداية
     shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
     
     document.getElementById('start-screen').classList.add('hidden');
@@ -129,11 +127,11 @@ function showQuestion() {
     container.innerHTML = '';
 
     q.o.forEach((opt, i) => {
-        const letter = String.fromCharCode(65 + i); // A, B, C, D
+        const letter = String.fromCharCode(65 + i);
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         btn.innerText = `${letter}) ${opt}`;
-        btn.onclick = () => saveAnswer(letter); // حفظ فقط بدون تصحيح
+        btn.onclick = () => saveAnswer(letter);
         container.appendChild(btn);
     });
 
@@ -147,42 +145,38 @@ function showQuestion() {
 
 function saveAnswer(choice) {
     clearInterval(timer);
-    // تسجيل الإجابة والـ ID الخاص بالسؤال لضمان التصحيح الصحيح في السيرفر
     studentAnswers.push({ 
         qIndex: shuffledQuestions[currentIndex].id, 
         selected: choice 
     });
-
     currentIndex++;
-    // انتقال مباشر للسؤال التالي بدون تأخير بصري
     showQuestion();
 }
 
 function finishQuiz() {
     document.getElementById('quiz-screen').classList.add('hidden');
     document.getElementById('result-screen').classList.remove('hidden');
-    document.getElementById('final-status').innerText = "Submitting your answers... Please wait.";
+    document.getElementById('final-status').innerText = "Submitting results...";
 
     fetch(SCRIPT_URL, {
         method: "POST",
-        mode: "no-cors", // لتجنب مشاكل الـ CORS في المتصفحات
-        cache: "no-cache",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             email: document.getElementById('email').value,
             answers: studentAnswers
         })
     })
-    .then(() => {
-        // بما أننا استخدمنا no-cors، لا يمكننا قراءة الـ JSON مباشرة
-        // سنعرض رسالة نجاح عامة، أو يفضل توجيه الطالب لصفحة شكر
-        document.getElementById('final-status').innerText = "Test Submitted Successfully!";
-        document.getElementById('level-display').innerText = "DONE";
-        document.getElementById('score-display').innerText = "Your results have been recorded. Mr. Ezz will contact you soon.";
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === 'success') {
+            document.getElementById('final-status').innerText = "Test Completed!";
+            document.getElementById('level-display').innerText = data.level;
+            document.getElementById('score-display').innerText = `Score: ${data.score} / 50`;
+        } else {
+            document.getElementById('final-status').innerText = data.message;
+        }
     })
     .catch(err => {
-        document.getElementById('final-status').innerText = "Connection Error. Please contact Mr. Ezz.";
-        console.error(err);
+        document.getElementById('final-status').innerText = "Submission Error. Please check your internet.";
     });
 }
 </script>
