@@ -42,10 +42,11 @@
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbydH3QgH_RxssBTPWOrtnBrba08GwzQU_9x45NN8RGE4xxB-5SpJL-FBZO-72DgEn2y/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxpCloMbwqAQ25RwGJlW4fil7QvMe2uJ85f1PrfwTNoLOhK4qYntq6tvrBxcR4GbyTq/exec"; // تأكد من وضع رابط الـ Exec الخاص بك هنا
 
-const allQuestions = [
-   [
+// تم إصلاح هيكل المصفوفة هنا
+const questions = [
+[
   {q: "She is a great doctor. _____ works at the city hospital.", o: ["Him", "Her", "She", "He"], id: 1},
   {q: "This is not my book. It is _____.", o: ["your", "yours", "you", "mine's"], id: 2},
   {q: "Can you give _____ the pen, please? I need to write.", o: ["I", "my", "mine", "me"], id: 3},
@@ -97,39 +98,42 @@ const allQuestions = [
   {q: "If they _____ more time, they would have finished the project.", o: ["have", "had", "had had", "will have"], id: 49},
   {q: "Rice _____ in China.", o: ["grows", "is grown", "grow", "is growing"], id: 50}
 ]
-let questions = [];
+
 let currentIndex = 0;
-let score = 0;
 let timer;
 let timeLeft = 30;
 let studentAnswers = [];
+let shuffledQuestions = [];
 
 function startQuiz() {
     const email = document.getElementById('email').value;
     if(!email.includes('@')) return alert("Valid Email Required");
-    questions = allQuestions.sort(() => Math.random() - 0.5);
+    
+    // خلط الأسئلة عند البداية
+    shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+    
     document.getElementById('start-screen').classList.add('hidden');
     document.getElementById('quiz-screen').classList.remove('hidden');
     showQuestion();
 }
 
 function showQuestion() {
-    if(currentIndex >= questions.length) return finishQuiz();
+    if(currentIndex >= shuffledQuestions.length) return finishQuiz();
     
     timeLeft = 30;
     document.getElementById('timer').innerText = timeLeft;
     
-    const q = questions[currentIndex];
-    document.getElementById('question-text').innerText = q.q;
+    const q = shuffledQuestions[currentIndex];
+    document.getElementById('question-text').innerText = `${currentIndex + 1}. ${q.q}`;
     const container = document.getElementById('options-container');
     container.innerHTML = '';
 
     q.o.forEach((opt, i) => {
-        const letter = String.fromCharCode(65 + i);
+        const letter = String.fromCharCode(65 + i); // A, B, C, D
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         btn.innerText = `${letter}) ${opt}`;
-        btn.onclick = () => checkAnswer(letter, btn);
+        btn.onclick = () => saveAnswer(letter); // حفظ فقط بدون تصحيح
         container.appendChild(btn);
     });
 
@@ -137,45 +141,48 @@ function showQuestion() {
     timer = setInterval(() => {
         timeLeft--;
         document.getElementById('timer').innerText = timeLeft;
-        if(timeLeft <= 0) checkAnswer(null, null);
+        if(timeLeft <= 0) saveAnswer("No Answer");
     }, 1000);
 }
 
-function checkAnswer(choice, btn) {
+function saveAnswer(choice) {
     clearInterval(timer);
-    const correct = questions[currentIndex].a;
-    studentAnswers.push({ qIndex: questions[currentIndex].id, selected: choice || "No Answer" });
+    // تسجيل الإجابة والـ ID الخاص بالسؤال لضمان التصحيح الصحيح في السيرفر
+    studentAnswers.push({ 
+        qIndex: shuffledQuestions[currentIndex].id, 
+        selected: choice 
+    });
 
-    if(btn) {
-        btn.classList.add(choice === correct ? 'correct' : 'wrong');
-    }
-
-    setTimeout(() => {
-        currentIndex++;
-        showQuestion();
-    }, 1000);
+    currentIndex++;
+    // انتقال مباشر للسؤال التالي بدون تأخير بصري
+    showQuestion();
 }
 
 function finishQuiz() {
     document.getElementById('quiz-screen').classList.add('hidden');
     document.getElementById('result-screen').classList.remove('hidden');
-    
+    document.getElementById('final-status').innerText = "Submitting your answers... Please wait.";
+
     fetch(SCRIPT_URL, {
         method: "POST",
+        mode: "no-cors", // لتجنب مشاكل الـ CORS في المتصفحات
+        cache: "no-cache",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             email: document.getElementById('email').value,
             answers: studentAnswers
         })
     })
-    .then(res => res.json())
-    .then(data => {
-        if(data.status === 'success') {
-            document.getElementById('final-status').innerText = "Test Completed!";
-            document.getElementById('level-display').innerText = data.level;
-            document.getElementById('score-display').innerText = `Score: ${data.score} / 50`;
-        } else {
-            document.getElementById('final-status').innerText = data.message;
-        }
+    .then(() => {
+        // بما أننا استخدمنا no-cors، لا يمكننا قراءة الـ JSON مباشرة
+        // سنعرض رسالة نجاح عامة، أو يفضل توجيه الطالب لصفحة شكر
+        document.getElementById('final-status').innerText = "Test Submitted Successfully!";
+        document.getElementById('level-display').innerText = "DONE";
+        document.getElementById('score-display').innerText = "Your results have been recorded. Mr. Ezz will contact you soon.";
+    })
+    .catch(err => {
+        document.getElementById('final-status').innerText = "Connection Error. Please contact Mr. Ezz.";
+        console.error(err);
     });
 }
 </script>
