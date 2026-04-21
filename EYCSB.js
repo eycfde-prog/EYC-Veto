@@ -7,7 +7,7 @@
 // ════════════════════════════════════════════
 // GAS API ENDPOINT
 // ════════════════════════════════════════════
-const GAS_API = 'https://script.google.com/macros/s/AKfycbw8IpWhfyHWjoTexSGaBxekm1c3bBNFOaYiQkbBxHHuVEz8eXEYbG2GeoQqyjOM7tld-A/exec';
+const GAS_API = 'https://script.google.com/macros/s/AKfycbzoAAggaUvxuNngkih1PWM5yDl7NU8CrLuJ9r8G_goIXGwDKjDlxZzs5ubW1bkzilaCdA/exec';
 
 // ════════════════════════════════════════════
 // LISTENING DATA — Inline (no fetch on file://)
