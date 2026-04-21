@@ -2,29 +2,139 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Placement Test | Mr. Ezz</title>
     <style>
-        :root { --bg: #121212; --card: #1e1e26; --accent: #00adb5; --text: #eeeeee; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        #quiz-container { background: var(--card); padding: 40px; border-radius: 20px; width: 90%; max-width: 600px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); text-align: center; }
-        .option-btn { display: block; width: 100%; padding: 15px; margin: 12px 0; border: 2px solid #393e46; border-radius: 10px; background: transparent; color: white; cursor: pointer; transition: 0.3s; font-size: 17px; text-align: left; }
-        .option-btn:hover { border-color: var(--accent); background: rgba(0, 173, 181, 0.1); }
-        .correct { background: #2ecc71 !important; border-color: #2ecc71 !important; }
-        .wrong { background: #e74c3c !important; border-color: #e74c3c !important; }
-        #timer { font-size: 28px; color: var(--accent); margin-bottom: 15px; font-weight: bold; }
+        :root { 
+            --bg: #121212; 
+            --card: #1e1e26; 
+            --accent: #00adb5; 
+            --text: #eeeeee; 
+            --wrong: #e74c3c;
+            --correct: #2ecc71;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px 0; /* مساحة أمان للجوال */
+        }
+
+        #quiz-container { 
+            background: var(--card); 
+            padding: 25px 20px; 
+            border-radius: 20px; 
+            width: 92%; 
+            max-width: 600px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5); 
+            text-align: center; 
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* شريط التقدم */
+        #progress-container {
+            width: 100%;
+            height: 6px;
+            background: #393e46;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .option-btn { 
+            display: block; 
+            width: 100%; 
+            padding: 16px 15px; 
+            margin: 10px 0; 
+            border: 2px solid #393e46; 
+            border-radius: 12px; 
+            background: transparent; 
+            color: white; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            font-size: 16px; /* لمنع الزووم في الآيفون */
+            text-align: left; 
+            touch-action: manipulation; /* استجابة أسرع للمس */
+        }
+
+        .option-btn:active, .option-btn:hover { 
+            border-color: var(--accent); 
+            background: rgba(0, 173, 181, 0.1); 
+        }
+
+        #timer { 
+            font-size: 24px; 
+            color: var(--accent); 
+            margin: 15px 0; 
+            font-weight: bold; 
+        }
+
         .hidden { display: none; }
-        input[type="email"] { width: 90%; padding: 15px; margin-bottom: 20px; border-radius: 8px; border: none; background: #393e46; color: white; }
-        .btn-main { background: var(--accent); color: white; padding: 15px 40px; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; }
+
+        input[type="email"] { 
+            width: 100%; 
+            padding: 15px; 
+            margin-bottom: 20px; 
+            border-radius: 10px; 
+            border: none; 
+            background: #393e46; 
+            color: white; 
+            font-size: 16px; /* ضروري للجوال */
+            box-sizing: border-box;
+        }
+
+        .btn-main { 
+            background: var(--accent); 
+            color: white; 
+            padding: 16px 40px; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 18px; 
+            font-weight: bold; 
+            width: 100%; /* عرض كامل في الجوال لسهولة الضغط */
+        }
+
+        h3#question-text {
+            font-size: 1.2rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        /* تحسينات الهواتف الصغيرة جداً */
+        @media (max-width: 380px) {
+            #quiz-container { padding: 20px 15px; }
+            h1 { font-size: 1.5rem; }
+            .option-btn { padding: 14px 12px; font-size: 15px; }
+        }
     </style>
 </head>
 <body>
 
 <div id="quiz-container">
+    <div id="progress-container" class="hidden">
+        <div id="progress-bar"></div>
+    </div>
+
     <div id="start-screen">
         <h1>Grammar Placement Test</h1>
         <p>50 Questions | 30 Seconds per question</p>
-        <p style="color: #00adb5;">⚠️ You have only 1 attempt</p>
-        <input type="email" id="email" placeholder="Enter your email address" required><br>
+        <p style="color: #00adb5; margin-bottom: 25px;">⚠️ You have only 1 attempt</p>
+        <input type="email" id="email" placeholder="Enter your email address" required>
         <button class="btn-main" onclick="startQuiz()">START EXAM</button>
     </div>
 
@@ -44,7 +154,6 @@
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxpCloMbwqAQ25RwGJlW4fil7QvMe2uJ85f1PrfwTNoLOhK4qYntq6tvrBxcR4GbyTq/exec";
 
-// تم التأكد من إغلاق المصفوفة بشكل سليم هنا
 const questions = [
   {q: "She is a great doctor. _____ works at the city hospital.", o: ["Him", "Her", "She", "He"], id: 1},
   {q: "This is not my book. It is _____.", o: ["your", "yours", "you", "mine's"], id: 2},
@@ -106,18 +215,28 @@ let shuffledQuestions = [];
 
 function startQuiz() {
     const email = document.getElementById('email').value;
-    if(!email.includes('@')) return alert("Valid Email Required");
+    if(!email.includes('@')) return alert("Please enter a valid email");
     
     shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
     
     document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('progress-container').classList.remove('hidden');
     document.getElementById('quiz-screen').classList.remove('hidden');
     showQuestion();
 }
 
+function updateProgressBar() {
+    const progress = (currentIndex / shuffledQuestions.length) * 100;
+    document.getElementById('progress-bar').style.width = `${progress}%`;
+}
+
 function showQuestion() {
-    if(currentIndex >= shuffledQuestions.length) return finishQuiz();
+    if(currentIndex >= shuffledQuestions.length) {
+        updateProgressBar(); // 100%
+        return finishQuiz();
+    }
     
+    updateProgressBar();
     timeLeft = 30;
     document.getElementById('timer').innerText = timeLeft;
     
@@ -160,23 +279,21 @@ function finishQuiz() {
 
     fetch(SCRIPT_URL, {
         method: "POST",
+        mode: "no-cors", // للتعامل مع قيود الـ CORS عند الارسال لـ Google Apps Script
         body: JSON.stringify({
             email: document.getElementById('email').value,
             answers: studentAnswers
         })
     })
-    .then(res => res.json())
-    .then(data => {
-        if(data.status === 'success') {
-            document.getElementById('final-status').innerText = "Test Completed!";
-            document.getElementById('level-display').innerText = data.level;
-            document.getElementById('score-display').innerText = `Score: ${data.score} / 50`;
-        } else {
-            document.getElementById('final-status').innerText = data.message;
-        }
+    .then(() => {
+        // بما أن no-cors لا تعيد بيانات، سنعتمد على الرسالة الافتراضية
+        // أو يمكنك تعديل الـ GAS ليعيد صفحة تأكيد.
+        document.getElementById('final-status').innerText = "Test Submitted!";
+        document.getElementById('level-display').innerText = "Thank You";
+        document.getElementById('score-display').innerText = "Your results will be reviewed soon.";
     })
     .catch(err => {
-        document.getElementById('final-status').innerText = "Submission Error. Please check your internet.";
+        document.getElementById('final-status').innerText = "Submission Error. Please check connection.";
     });
 }
 </script>
