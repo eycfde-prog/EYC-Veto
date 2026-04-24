@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Quiz – Prep 1 | New Vision School</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Rajdhani:wght@600;700&display=swap');
+:root{
+  --bg:#0d1117;--surface:#161b22;--card:#1c2333;--border:#21262d;
+  --green:#2ea043;--green2:#3fb950;--blue:#58a6ff;--purple:#bc8cff;
+  --orange:#f0883e;--red:#f85149;--yellow:#e3b341;
+  --text:#e6edf3;--muted:#7d8590;--dim:#484f58;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(46,160,67,.12),transparent),
+             radial-gradient(ellipse 60% 40% at 80% 80%,rgba(88,166,255,.08),transparent);
+  pointer-events:none;z-index:0;}
+
+/* ── SCREENS ── */
+.screen{display:none;position:relative;z-index:1;}
+.screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+#gameScreen,#poetryScreen{justify-content:flex-start;padding:0;}
+#poetryScreen .inner{width:100%;max-width:820px;margin:0 auto;padding:20px 16px 60px;}
+
+/* ── WELCOME ── */
+.logo{text-align:center;margin-bottom:32px;}
+.logo .pill{display:inline-block;background:linear-gradient(135deg,var(--green),#56d364);color:#000;font-weight:900;font-size:11px;padding:4px 14px;border-radius:20px;letter-spacing:2px;margin-bottom:12px;font-family:'Rajdhani',sans-serif;}
+.logo h1{font-size:clamp(20px,4vw,38px);font-weight:900;background:linear-gradient(135deg,#fff,var(--green2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2;}
+.logo p{color:var(--muted);margin-top:6px;font-size:13px;}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px;width:100%;max-width:560px;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.slabel{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;font-family:'Rajdhani',sans-serif;}
+
+/* player count */
+.pc-row{display:flex;gap:8px;margin-bottom:18px;}
+.pc-btn{flex:1;padding:11px;border-radius:9px;border:2px solid var(--border);background:var(--surface);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;cursor:pointer;transition:all .2s;}
+.pc-btn.active{border-color:var(--green);background:rgba(46,160,67,.15);color:var(--green2);}
+.pc-btn:hover{border-color:var(--green);}
+
+/* player inputs */
+.pi-group{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
+.pi-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.c0{background:linear-gradient(135deg,#f0883e,#f85149);}
+.c1{background:linear-gradient(135deg,#58a6ff,#bc8cff);}
+.c2{background:linear-gradient(135deg,#3fb950,#26a641);}
+.c3{background:linear-gradient(135deg,#e3b341,#f0883e);}
+input[type=text]{flex:1;padding:10px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:9px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+input[type=text]:focus{border-color:var(--blue);}
+input[type=text]::placeholder{color:var(--muted);}
+
+/* qtype grid */
+.qt-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:22px;}
+.qt-btn{padding:12px 8px;border-radius:11px;border:2px solid var(--border);background:var(--surface);color:var(--text);font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;}
+.qt-btn .qi{font-size:19px;display:block;margin-bottom:3px;}
+.qt-btn.active{border-color:var(--blue);background:rgba(88,166,255,.12);color:var(--blue);}
+.qt-btn:hover{border-color:var(--blue);}
+/* poetry mode btn - special */
+.qt-btn.poetry-mode{border-color:var(--purple);}
+.qt-btn.poetry-mode.active{background:rgba(188,140,255,.12);color:var(--purple);}
+.qt-btn.poetry-mode:hover{border-color:var(--purple);}
+
+.start-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--green),#26a641);border:none;border-radius:11px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 6px 20px rgba(46,160,67,.35);}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(46,160,67,.5);}
+
+/* ── GAME HEADER ── */
+.game-header{width:100%;background:var(--surface);border-bottom:1px solid var(--border);padding:9px 14px;display:flex;align-items:center;gap:11px;position:sticky;top:0;z-index:10;}
+.sbar{display:flex;gap:6px;flex:1;overflow-x:auto;}
+.chip{display:flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--border);border-radius:30px;padding:4px 10px;white-space:nowrap;transition:all .3s;}
+.chip.active{border-color:var(--green);background:rgba(46,160,67,.15);box-shadow:0 0 14px rgba(46,160,67,.25);}
+.ch-av{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;}
+.ch-name{font-size:12px;font-weight:700;}
+.ch-sc{font-size:16px;font-weight:900;font-family:'Rajdhani',sans-serif;color:var(--green2);}
+.q-ctr{font-family:'Rajdhani',sans-serif;font-size:12px;color:var(--muted);white-space:nowrap;}
+.tcircle{width:44px;height:44px;position:relative;flex-shrink:0;}
+.tcircle svg{transform:rotate(-90deg);}
+.t-track{fill:none;stroke:var(--border);stroke-width:4;}
+.t-prog{fill:none;stroke:var(--green2);stroke-width:4;stroke-linecap:round;stroke-dasharray:125.6;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear,stroke .3s;}
+.t-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;}
+
+/* ── GAME CONTENT ── */
+.game-content{flex:1;width:100%;max-width:760px;margin:0 auto;padding:16px 14px 40px;}
+.turn-wrap{display:flex;justify-content:center;margin-bottom:12px;}
+.turn-banner{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--border);border-radius:30px;padding:6px 16px;font-size:13px;font-weight:700;}
+.qtag{display:inline-block;padding:2px 11px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:10px;background:rgba(88,166,255,.15);color:var(--blue);border:1px solid rgba(88,166,255,.25);font-family:'Rajdhani',sans-serif;}
+.qbox{font-size:clamp(13px,1.9vw,16px);font-weight:600;line-height:1.85;margin-bottom:20px;direction:ltr;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:13px;padding:15px 18px;border-left:4px solid var(--blue);}
+.qbox.dlg{font-family:'Rajdhani',sans-serif;font-size:clamp(13px,1.8vw,15px);line-height:2.1;}
+.dlg-line{display:block;}
+.spa{font-weight:900;color:var(--orange);margin-right:3px;}
+.spb{font-weight:900;color:var(--blue);margin-right:3px;}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px;}
+@media(max-width:480px){.opts{grid-template-columns:1fr;}}
+.opt{padding:12px 14px;border-radius:11px;border:2px solid var(--border);background:var(--card);color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;text-align:left;direction:ltr;display:flex;align-items:center;gap:8px;}
+.opt-l{width:26px;height:26px;border-radius:6px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;flex-shrink:0;color:var(--green2);font-family:'Rajdhani',sans-serif;border:1px solid var(--border);transition:all .2s;}
+.opt:hover:not(:disabled){border-color:var(--blue);background:rgba(88,166,255,.08);transform:translateX(3px);}
+.opt:hover:not(:disabled) .opt-l{background:var(--blue);color:#fff;border-color:var(--blue);}
+.opt.correct{border-color:var(--green)!important;background:rgba(46,160,67,.15)!important;animation:cPulse .4s;}
+.opt.correct .opt-l{background:var(--green);color:#fff;border-color:var(--green);}
+.opt.wrong{border-color:var(--red)!important;background:rgba(248,81,73,.15)!important;animation:wShake .4s;}
+.opt.wrong .opt-l{background:var(--red);color:#fff;border-color:var(--red);}
+.opt:disabled{cursor:default;}
+@keyframes cPulse{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+@keyframes wShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.nxt-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--blue),var(--purple));border:none;border-radius:11px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+.nxt-btn:hover{opacity:.9;transform:translateY(-2px);}
+
+/* ── FEEDBACK ── */
+.fb-ov{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:100;}
+.fb-msg{font-size:80px;animation:fbAnim .8s forwards;opacity:0;}
+@keyframes fbAnim{0%{opacity:0;transform:scale(.5) translateY(20px)}50%{opacity:1;transform:scale(1.2) translateY(-10px)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.8) translateY(-30px)}}
+
+/* ── RESULTS ── */
+#resultsScreen{padding:30px 20px;}
+.res-t{font-size:clamp(24px,4.5vw,38px);font-weight:900;text-align:center;margin-bottom:5px;background:linear-gradient(135deg,var(--green2),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.res-s{color:var(--muted);text-align:center;margin-bottom:28px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:11px;margin-bottom:28px;width:100%;max-width:420px;}
+.pod-item{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;}
+.pod-av{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:21px;margin-bottom:5px;border:3px solid transparent;}
+.pod-name{font-size:11px;font-weight:700;margin-bottom:3px;}
+.pod-sc{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:900;margin-bottom:5px;}
+.pod-block{width:100%;border-radius:7px 7px 0 0;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.rk1 .pod-av{border-color:#fbbf24;}.rk1 .pod-block{background:linear-gradient(180deg,#fbbf24,#d97706);height:90px;}.rk1 .pod-sc{color:#fbbf24;}
+.rk2 .pod-av{border-color:#94a3b8;}.rk2 .pod-block{background:linear-gradient(180deg,#94a3b8,#475569);height:68px;}.rk2 .pod-sc{color:#94a3b8;}
+.rk3 .pod-av{border-color:#cd7f32;}.rk3 .pod-block{background:linear-gradient(180deg,#cd7f32,#78350f);height:50px;}.rk3 .pod-sc{color:#cd7f32;}
+.slist{width:100%;max-width:420px;margin-bottom:24px;}
+.srow{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:11px 14px;margin-bottom:7px;}
+.sr-rk{font-family:'Rajdhani',sans-serif;font-size:19px;font-weight:900;width:24px;text-align:center;color:var(--muted);}
+.sr-name{flex:1;font-weight:700;font-size:13px;}
+.sr-pts{font-family:'Rajdhani',sans-serif;font-size:21px;font-weight:900;color:var(--green2);}
+.again-btn{padding:11px 32px;background:linear-gradient(135deg,var(--green),#26a641);border:none;border-radius:11px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s;box-shadow:0 6px 20px rgba(46,160,67,.35);}
+.again-btn:hover{transform:translateY(-2px);}
+
+/* ── FLASH FAB ── */
+.flash-fab{position:fixed;bottom:18px;right:18px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--red));border:none;color:#fff;font-size:19px;cursor:pointer;z-index:200;box-shadow:0 5px 18px rgba(240,136,62,.5);display:flex;align-items:center;justify-content:center;transition:transform .2s;}
+.flash-fab:hover{transform:scale(1.1);}
+.flash-ov{position:fixed;inset:0;z-index:300;background:#000;display:none;flex-direction:column;}
+.flash-ov.open{display:flex;}
+.flash-tb{display:flex;align-items:center;gap:9px;padding:9px 13px;background:#111;flex-shrink:0;}
+.f-close{padding:6px 12px;background:var(--red);border:none;border-radius:7px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.f-clear{padding:6px 12px;background:var(--muted);border:none;border-radius:7px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:14px;cursor:pointer;}
+.f-hint{color:var(--muted);font-size:11px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;}
+.flash-body{flex:1;position:relative;}
+.flash-ta{position:absolute;inset:0;width:100%;height:100%;background:transparent;border:none;outline:none;color:#fff;font-size:clamp(34px,6.5vw,80px);font-family:'Outfit',sans-serif;font-weight:900;text-align:center;resize:none;padding:36px;text-shadow:0 0 26px rgba(240,136,62,.8);caret-color:var(--orange);}
+
+/* ── CONFETTI ── */
+.cp{position:fixed;top:-20px;z-index:400;animation:cFall linear forwards;border-radius:2px;}
+@keyframes cFall{to{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+.q-slide{animation:slideIn .3s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* ══════════════════════════════════════
+   POETRY SCREEN
+══════════════════════════════════════ */
+.poetry-nav{width:100%;background:var(--surface);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;}
+.poetry-nav .back-btn{padding:6px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}
+.poetry-nav .back-btn:hover{border-color:var(--purple);}
+.poetry-nav h2{font-size:16px;font-weight:700;color:var(--purple);}
+.poetry-nav .pbar{flex:1;display:flex;gap:6px;justify-content:flex-end;overflow-x:auto;}
+.poem-tab{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.poem-tab.active{border-color:var(--purple);color:var(--purple);background:rgba(188,140,255,.1);}
+
+/* poem viewer */
+.poem-section{margin-bottom:28px;}
+.poem-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:14px;font-family:'Rajdhani',sans-serif;}
+.badge-info{background:rgba(88,166,255,.15);color:var(--blue);border:1px solid rgba(88,166,255,.25);}
+.badge-stanza{background:rgba(188,140,255,.15);color:var(--purple);border:1px solid rgba(188,140,255,.25);}
+.badge-figures{background:rgba(240,136,62,.15);color:var(--orange);border:1px solid rgba(240,136,62,.25);}
+.badge-quiz{background:rgba(46,160,67,.15);color:var(--green2);border:1px solid rgba(46,160,67,.25);}
+
+/* poet card */
+.poet-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:20px;border-left:4px solid var(--purple);}
+.poet-card h3{font-size:18px;font-weight:900;color:var(--purple);margin-bottom:4px;}
+.poet-card .dates{font-family:'Rajdhani',sans-serif;color:var(--muted);font-size:13px;margin-bottom:10px;}
+.poet-card p{font-size:13px;color:#b1bac4;line-height:1.7;}
+.poet-facts{margin-top:10px;display:flex;flex-wrap:wrap;gap:7px;}
+.fact-chip{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:12px;color:var(--muted);}
+
+/* stanza card */
+.stanza-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px;}
+.stanza-card h4{font-size:14px;font-weight:700;color:var(--purple);margin-bottom:12px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;}
+.stanza-lines{font-size:15px;line-height:2.2;font-style:italic;color:#c9d1d9;padding:12px 16px;background:var(--surface);border-radius:9px;margin-bottom:14px;border-left:3px solid var(--purple);}
+.stanza-line{display:block;}
+.paraphrase-box{background:rgba(88,166,255,.06);border:1px solid rgba(88,166,255,.2);border-radius:9px;padding:13px;margin-bottom:12px;}
+.paraphrase-box .pb-label{font-size:11px;font-weight:700;color:var(--blue);letter-spacing:1px;font-family:'Rajdhani',sans-serif;margin-bottom:5px;}
+.paraphrase-box p{font-size:13px;line-height:1.7;color:#b1bac4;}
+.figures-list{display:flex;flex-direction:column;gap:8px;}
+.fig-item{background:rgba(240,136,62,.06);border:1px solid rgba(240,136,62,.2);border-radius:9px;padding:11px 13px;display:flex;gap:10px;align-items:flex-start;}
+.fig-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.fig-content{flex:1;}
+.fig-title{font-size:12px;font-weight:700;color:var(--orange);font-family:'Rajdhani',sans-serif;letter-spacing:1px;margin-bottom:3px;}
+.fig-desc{font-size:13px;color:#b1bac4;line-height:1.6;}
+.fig-example{font-size:12px;font-style:italic;color:var(--muted);margin-top:3px;}
+
+/* poetry quiz */
+.pq-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px;}
+.pq-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.pq-title{font-size:15px;font-weight:700;color:var(--green2);}
+.pq-progress{font-family:'Rajdhani',sans-serif;font-size:13px;color:var(--muted);}
+.pq-qtext{font-size:14px;font-weight:600;line-height:1.7;margin-bottom:14px;padding:13px 15px;background:var(--surface);border-radius:9px;border-left:3px solid var(--green);}
+.pq-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.pq-opt{padding:11px 14px;border-radius:9px;border:2px solid var(--border);background:var(--surface);color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;text-align:left;display:flex;align-items:center;gap:8px;}
+.pq-opt-l{width:24px;height:24px;border-radius:6px;background:var(--card);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;flex-shrink:0;color:var(--green2);font-family:'Rajdhani',sans-serif;border:1px solid var(--border);}
+.pq-opt:hover:not(:disabled){border-color:var(--green);background:rgba(46,160,67,.08);}
+.pq-opt.correct{border-color:var(--green)!important;background:rgba(46,160,67,.15)!important;}
+.pq-opt.correct .pq-opt-l{background:var(--green);color:#fff;}
+.pq-opt.wrong{border-color:var(--red)!important;background:rgba(248,81,73,.15)!important;}
+.pq-opt.wrong .pq-opt-l{background:var(--red);color:#fff;}
+.pq-opt:disabled{cursor:default;}
+.pq-feedback{padding:10px 13px;border-radius:9px;font-size:13px;font-weight:600;margin-bottom:12px;display:none;}
+.pq-feedback.show{display:block;}
+.pq-feedback.correct-fb{background:rgba(46,160,67,.15);border:1px solid rgba(46,160,67,.3);color:var(--green2);}
+.pq-feedback.wrong-fb{background:rgba(248,81,73,.15);border:1px solid rgba(248,81,73,.3);color:var(--red);}
+.pq-next{width:100%;padding:11px;background:linear-gradient(135deg,var(--green),#26a641);border:none;border-radius:9px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;}
+.pq-next:hover{opacity:.9;}
+.pq-score-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;margin-bottom:16px;}
+.pq-score-box .big-score{font-family:'Rajdhani',sans-serif;font-size:52px;font-weight:900;color:var(--green2);}
+.pq-score-box .score-label{color:var(--muted);font-size:13px;margin-top:4px;}
+.pq-restart{padding:10px 28px;background:var(--surface);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;}
+.pq-restart:hover{border-color:var(--green);}
+
+/* word reveal (tap to show meaning) */
+.vocab-reveal{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+@media(max-width:480px){.vocab-reveal{grid-template-columns:1fr;}}
+.vr-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:all .2s;position:relative;}
+.vr-card:hover{border-color:var(--purple);}
+.vr-word{font-size:15px;font-weight:700;color:var(--purple);}
+.vr-def{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5;display:none;}
+.vr-card.revealed .vr-def{display:block;}
+.vr-card.revealed{border-color:var(--purple);background:rgba(188,140,255,.06);}
+.vr-hint{font-size:10px;color:var(--dim);margin-top:4px;font-family:'Rajdhani',sans-serif;}
+</style>
+</head>
+<body>
+
+<!-- ══ WELCOME ══ -->
+<div id="welcomeScreen" class="screen active">
+  <div class="logo">
+    <div class="pill">NEW VISION ★ PREP 1</div>
+    <h1>English Quiz Competition<br>Preparatory Year 1</h1>
+    <p>New Vision School — English Department</p>
+  </div>
+  <div class="card">
+    <div class="slabel">Number of Players</div>
+    <div class="pc-row">
+      <button class="pc-btn active" onclick="setPC(1)">1</button>
+      <button class="pc-btn" onclick="setPC(2)">2</button>
+      <button class="pc-btn" onclick="setPC(3)">3</button>
+      <button class="pc-btn" onclick="setPC(4)">4</button>
+    </div>
+    <div class="slabel">Player Names</div>
+    <div id="pCont"></div>
+    <div class="slabel">Question Type</div>
+    <div class="qt-grid">
+      <button class="qt-btn active" id="btn_vocab" onclick="setQt('vocab')"><span class="qi">📚</span>Vocabulary MCQ</button>
+      <button class="qt-btn" id="btn_grammar" onclick="setQt('grammar')"><span class="qi">📝</span>Grammar MCQ</button>
+      <button class="qt-btn" id="btn_dialogue" onclick="setQt('dialogue')"><span class="qi">💬</span>Dialogue</button>
+      <button class="qt-btn poetry-mode" id="btn_poetry" onclick="startPoetry()"><span class="qi">🎭</span>Poetry Explorer</button>
+    </div>
+    <button class="start-btn" onclick="startGame()">🚀 Start Competition</button>
+  </div>
+</div>
+
+<!-- ══ GAME ══ -->
+<div id="gameScreen" class="screen">
+  <div class="game-header">
+    <div class="sbar" id="sBar"></div>
+    <div class="q-ctr" id="qCtr">1/50</div>
+    <div class="tcircle">
+      <svg viewBox="0 0 44 44" width="44" height="44">
+        <circle class="t-track" cx="22" cy="22" r="20"/>
+        <circle class="t-prog" id="tProg" cx="22" cy="22" r="20"/>
+      </svg>
+      <div class="t-num" id="tNum">45</div>
+    </div>
+  </div>
+  <div class="game-content">
+    <div class="turn-wrap"><div class="turn-banner" id="turnB">🎯 Player's Turn</div></div>
+    <div id="qSlide" class="q-slide">
+      <div class="qtag" id="qtTag">VOCABULARY</div>
+      <div class="qbox" id="qText">Loading…</div>
+      <div class="opts" id="optGrid"></div>
+      <button class="nxt-btn" id="nxtBtn" onclick="nextQ()" style="display:none">Next Question →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RESULTS ══ -->
+<div id="resultsScreen" class="screen">
+  <div class="res-t">🏆 Final Results</div>
+  <div class="res-s">WELL DONE EVERYONE!</div>
+  <div class="podium" id="podium"></div>
+  <div class="slist" id="sList"></div>
+  <button class="again-btn" onclick="playAgain()">🔄 Play Again</button>
+</div>
+
+<!-- ══ POETRY SCREEN ══ -->
+<div id="poetryScreen" class="screen">
+  <div class="poetry-nav">
+    <button class="back-btn" onclick="show('welcomeScreen')">← Back</button>
+    <h2>🎭 Poetry Explorer</h2>
+    <div class="pbar">
+      <button class="poem-tab active" onclick="switchPoem(0)">Bed in Summer</button>
+      <button class="poem-tab" onclick="switchPoem(1)">Solitary Reaper</button>
+    </div>
+  </div>
+  <div class="inner" id="poetryInner"></div>
+</div>
+
+<!-- Feedback -->
+<div class="fb-ov"><div class="fb-msg" id="fbMsg"></div></div>
+
+<!-- Flash -->
+<button class="flash-fab" onclick="openFlash()">✏️</button>
+<div class="flash-ov" id="flashOv">
+  <div class="flash-tb">
+    <button class="f-close" onclick="closeFlash()">✕ CLOSE</button>
+    <button class="f-clear" onclick="clearFlash()">🗑 CLEAR</button>
+    <span class="f-hint">WHITEBOARD</span>
+  </div>
+  <div class="flash-body">
+    <textarea class="flash-ta" id="flashTA" placeholder="Write here…"></textarea>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════════════════════
+
+const vocabQ = [
+  {q:"A book, record, or film _______ when it becomes available to buy or see.",o:["runs out","comes out","goes out","starts out"],a:1},
+  {q:"To get information about something for the first time is to _______ it.",o:["sort out","find out","run out","come out"],a:1},
+  {q:"To finish all of something so none is left is to _______.",o:["go out","start out","run out","find out"],a:2},
+  {q:"To leave a place to go somewhere else means to _______.",o:["come out","sort out","go out","run out"],a:2},
+  {q:"To deal successfully with a problem means to _______.",o:["start out","go out","sort out","find out"],a:2},
+  {q:"To begin your life or career in a particular way is to _______.",o:["start out","run out","come out","find out"],a:0},
+  {q:"The movie will _______ tomorrow.",o:["run out","come out","find out","go out"],a:1},
+  {q:"We should _______ for a walk after school.",o:["sort out","start out","go out","come out"],a:2},
+  {q:"My water bottle will _______ soon if I keep drinking.",o:["come out","find out","run out","go out"],a:2},
+  {q:"The teacher helped us _______ the difficult exercise.",o:["run out","go out","sort out","find out"],a:2},
+  {q:"An object like a piano or guitar played to produce musical sounds is called a/an _______.",o:["venue","instrument","launch","crowd"],a:1},
+  {q:"A special type of photograph made with a laser is called a _______.",o:["hologram","develop","perform","virtual reality"],a:0},
+  {q:"The place where a public event or meeting happens is called the _______.",o:["crowd","venue","developer","launch"],a:1},
+  {q:"A large group of people who have come together is a _______.",o:["venue","launch","crowd","developer"],a:2},
+  {q:"An event to celebrate or introduce something new is called a _______.",o:["crowd","venue","launch","development"],a:2},
+  {q:"The process by which someone grows and becomes more advanced is called _______.",o:["development","perform","instrument","hologram"],a:0},
+  {q:"A person who makes money from buying land and building offices is a _______.",o:["audience","developer","venue","crowd"],a:1},
+  {q:"A metal instrument played by blowing and pressing buttons is a _______.",o:["violin","drums","trumpet","saxophone"],a:2},
+  {q:"An electric guitar with four strings that plays very low notes is a _______.",o:["violin","bass guitar","drums","trumpet"],a:1},
+  {q:"A person who is travelling in a vehicle but not driving it is a _______.",o:["minister","passenger","demonstrator","vegetarian"],a:1},
+  {q:"A vehicle used for travel in space is a _______.",o:["spaceship","institute","conference","handheld"],a:0},
+  {q:"A person who does not eat meat is a _______.",o:["minister","demonstrator","vegetarian","passenger"],a:2},
+  {q:"The condition of being extremely poor is called _______.",o:["audience","poverty","conference","institute"],a:1},
+  {q:"The group of people who watch or listen to a play is the _______.",o:["institute","poverty","audience","conference"],a:2},
+  {q:"To post cards that invite people to an event is to _______.",o:["hire a DJ","book a room","get permission","send out invitations"],a:3},
+  {q:"To arrange to use a room at a particular time is to _______.",o:["book a room","hire a DJ","send out invitations","get permission"],a:0},
+  {q:"To pay to use something for a short period is to _______.",o:["send out invitations","hire","get permission","book a room"],a:1},
+  {q:"A cover on a container that can be lifted or removed is called a _______.",o:["spout","lid","vaccine","cure"],a:1},
+  {q:"To watch carefully the way something happens is to _______.",o:["observe","cure","spout","vaccinate"],a:0},
+  {q:"Something that makes a sick person healthy again is a _______.",o:["bath","observation","cure","injuries"],a:2},
+  {q:"Physical harm caused by an accident or attack are called _______.",o:["vaccine","injuries","cure","observation"],a:1},
+  {q:"A substance put into the body to protect from disease is a _______.",o:["spout","lid","vaccine","bath"],a:2},
+  {q:"A situation where people can talk about a problem of public interest is a _______.",o:["forum","clone","coordinate","stuff"],a:0},
+  {q:"Someone who looks very much like someone else is a _______.",o:["clone","stuff","forum","coordinate"],a:0},
+  {q:"Things that someone says or does informally are called _______.",o:["coordinates","forum","stuff","clone"],a:2},
+  {q:"The feeling of needing rest or sleep is called _______.",o:["clone","tiredness","stuff","coordinates"],a:1},
+  {q:"To communicate with someone using phone or writing is to _______.",o:["get in touch","clone","coordinate","forum"],a:0},
+  {q:"Human society with well-developed social organizations is called _______.",o:["cylinder","civilization","nanotechnology","archaeologist"],a:1},
+  {q:"Someone who studies buildings and objects of people in the past is an _______.",o:["archaeologist","cylinder","theory","detector"],a:0},
+  {q:"Worth a lot of money means _______.",o:["confuse","detect","valuable","tremors"],a:2},
+  {q:"To notice something partly hidden or not clear is to _______.",o:["confuse","detect","tremble","valuable"],a:1},
+  {q:"A slight shaking movement especially because of nervousness are called _______.",o:["theory","cylinder","tremors","detect"],a:2},
+  {q:"I found an interesting discussion on an online _______ about technology.",o:["clone","forum","coordinate","stuff"],a:1},
+  {q:"After the long flight, I felt extreme _______ and went straight to bed.",o:["tiredness","clone","forum","coordinate"],a:0},
+  {q:"The rise of modern _______ changed human life forever.",o:["cylinder","theory","civilization","tremors"],a:2},
+  {q:"An _______ studies ancient artifacts and ruins.",o:["archaeologist","valuable","detect","confuse"],a:0},
+  {q:"The police can _______ hidden clues using advanced technology.",o:["confuse","detect","valuable","tremble"],a:1},
+  {q:"He proposed a new _______ about how stars are formed.",o:["theory","detect","tremors","cylinder"],a:0},
+  {q:"The class will start in about _______ .",o:["how about","think about","about half an hour","about to"],a:2},
+  {q:"She was _______ leave when the phone rang.",o:["sorry about","about half an hour","about to","think about"],a:2},
+  {q:"_______ going to the park this afternoon?",o:["How about","Think about","About to","Sorry about"],a:0},
+];
+
+const grammarQ = [
+  {q:"She is coming to the party, _______?",o:["isn't she?","doesn't she?","hasn't she?","won't she?"],a:0},
+  {q:"You like pizza, _______?",o:["don't you?","isn't it?","do you?","aren't you?"],a:0},
+  {q:"They have already left, _______?",o:["do they?","haven't they?","have they?","doesn't it?"],a:1},
+  {q:"He can swim, _______?",o:["can't he?","doesn't he?","can he?","isn't it?"],a:0},
+  {q:"She will finish her homework on time, _______?",o:["will she?","won't she?","does she?","isn't it?"],a:1},
+  {q:"A: I don't like milk. B: _______ do I.",o:["So","Neither"],a:1},
+  {q:"A: She is very busy today. B: _______ is he.",o:["So","Neither"],a:0},
+  {q:"A: We haven't finished our work. B: _______ have they.",o:["So","Neither"],a:1},
+  {q:"A: I enjoy watching movies. B: _______ do I.",o:["So","Neither"],a:0},
+  {q:"A: He doesn't understand the lesson. B: _______ does she.",o:["So","Neither"],a:1},
+  {q:"A: I can't drive a car. B: _______ can I.",o:["So","Neither"],a:1},
+  {q:"A: She likes chocolate. B: _______ do we.",o:["So","Neither"],a:0},
+  {q:"A: We weren't late for school. B: _______ were they.",o:["So","Neither"],a:1},
+  {q:"A: I have finished my homework. B: _______ have I.",o:["So","Neither"],a:0},
+  {q:"The sky is dark. It _______ rain soon.",o:["is going to","will","rains","rained"],a:0},
+  {q:"School _______ next week. (timetable)",o:["will start","starts","is going to start","started"],a:1},
+  {q:"She's going to buy a bigger desk. She _______.",o:["is planning to","planned","will have","had planned"],a:0},
+  {q:"Be careful! You're going to spill ink. This is a _______ based on evidence.",o:["promise","prediction","threat","offer"],a:1},
+  {q:"We _______ be very close neighbors years ago.",o:["used to","were use to","are used to","use to"],a:0},
+  {q:"She _______ have long hair, but now she cuts it short.",o:["didn't use to","used to","wasn't used to","uses to"],a:1},
+  {q:"_______ they use to live in the countryside before moving to the city?",o:["Were","Did","Do","Have"],a:1},
+  {q:"He _______ smoke heavily, which is why he finds it hard to quit.",o:["uses to","used to","is used to","use to"],a:1},
+  {q:"Where _______ you use to spend your summers as a teenager?",o:["do","were","did","have"],a:2},
+  {q:"I used to play football every weekend, but now I _______.",o:["didn't","doesn't","don't","am not"],a:2},
+  {q:"When she _______ into the room, I was listening to the radio.",o:["comes","came","coming","has come"],a:1},
+  {q:"While I _______ home, I had an accident.",o:["drive","drove","were driving","was driving"],a:3},
+  {q:"If I _______ taller, I would play basketball.",o:["am","was","were","will be"],a:2},
+  {q:"If it _______ sunny, we would go for a walk.",o:["is","was","were","will be"],a:2},
+  {q:"If they _______ more time, they would travel.",o:["have","had","were","will have"],a:1},
+  {q:"I have already done my homework. Which word comes with affirmative form?",o:["yet","already","ever","never"],a:1},
+  {q:"Have you finished your work _______? (asking if completed)",o:["already","just","ever","yet"],a:3},
+  {q:"Have you _______ been to London?",o:["already","yet","ever","never"],a:2},
+  {q:"She has _______ started painting (a few moments ago).",o:["yet","already","just","ever"],a:2},
+  {q:"I've been working _______ 6 years. (duration)",o:["since","for","ago","when"],a:1},
+  {q:"She has lived here _______ 2019. (starting point)",o:["for","ago","since","when"],a:2},
+  {q:"James has been training all day _______ 3 months.",o:["since","when","ago","for"],a:3},
+  {q:"The form of Present Perfect Continuous is: Subject + _______ + been + v.ing",o:["do/does","was/were","have/has","had"],a:2},
+  {q:"How long _______ you been working as a teacher?",o:["do","did","have","are"],a:2},
+  {q:"She _______ never been late for class.",o:["is","has","was","have"],a:1},
+  {q:"You aren't coming, _______?",o:["is it?","are you?","aren't you?","do you?"],a:1},
+  {q:"The children are sleeping, _______?",o:["are they?","aren't they?","do they?","don't they?"],a:1},
+  {q:"I'm going to get an email with the details, _______?",o:["am I?","aren't I?","isn't it?","won't I?"],a:1},
+  {q:"Nobody has called for me, _______?",o:["have they?","haven't they?","do they?","did they?"],a:0},
+  {q:"None of those customers were happy, _______?",o:["were they?","weren't they?","are they?","aren't they?"],a:0},
+  {q:"We often go out for dinner on weekends, _______?",o:["do we?","don't we?","are we?","aren't we?"],a:1},
+  {q:"A: They are ready to leave. B: _______ are we.",o:["So","Neither"],a:0},
+  {q:"Second Conditional structure: IF + _______ Simple, would + bare infinitive",o:["Future","Present","Past","Perfect"],a:2},
+  {q:"If she _______ a doctor, she would save lives.",o:["is","was","were","will be"],a:2},
+  {q:"If we _______ rich, we would buy a mansion.",o:["are","were","will be","have been"],a:1},
+  {q:"I _______ to play the piano when I was young, but not anymore.",o:["use","used","am used","was use"],a:1},
+];
+
+const dialogueQ = [
+  {lines:["Principal: ____________?","A teacher: I teach Maths, sir."],o:["What subject do you teach?","Where are you from?","When did you start?","How long have you worked here?"],a:0},
+  {lines:["Principal: ____________?","A teacher: I have been working in Bahrain."],o:["What do you teach?","Where have you been working?","Do you like teaching?","When did you arrive?"],a:1},
+  {lines:["Principal: How long ____________?","A teacher: For five years."],o:["do you work here","have you been working here","will you stay","did you arrive"],a:1},
+  {lines:["Principal: ____________?","A teacher: Because I missed my country and my family."],o:["What do you teach?","Where are you from?","Why did you come back?","How long were you away?"],a:2},
+  {lines:["Nelly: Which musical instrument do you prefer?","Omar: My favorite one is the guitar because ____________."],o:["it is the easiest","I can play pop on it","it is very expensive","everyone plays it"],a:1},
+  {lines:["Nelly: ____________?","Omar: I practise it every day after school and on Fridays."],o:["Do you like music?","When do you practise?","How much does it cost?","Who taught you?"],a:1},
+  {lines:["Omar: No, ____________, but I like the guitar better.","Nelly: Is it more difficult to play the piano?"],o:["the piano is easier","it is not difficult","I can't play it","they are the same"],a:1},
+  {lines:["Jihan: Hi, Samia. How are you?","Samia: ____________"],o:["I don't know.","Fine, thanks. And you?","Yes, I am.","I'm busy."],a:1},
+  {lines:["Jihan: ____________?","Samia: I come twice a week in winter but almost every day in summer."],o:["What sport do you play?","How often do you come to the club?","Are you a good swimmer?","Where do you practise?"],a:1},
+  {lines:["Jihan: ____________?","Samia: Yes, I practise two games, tennis and basketball."],o:["Is the club expensive?","Do you practise other sports?","When did you join?","Who is your coach?"],a:1},
+  {lines:["Huda: Where have you been?","Sana: ____________"],o:["I was at home.","I've been to the market.","I am going shopping.","I went yesterday."],a:1},
+  {lines:["Huda: ____________?","Sana: I bought a piece of cloth."],o:["Why are you late?","What did you buy?","Where are you going?","How much did you spend?"],a:1},
+  {lines:["Samia: ____________ in order to have a dress made.","Huda: How much will you pay?"],o:["I am going to the tailor's","I have been to the market","I will go to school","I went to the gym"],a:0},
+  {lines:["Huda: Oh! It is too much. That's why I always prefer ____________."],o:["buying ready-made clothes","going to the tailor","making my own clothes","ordering online"],a:0},
+  {lines:["Amina: Hey, ____________?","Leo: I'm not sure… something feels off today."],o:["how are you feeling?","what's up?","are you OK?","is something the matter?"],a:1},
+  {lines:["Amina: ____________?","Leo: I just got some bad news from home."],o:["Are you tired?","Is something the matter?","Do you want lunch?","Can I help you?"],a:1},
+  {lines:["Amina: ____________?","Leo: I'll manage. I just need some time to think."],o:["Are you angry?","Are you OK?","Did you eat?","Where are you going?"],a:1},
+  {lines:["Maya: ____________?","Jordan: Honestly, I'm stressed about the upcoming exams."],o:["What's up?","Did you finish?","How was school?","Are you ready?"],a:0},
+  {lines:["Maya: ____________?","Jordan: I feel unprepared, even though I studied."],o:["Are you OK?","How are you feeling?","Did you study?","When is the exam?"],a:1},
+  {lines:["Maya: ____________?","Jordan: Yeah, I think so. I just need to review a bit more."],o:["Is something the matter?","Are you going to be fine?","Did you eat?","Can you help me?"],a:1},
+  {lines:["Riley: You seem quiet today. ____________?","Sam: I had an argument with my friend this morning."],o:["Are you sleeping?","Is something the matter?","Do you feel sick?","Are you hungry?"],a:1},
+  {lines:["Riley: ____________?","Sam: Not great. I keep thinking about it."],o:["Are you angry?","How are you feeling?","What happened?","Did you apologize?"],a:1},
+  {lines:["Riley: ____________?","Sam: Thanks. I'll talk to them later and try to fix things."],o:["Do you feel OK?","Are you sure you'll be alright?","Did you call them?","Should I help?"],a:1},
+  {lines:["Alya: I've recently started painting landscapes in my free time.","Karim: ____________"],o:["That sounds boring.","So have I! I love watercolors too.","I don't like art.","Neither have I."],a:1},
+  {lines:["Alya: I also experiment with watercolor techniques.","Karim: ____________"],o:["Neither do I.","I don't paint.","So do I. It's very relaxing.","I prefer drawing."],a:2},
+  {lines:["Sara: I've never traveled outside my country before.","Omar: ____________"],o:["So have I.","Neither have I.","I travel all the time.","That's strange."],a:1},
+  {lines:["Sara: I'm hoping to visit historical cities next year.","Omar: ____________"],o:["Neither am I.","I don't travel.","So am I! I love history.","That's impossible."],a:2},
+  {lines:["Lina: I was completely exhausted after the science project.","Rami: ____________"],o:["So was I. It was really tiring.","Neither was I.","I'm not tired.","That's your problem."],a:0},
+  {lines:["Lina: I barely had time to eat or rest this week.","Rami: ____________"],o:["Neither did I. It was such a busy week.","So did I.","I had plenty of time.","You should rest."],a:0},
+  {lines:["Principal: ____________?","A teacher: I teach Maths, sir."],o:["Which subject are you teaching?","What is your name?","Are you new here?","Where are you from?"],a:0},
+];
+
+// ════════════════════════════════════════════════════════════
+// POETRY DATA
+// ════════════════════════════════════════════════════════════
+const poems = [
+  {
+    title:"Bed in Summer",
+    author:"Robert Louis Stevenson",
+    poetInfo:{
+      name:"Robert Louis Stevenson",dates:"1850 – 1894",
+      bio:"Scottish novelist, poet and travel writer. Born in Edinburgh, Scotland. He entered the university in 1867, studied engineering then law and became a lawyer. He wrote remarkable poetry collected in 'A Child's Garden of Verses.' He died in 1894.",
+      facts:["Born: Edinburgh, Scotland","Died: 1894","Collection: A Child's Garden of Verses","Also wrote: Treasure Island, Jekyll & Hyde"]
+    },
+    mainTheme:"The poet doesn't like the idea of having to go to bed in summer when the sky is clear and blue. On the other hand, he has to get up early during winter when it is still dark.",
+    stanzas:[
+      {
+        number:"Stanza One",
+        lines:["In winter I get up at night","And dress by yellow candle light.","In summer, quite the other way—","I have to go to bed by day."],
+        paraphrase:"In winter (around Christmas), it is still dark at 8 o'clock in the morning. In summer (June to September), it is light until 9 o'clock at night. The child gets up in winter when it is still dark and uses a candle to get dressed. But in summer, when days are longer, the child goes to bed while it is still daylight.",
+        figures:[
+          {icon:"🔤",title:"Alliteration",desc:"Line 4: 'bed – by' — The repetition of the sound /b/ creates internal music.",example:""},
+          {icon:"⚡",title:"Contrast",desc:"(night – day) / (summer – winter) / (get up – go to bed). This contrast makes the meaning clear and stronger.",example:""},
+          {icon:"🌅",title:"Simile",desc:"The poet likens the early morning of winter to night.",example:""},
+          {icon:"🎵",title:"Rhyme Scheme",desc:"The rhyme scheme in this stanza is (aa, bb).",example:"night/light, way/day"}
+        ]
+      },
+      {
+        number:"Stanza Two",
+        lines:["I have to go to bed and see","The birds still hopping on the tree,","Or hear the grown-up people's feet","Still going past me in the street."],
+        paraphrase:"In summer, the child goes to bed when there is still daylight outside. He goes to bed when the birds are still active out on the trees. The child also hears the sounds of the adults walking past the house while he is in bed. All these activities are taking place outside the child's bedroom while he is trying to sleep.",
+        figures:[
+          {icon:"🦅",title:"Personification",desc:"Line 2: 'the birds still hopping on the tree.' The poet personifies the birds as if they were children jumping on one leg — referring to activity and liveliness.",example:""},
+          {icon:"🔤",title:"Alliteration",desc:"(still – street): repetition of /s/. (bed – birds): repetition of /b/. Both create internal music.",example:""},
+          {icon:"🎵",title:"Rhyme Scheme",desc:"aa, bb",example:"see/tree, feet/street"}
+        ]
+      },
+      {
+        number:"Stanza Three",
+        lines:["And does it not seem hard to you,","When all the sky is clear and blue,","And I should like so much to play,","To have to go to bed by day?"],
+        paraphrase:"In this stanza, the poet doesn't like the idea of going to bed early. He feels it is unfair to have to go to bed early when the sky is clear and blue and everything around him is beautiful instead of playing and having fun.",
+        figures:[
+          {icon:"🔤",title:"Alliteration",desc:"(bed – by): The repetition of the sound /b/ creates internal music.",example:""},
+          {icon:"🎵",title:"Rhyme Scheme",desc:"aa, bb",example:"you/blue, play/day"},
+          {icon:"❓",title:"Rhetorical Question",desc:"'And does it not seem hard to you?' — The poet asks a question he doesn't expect to be answered. It emphasizes how unfair he feels.",example:""}
+        ]
+      }
+    ],
+    quizQuestions:[
+      {q:"What does the child use to get dressed in winter?",o:["The sun","A torch","A yellow candle light","A lamp"],a:2},
+      {q:"In summer, the child has to go to bed _______ .",o:["at night","by day","in the morning","at sunset"],a:1},
+      {q:"What figure of speech is used in 'bed by day'?",o:["Personification","Simile","Alliteration","Metaphor"],a:2},
+      {q:"What are the birds doing in Stanza Two?",o:["Sleeping on the tree","Flying away","Hopping on the tree","Singing loudly"],a:2},
+      {q:"'The birds still hopping on the tree' is an example of _______.",o:["Alliteration","Assonance","Personification","Simile"],a:2},
+      {q:"The rhyme scheme in Stanza One is _______.",o:["abab","aabb","abba","abcd"],a:1},
+      {q:"The main theme of the poem is _______.",o:["Going to school early","The unfairness of bedtime in summer","Playing in winter","Having fun with birds"],a:1},
+      {q:"Who wrote 'Bed in Summer'?",o:["William Wordsworth","John Keats","Robert Louis Stevenson","William Blake"],a:2},
+      {q:"In Stanza Three, the child wants to _______.",o:["sleep early","stay up and play","go to school","wake up late"],a:1},
+      {q:"The contrast in Stanza One is between night and _______ .",o:["day","winter","summer","candle"],a:0}
+    ]
+  },
+  {
+    title:"The Solitary Reaper",
+    author:"William Wordsworth",
+    poetInfo:{
+      name:"William Wordsworth",dates:"1770 – 1850",
+      bio:"One of the greatest English Romantic poets. He co-wrote 'Lyrical Ballads' with Samuel Taylor Coleridge, which launched the Romantic Age in English literature. He was appointed Poet Laureate in 1843. 'The Solitary Reaper' is one of his most celebrated lyrical poems.",
+      facts:["Born: Cockermouth, England","Died: 1850","Movement: Romanticism","Famous work: The Prelude"]
+    },
+    mainTheme:"The poet is deeply moved by a solitary Highland girl who is reaping and singing alone in a field. He is enchanted by her beautiful, melancholy song even though he cannot understand the words, and the music stays in his heart long after he leaves.",
+    stanzas:[
+      {
+        number:"Stanza One",
+        lines:["Behold her, single in the field,","Yon solitary Highland Lass!","Reaping and singing by herself;","Stop here, or gently pass!","Alone she cuts and binds the grain,","And sings a melancholy strain;","O listen! for the Vale profound","Is overflowing with the sound."],
+        paraphrase:"During one of his journeys in the countryside of Scotland, the poet saw a girl working in the field all alone. She had no one to help her. She was singing to herself without knowing that someone was listening. She was busy cutting and binding while singing a melancholy (sad) song. The poet is so struck by the sad beauty of her song that the whole valley overflows with the sound.",
+        figures:[
+          {icon:"🎵",title:"Assonance",desc:"'O listen! for the Vale profound / Is overflowing with the sound' — The repetition of the vowel /o/ makes a sort of music.",example:"profound/sound"},
+          {icon:"⚡",title:"Contrast",desc:"The words 'stop' and 'pass' are opposites — this makes the meaning clear.",example:"stop ↔ pass"},
+          {icon:"🎭",title:"Rhyme Scheme",desc:"ABABCCDD",example:"field/herself, Lass/pass, grain/strain, profound/sound"}
+        ]
+      },
+      {
+        number:"Stanza Two",
+        lines:["No Nightingale did ever chaunt","More welcome notes to weary bands","Of travellers in some shady haunt,","Among Arabian sands;","A voice so thrilling ne'er was heard","In spring-time from the Cuckoo-bird,","Breaking the silence of the seas","Among the farthest Hebrides."],
+        paraphrase:"The poet compares the young woman's song with the Nightingale and the Cuckoo. He complains that neither bird sang a song as sweet as hers. The song of the girl has stopped him from going to his work. He is utterly enchanted — he says her voice is so thrilling that it symbolically surpasses both birds.",
+        figures:[
+          {icon:"🦉",title:"Symbolism / Metaphor",desc:"The poet makes a symbolic comparison of the girl's song with the Nightingale and Cuckoo bird for its melodious nature. But it turns out to be hyperbole — he exaggerates that her song is better than theirs.",example:""},
+          {icon:"🔤",title:"Alliteration",desc:"'No Nightingale' — The sound /n/ is repeated making some sort of music.",example:"No Nightingale"}
+        ]
+      },
+      {
+        number:"Stanza Three",
+        lines:["Will no one tell me what she sings?—","Perhaps the plaintive numbers flow","For old, unhappy, far-off things,","And battles long ago:","Or is it some more humble lay,","Familiar matter of to-day?","Some natural sorrow, loss, or pain,","That has been, and may be again?"],
+        paraphrase:"The poet couldn't understand the local Scottish dialect in which the reaper was singing. So he tries to imagine what the song might be about. He speculates that her song might be about some past sorrow, pain or loss ('of old, unhappy things'). Or perhaps, it is a humbler, simpler song about some present sorrow, pain or loss.",
+        figures:[
+          {icon:"❓",title:"Rhetorical Questions",desc:"'Or is it some more humble lay, Familiar matter of to-day?' The rhetorical question helps make the point clear.",example:""},
+          {icon:"🔤",title:"Alliteration",desc:"'perhaps / plaintive' — /p/ is repeated. 'some / sorrow' — /s/ is repeated. Both create internal music.",example:"perhaps/plaintive, some/sorrow"}
+        ]
+      },
+      {
+        number:"Stanza Four",
+        lines:["Whate'er the theme, the Maiden sang","As if her song could have no ending;","I saw her singing at her work,","And o'er the sickle bending;—","I listened, motionless and still;","And, as I mounted up the hill,","The music in my heart I bore,","Long after it was heard no more."],
+        paraphrase:"Whatever the theme of her poem, it is not going to end. Not only her song but also her suffering sounds like a never-ending one. He stays there motionless and listened to her song quite some times. Even when he left and mounted up the hill he could still hear her voice — the song remained in his heart long after he heard that song.",
+        figures:[
+          {icon:"🎵",title:"Assonance",desc:"'hill' / 'still' / 'bore' / 'more' — the vowels /i/ and /o/ are repeated to make a sort of music.",example:"hill/still, bore/more"},
+          {icon:"🔤",title:"Alliteration",desc:"'saw' / 'singing' — the consonant /s/ is repeated.",example:"saw, singing"}
+        ]
+      }
+    ],
+    quizQuestions:[
+      {q:"What is the girl doing in the poem?",o:["Cooking in a kitchen","Reaping and singing in a field","Playing an instrument","Dancing at a festival"],a:1},
+      {q:"The poem is set in _______.",o:["England","Arabia","Scotland","Ireland"],a:2},
+      {q:"'No Nightingale did ever chaunt' is an example of _______.",o:["Alliteration","Simile","Contrast","Personification"],a:0},
+      {q:"The poet compares the girl's voice to which birds?",o:["Eagle and Hawk","Sparrow and Dove","Nightingale and Cuckoo","Robin and Wren"],a:2},
+      {q:"Why couldn't the poet understand the girl's song?",o:["She was too far away","She sang too quietly","She sang in a local Scottish dialect","She used a different language"],a:2},
+      {q:"What does 'motionless and still' tell us about the poet?",o:["He was sleeping","He was so enchanted he couldn't move","He was frightened","He was cold"],a:1},
+      {q:"The music stayed with the poet _______.",o:["until he reached the field","long after it was heard no more","only while he was watching","for just a few seconds"],a:1},
+      {q:"Who wrote 'The Solitary Reaper'?",o:["Robert Louis Stevenson","John Keats","William Wordsworth","Lord Byron"],a:2},
+      {q:"The rhyme scheme in Stanza One is _______.",o:["aabb","abab","ABABCCDD","ABBA"],a:2},
+      {q:"The poem's main emotion is one of _______.",o:["anger and frustration","joy and excitement","enchantment and melancholy","fear and anxiety"],a:2}
+    ]
+  }
+];
+
+// ════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════
+let players=[],qt='vocab',curQs=[],qIdx=0,pIdx=0,timer=null,tLeft=45,answered=false;
+const TOTAL=45,CIRC=125.6;
+const pColors=[
+  {bg:'linear-gradient(135deg,#f0883e,#f85149)',tx:'#fff'},
+  {bg:'linear-gradient(135deg,#58a6ff,#bc8cff)',tx:'#fff'},
+  {bg:'linear-gradient(135deg,#3fb950,#26a641)',tx:'#fff'},
+  {bg:'linear-gradient(135deg,#e3b341,#f0883e)',tx:'#fff'},
+];
+const emojis=['🥇','🥈','🥉','🎯'];
+let nPlayers=1;
+
+// ────── WELCOME ──────
+function setPC(n){nPlayers=n;document.querySelectorAll('.pc-btn').forEach((b,i)=>b.classList.toggle('active',i+1===n));renderInputs();}
+function renderInputs(){
+  const c=document.getElementById('pCont');c.innerHTML='';
+  const cls=['c0','c1','c2','c3'];
+  for(let i=0;i<nPlayers;i++)c.innerHTML+=`<div class="pi-group"><div class="pi-icon ${cls[i]}">${emojis[i]}</div><input type="text" id="p${i+1}" placeholder="Player ${i+1} name"></div>`;
+}
+function setQt(t){qt=t;document.querySelectorAll('.qt-btn').forEach(b=>b.classList.remove('active'));document.getElementById('btn_'+t).classList.add('active');}
+
+function startGame(){
+  players=[];
+  for(let i=0;i<nPlayers;i++){const v=document.getElementById('p'+(i+1))?.value.trim();players.push({name:v||'Player '+(i+1),score:0,color:pColors[i]});}
+  const pool=qt==='vocab'?vocabQ:qt==='grammar'?grammarQ:dialogueQ;
+  curQs=shuffle([...pool]).slice(0,50);qIdx=0;pIdx=0;
+  show('gameScreen');renderBar();loadQ();
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// ────── GAME ──────
+function renderBar(){
+  document.getElementById('sBar').innerHTML=players.map((p,i)=>`
+    <div class="chip ${i===pIdx?'active':''}" id="chip${i}">
+      <div class="ch-av" style="background:${p.color.bg}">${emojis[i]}</div>
+      <span class="ch-name">${p.name}</span>
+      <span class="ch-sc" id="sc${i}">${p.score}</span>
+    </div>`).join('');
+}
+function loadQ(){
+  if(qIdx>=curQs.length){showResults();return;}
+  answered=false;
+  const q=curQs[qIdx],p=players[pIdx];
+  document.getElementById('qCtr').textContent=`${qIdx+1}/${curQs.length}`;
+  document.getElementById('turnB').innerHTML=`<span style="background:${p.color.bg};-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900">${emojis[pIdx]}</span>&nbsp;${p.name}'s Turn`;
+  const tags={vocab:'📚 VOCABULARY',grammar:'📝 GRAMMAR',dialogue:'💬 DIALOGUE'};
+  document.getElementById('qtTag').textContent=tags[qt];
+  const qBox=document.getElementById('qText');
+  if(qt==='dialogue'&&q.lines){
+    qBox.className='qbox dlg';
+    qBox.innerHTML=q.lines.map(l=>`<span class="dlg-line">${l.replace(/^([A-Za-z]+:)/,(m,s)=>`<span class="${/^[AB]:/.test(s)?'spa':'spb'}">${s}</span>`)}</span>`).join('');
+  } else {
+    qBox.className='qbox';qBox.textContent=q.q;
+  }
+  const letters=['A','B','C','D'];
+  document.getElementById('optGrid').innerHTML=q.o.map((o,i)=>`
+    <button class="opt" id="opt${i}" onclick="pick(${i})">
+      <span class="opt-l">${letters[i]}</span>${o}
+    </button>`).join('');
+  document.getElementById('nxtBtn').style.display='none';
+  const s=document.getElementById('qSlide');s.classList.remove('q-slide');void s.offsetWidth;s.classList.add('q-slide');
+  renderBar();startTimer();
+}
+function pick(i){
+  if(answered)return;answered=true;clearInterval(timer);
+  const q=curQs[qIdx];
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  document.getElementById('opt'+q.a).classList.add('correct');
+  if(i===q.a){players[pIdx].score++;document.getElementById('sc'+pIdx).textContent=players[pIdx].score;showFb('✅');}
+  else{document.getElementById('opt'+i).classList.add('wrong');showFb('❌');}
+  document.getElementById('nxtBtn').style.display='block';
+}
+function nextQ(){qIdx++;pIdx=(pIdx+1)%players.length;loadQ();}
+function startTimer(){
+  tLeft=TOTAL;updateTimer();clearInterval(timer);
+  timer=setInterval(()=>{tLeft--;updateTimer();
+    if(tLeft<=0){clearInterval(timer);
+      if(!answered){answered=true;const q=curQs[qIdx];document.querySelectorAll('.opt').forEach(b=>b.disabled=true);document.getElementById('opt'+q.a).classList.add('correct');showFb('⏰');document.getElementById('nxtBtn').style.display='block';}}
+  },1000);
+}
+function updateTimer(){
+  document.getElementById('tNum').textContent=tLeft;
+  const p=document.getElementById('tProg');p.style.strokeDashoffset=CIRC-(tLeft/TOTAL)*CIRC;
+  if(tLeft<=10){p.style.stroke='#f85149';document.getElementById('tNum').style.color='#f85149';}
+  else if(tLeft<=20){p.style.stroke='#e3b341';document.getElementById('tNum').style.color='#e3b341';}
+  else{p.style.stroke='#3fb950';document.getElementById('tNum').style.color='#e6edf3';}
+}
+function showFb(e){const m=document.getElementById('fbMsg');m.textContent=e;m.style.animation='none';void m.offsetWidth;m.style.animation='fbAnim .8s forwards';}
+
+// ────── RESULTS ──────
+function showResults(){
+  clearInterval(timer);show('resultsScreen');confetti();
+  const s=[...players].sort((a,b)=>b.score-a.score);
+  document.getElementById('sList').innerHTML=s.map((p,i)=>{
+    const oi=players.indexOf(p);
+    return `<div class="srow"><div class="sr-rk">${i+1}</div>
+      <div class="ch-av" style="background:${p.color.bg};width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${emojis[oi]}</div>
+      <div class="sr-name">${p.name}</div><div class="sr-pts">${p.score} pts</div></div>`;
+  }).join('');
+  if(s.length>=2){
+    const ord=s.length>=3?[s[1],s[0],s[2]]:[null,s[0],s[1]];
+    const rks=['rk2','rk1','rk3'],hs=[68,90,50],ms=['🥈','🥇','🥉'];
+    document.getElementById('podium').innerHTML=ord.map((p,i)=>{
+      if(!p)return'<div class="pod-item"></div>';
+      const oi=players.indexOf(p);
+      return `<div class="pod-item ${rks[i]}"><div class="pod-av" style="background:${p.color.bg}">${emojis[oi]}</div>
+        <div class="pod-name">${p.name}</div><div class="pod-sc">${p.score}</div>
+        <div class="pod-block" style="height:${hs[i]}px">${ms[i]}</div></div>`;
+    }).join('');
+  } else document.getElementById('podium').style.display='none';
+}
+function confetti(){
+  const c=['#3fb950','#58a6ff','#bc8cff','#f0883e','#e3b341','#f85149'];
+  for(let i=0;i<80;i++){
+    const e=document.createElement('div');e.className='cp';
+    e.style.cssText=`left:${Math.random()*100}vw;background:${c[~~(Math.random()*c.length)]};animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*1.5}s;width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;`;
+    document.body.appendChild(e);setTimeout(()=>e.remove(),4000);
+  }
+}
+function playAgain(){show('welcomeScreen');}
+
+// ════════════════════════════════════════════════════════════
+// POETRY ENGINE
+// ════════════════════════════════════════════════════════════
+let currentPoem=0;
+let pqIndex=0,pqAnswered=false,pqScore=0,pqDone=false;
+
+function startPoetry(){
+  currentPoem=0;pqIndex=0;pqScore=0;pqDone=false;
+  show('poetryScreen');
+  renderPoetry();
+}
+
+function switchPoem(idx){
+  currentPoem=idx;pqIndex=0;pqScore=0;pqDone=false;pqAnswered=false;
+  document.querySelectorAll('.poem-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  renderPoetry();
+}
+
+function renderPoetry(){
+  const poem=poems[currentPoem];
+  const inner=document.getElementById('poetryInner');
+  inner.innerHTML='';
+
+  // ── POET INFO ──
+  const pi=poem.poetInfo;
+  inner.innerHTML+=`
+    <div class="poem-section">
+      <div class="poem-badge badge-info">📜 ABOUT THE POET</div>
+      <div class="poet-card">
+        <h3>${pi.name}</h3>
+        <div class="dates">${pi.dates}</div>
+        <p>${pi.bio}</p>
+        <div class="poet-facts">${pi.facts.map(f=>`<span class="fact-chip">📌 ${f}</span>`).join('')}</div>
+      </div>
+      <div class="stanza-card">
+        <h4>🎯 MAIN THEME</h4>
+        <div class="paraphrase-box"><div class="pb-label">THEME</div><p>${poem.mainTheme}</p></div>
+      </div>
+    </div>`;
+
+  // ── STANZAS ──
+  inner.innerHTML+=`<div class="poem-section"><div class="poem-badge badge-stanza">🎭 STANZAS & ANALYSIS</div>`;
+  poem.stanzas.forEach(st=>{
+    const linesHtml=st.lines.map(l=>`<span class="stanza-line">${l}</span>`).join('');
+    const figHtml=st.figures.map(f=>`
+      <div class="fig-item">
+        <span class="fig-icon">${f.icon}</span>
+        <div class="fig-content">
+          <div class="fig-title">${f.title}</div>
+          <div class="fig-desc">${f.desc}</div>
+          ${f.example?`<div class="fig-example">Example: ${f.example}</div>`:''}
+        </div>
+      </div>`).join('');
+    inner.innerHTML+=`
+      <div class="stanza-card">
+        <h4>${st.number}</h4>
+        <div class="stanza-lines">${linesHtml}</div>
+        <div class="paraphrase-box"><div class="pb-label">📖 PARAPHRASE</div><p>${st.paraphrase}</p></div>
+        <div class="poem-badge badge-figures">✨ FIGURES OF SPEECH</div>
+        <div class="figures-list">${figHtml}</div>
+      </div>`;
+  });
+  inner.innerHTML+=`</div>`;
+
+  // ── VOCAB CARDS ──
+  inner.innerHTML+=`
+    <div class="poem-section">
+      <div class="poem-badge badge-info">📚 KEY VOCABULARY — Tap to Reveal</div>
+      <div class="vocab-reveal" id="vocabCards"></div>
+    </div>`;
+
+  // ── POETRY QUIZ ──
+  inner.innerHTML+=`
+    <div class="poem-section">
+      <div class="poem-badge badge-quiz">✅ POETRY QUIZ</div>
+      <div id="pqArea"></div>
+    </div>`;
+
+  // populate vocab
+  const vocabData={
+    0:[["solitary","alone, without anyone else"],["reaping","cutting grain in a field"],["melancholy","sad and thoughtful"],["profound","very deep"],["vale","a valley"],["chaunt","to sing"],["thrilling","exciting and emotional"],["plaintive","sounding sad"],["motionless","not moving at all"],["sickle","a curved blade for cutting crops"]],
+    1:[["candlelight","the soft light of a candle"],["hopping","jumping lightly on one foot"],["grown-up","an adult person"],["clear","easy to see through / bright"],["stanza","a verse or section of a poem"],["alliteration","repetition of the same consonant sound"],["assonance","repetition of vowel sounds"],["personification","giving human qualities to non-human things"],["contrast","showing differences between two things"],["rhyme scheme","the pattern of rhymes at the end of lines"]]
+  };
+  const vc=vocabData[currentPoem]||[];
+  document.getElementById('vocabCards').innerHTML=vc.map((v,i)=>`
+    <div class="vr-card" onclick="this.classList.toggle('revealed')">
+      <div class="vr-word">${v[0]}</div>
+      <div class="vr-def">${v[1]}</div>
+      <div class="vr-hint">Tap to see meaning</div>
+    </div>`).join('');
+
+  renderPQ();
+}
+
+function renderPQ(){
+  const poem=poems[currentPoem];
+  const area=document.getElementById('pqArea');
+  if(!area)return;
+  if(pqDone){
+    area.innerHTML=`
+      <div class="pq-score-box">
+        <div class="big-score">${pqScore}/${poem.quizQuestions.length}</div>
+        <div class="score-label">Poetry Quiz Score</div>
+        <div style="margin-top:16px">${pqScore===poem.quizQuestions.length?'🏆 Perfect! Excellent work!':pqScore>=7?'⭐ Great job!':pqScore>=5?'👍 Good effort!':'📚 Keep studying the stanzas!'}</div>
+      </div>
+      <button class="pq-restart" onclick="pqIndex=0;pqScore=0;pqDone=false;pqAnswered=false;renderPQ()">🔄 Retry Quiz</button>`;
+    return;
+  }
+  const q=poem.quizQuestions[pqIndex];
+  const letters=['A','B','C','D'];
+  area.innerHTML=`
+    <div class="pq-card">
+      <div class="pq-header">
+        <div class="pq-title">Question ${pqIndex+1} of ${poem.quizQuestions.length}</div>
+        <div class="pq-progress">Score: ${pqScore}</div>
+      </div>
+      <div class="pq-qtext">${q.q}</div>
+      <div class="pq-opts">${q.o.map((o,i)=>`
+        <button class="pq-opt" id="pqo${i}" onclick="pickPQ(${i})">
+          <span class="pq-opt-l">${letters[i]}</span>${o}
+        </button>`).join('')}</div>
+      <div class="pq-feedback" id="pqFb"></div>
+      <button class="pq-next" id="pqNext" onclick="nextPQ()" style="display:none">${pqIndex+1<poem.quizQuestions.length?'Next Question →':'See Results 🏆'}</button>
+    </div>`;
+}
+
+function pickPQ(i){
+  if(pqAnswered)return;pqAnswered=true;
+  const q=poems[currentPoem].quizQuestions[pqIndex];
+  document.querySelectorAll('.pq-opt').forEach(b=>b.disabled=true);
+  document.getElementById('pqo'+q.a).classList.add('correct');
+  const fb=document.getElementById('pqFb');
+  if(i===q.a){
+    pqScore++;
+    fb.textContent='✅ Correct! Well done!';
+    fb.className='pq-feedback show correct-fb';
+  } else {
+    document.getElementById('pqo'+i).classList.add('wrong');
+    fb.textContent=`❌ Wrong. Correct answer: ${poems[currentPoem].quizQuestions[pqIndex].o[q.a]}`;
+    fb.className='pq-feedback show wrong-fb';
+  }
+  document.getElementById('pqNext').style.display='block';
+}
+
+function nextPQ(){
+  pqAnswered=false;pqIndex++;
+  if(pqIndex>=poems[currentPoem].quizQuestions.length)pqDone=true;
+  renderPQ();
+  document.getElementById('pqArea').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ════════════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════════════
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function openFlash(){document.getElementById('flashOv').classList.add('open');document.getElementById('flashTA').focus();}
+function closeFlash(){document.getElementById('flashOv').classList.remove('open');}
+function clearFlash(){document.getElementById('flashTA').value='';}
+
+// INIT
+renderInputs();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     Prep1.js — Student Auth / Session / Score Manager
+     Must be loaded AFTER the inline script above
+     ═══════════════════════════════════════════════════════ -->
+<script src="Prep1.js"></script>
+</body>
+</html>

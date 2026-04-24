@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Quiz Competition – Grade 3 Secondary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Rajdhani:wght@600;700&display=swap');
+  :root{--bg:#0a0e1a;--surface:#111827;--card:#1a2235;--accent:#f59e0b;--accent2:#3b82f6;--accent3:#10b981;--danger:#ef4444;--success:#22c55e;--text:#e2e8f0;--muted:#64748b;--border:#1e293b;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(59,130,246,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.05) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+  .screen{display:none;position:relative;z-index:1;}
+  .screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+  /* WELCOME */
+  .logo-area{text-align:center;margin-bottom:36px;}
+  .badge{display:inline-block;background:linear-gradient(135deg,var(--accent),#f97316);color:#000;font-weight:900;font-size:11px;padding:4px 14px;border-radius:20px;letter-spacing:2px;margin-bottom:12px;font-family:'Rajdhani',sans-serif;}
+  .logo-area h1{font-size:clamp(22px,4vw,40px);font-weight:900;background:linear-gradient(135deg,#fff,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2;}
+  .logo-area p{color:var(--muted);margin-top:8px;font-size:13px;}
+  .welcome-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:30px;width:100%;max-width:540px;box-shadow:0 25px 60px rgba(0,0,0,.5);}
+  .section-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;font-family:'Rajdhani',sans-serif;}
+  .player-count-selector{display:flex;gap:10px;margin-bottom:20px;}
+  .player-count-btn{flex:1;padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--surface);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;cursor:pointer;transition:all .2s;}
+  .player-count-btn.active{border-color:var(--accent);background:rgba(245,158,11,.15);color:var(--accent);}
+  .player-count-btn:hover{border-color:var(--accent);}
+  .players-container{margin-bottom:20px;}
+  .player-input-group{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+  .player-icon{width:33px;height:33px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+  .p1{background:linear-gradient(135deg,#f59e0b,#f97316);}
+  .p2{background:linear-gradient(135deg,#3b82f6,#8b5cf6);}
+  .p3{background:linear-gradient(135deg,#10b981,#06b6d4);}
+  .p4{background:linear-gradient(135deg,#ec4899,#f43f5e);}
+  input[type=text]{flex:1;padding:11px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:'Cairo',sans-serif;font-size:14px;transition:border-color .2s;outline:none;}
+  input[type=text]:focus{border-color:var(--accent2);}
+  input[type=text]::placeholder{color:var(--muted);}
+  .qtype-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;}
+  .qtype-btn{padding:13px 8px;border-radius:12px;border:2px solid var(--border);background:var(--surface);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;}
+  .qtype-btn .qi{font-size:20px;display:block;margin-bottom:3px;}
+  .qtype-btn.active{border-color:var(--accent3);background:rgba(16,185,129,.15);color:var(--accent3);}
+  .qtype-btn:hover{border-color:var(--accent3);}
+  .start-btn{width:100%;padding:15px;background:linear-gradient(135deg,var(--accent),#f97316);border:none;border-radius:12px;color:#000;font-family:'Cairo',sans-serif;font-size:17px;font-weight:900;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 8px 24px rgba(245,158,11,.35);}
+  .start-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(245,158,11,.5);}
+  /* GAME */
+  #gameScreen{padding:0;justify-content:flex-start;}
+  .game-header{width:100%;background:var(--surface);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;}
+  .scores-bar{display:flex;gap:7px;flex:1;overflow-x:auto;}
+  .player-score-chip{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:30px;padding:5px 11px;white-space:nowrap;transition:all .3s;}
+  .player-score-chip.active-player{border-color:var(--accent);background:rgba(245,158,11,.15);box-shadow:0 0 16px rgba(245,158,11,.3);}
+  .chip-avatar{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;}
+  .chip-name{font-size:13px;font-weight:700;}
+  .chip-score{font-size:17px;font-weight:900;font-family:'Rajdhani',sans-serif;color:var(--accent);}
+  .q-counter{font-family:'Rajdhani',sans-serif;font-size:13px;color:var(--muted);white-space:nowrap;}
+  .timer-circle{width:46px;height:46px;position:relative;flex-shrink:0;}
+  .timer-circle svg{transform:rotate(-90deg);}
+  .timer-track{fill:none;stroke:var(--border);stroke-width:4;}
+  .timer-progress{fill:none;stroke:var(--accent3);stroke-width:4;stroke-linecap:round;stroke-dasharray:125.6;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear,stroke .3s;}
+  .timer-number{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;}
+  .game-content{flex:1;width:100%;max-width:760px;margin:0 auto;padding:18px 16px 40px;}
+  .turn-wrap{display:flex;justify-content:center;margin-bottom:14px;}
+  .turn-banner{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:30px;padding:7px 18px;font-size:14px;font-weight:700;}
+  .qtype-tag{display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:11px;background:rgba(59,130,246,.2);color:var(--accent2);border:1px solid rgba(59,130,246,.3);font-family:'Rajdhani',sans-serif;}
+  /* Question box */
+  .question-text{font-size:clamp(14px,2vw,17px);font-weight:600;line-height:1.8;margin-bottom:22px;direction:ltr;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;border-left:4px solid var(--accent2);}
+  /* Dialogue: each line stacked */
+  .question-text.dlg{font-family:'Rajdhani',sans-serif;font-size:clamp(14px,2vw,16px);line-height:2.1;padding:16px 20px;}
+  .dlg-line{display:block;}
+  .sp-a{font-weight:900;color:var(--accent);margin-right:4px;}
+  .sp-b{font-weight:900;color:var(--accent2);margin-right:4px;}
+  /* Options */
+  .options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+  @media(max-width:500px){.options-grid{grid-template-columns:1fr;}}
+  .option-btn{padding:13px 15px;border-radius:12px;border:2px solid var(--border);background:var(--card);color:var(--text);font-family:'Cairo',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;text-align:left;direction:ltr;display:flex;align-items:center;gap:9px;}
+  .opt-letter{width:27px;height:27px;border-radius:7px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;color:var(--accent);font-family:'Rajdhani',sans-serif;border:1px solid var(--border);transition:all .2s;}
+  .option-btn:hover:not(:disabled){border-color:var(--accent2);background:rgba(59,130,246,.1);transform:translateX(3px);}
+  .option-btn:hover:not(:disabled) .opt-letter{background:var(--accent2);color:#fff;}
+  .option-btn.correct{border-color:var(--success)!important;background:rgba(34,197,94,.2)!important;animation:cPulse .4s ease;}
+  .option-btn.correct .opt-letter{background:var(--success);color:#fff;border-color:var(--success);}
+  .option-btn.wrong{border-color:var(--danger)!important;background:rgba(239,68,68,.2)!important;animation:wShake .4s ease;}
+  .option-btn.wrong .opt-letter{background:var(--danger);color:#fff;border-color:var(--danger);}
+  .option-btn:disabled{cursor:default;}
+  @keyframes cPulse{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
+  @keyframes wShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .next-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent2),#8b5cf6);border:none;border-radius:12px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+  .next-btn:hover{opacity:.9;transform:translateY(-2px);}
+  /* Feedback */
+  .fb-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:100;}
+  .fb-msg{font-size:80px;animation:fbAnim .8s forwards;opacity:0;}
+  @keyframes fbAnim{0%{opacity:0;transform:scale(.5) translateY(20px)}50%{opacity:1;transform:scale(1.2) translateY(-10px)}80%{opacity:1;transform:scale(1) translateY(0)}100%{opacity:0;transform:scale(.8) translateY(-30px)}}
+  /* RESULTS */
+  #resultsScreen{padding:30px 20px;}
+  .res-title{font-size:clamp(26px,5vw,40px);font-weight:900;text-align:center;margin-bottom:5px;background:linear-gradient(135deg,var(--accent),#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .res-sub{color:var(--muted);text-align:center;margin-bottom:32px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;}
+  .podium-area{display:flex;align-items:flex-end;justify-content:center;gap:12px;margin-bottom:32px;width:100%;max-width:440px;}
+  .podium-item{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;}
+  .pod-avatar{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:5px;border:3px solid transparent;}
+  .pod-name{font-size:12px;font-weight:700;margin-bottom:3px;}
+  .pod-score{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:900;margin-bottom:5px;}
+  .pod-block{width:100%;border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center;font-size:24px;}
+  .rank1 .pod-avatar{border-color:#fbbf24;}.rank1 .pod-block{background:linear-gradient(180deg,#fbbf24,#f59e0b);height:100px;}.rank1 .pod-score{color:#fbbf24;}
+  .rank2 .pod-avatar{border-color:#94a3b8;}.rank2 .pod-block{background:linear-gradient(180deg,#94a3b8,#64748b);height:72px;}.rank2 .pod-score{color:#94a3b8;}
+  .rank3 .pod-avatar{border-color:#cd7f32;}.rank3 .pod-block{background:linear-gradient(180deg,#cd7f32,#92400e);height:52px;}.rank3 .pod-score{color:#cd7f32;}
+  .scores-list{width:100%;max-width:440px;margin-bottom:26px;}
+  .score-row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 15px;margin-bottom:8px;}
+  .s-rank{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:900;width:26px;text-align:center;color:var(--muted);}
+  .s-name{flex:1;font-weight:700;font-size:14px;}
+  .s-pts{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:900;color:var(--accent);}
+  .again-btn{padding:12px 34px;background:linear-gradient(135deg,var(--accent3),#06b6d4);border:none;border-radius:12px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s;box-shadow:0 8px 24px rgba(16,185,129,.35);}
+  .again-btn:hover{transform:translateY(-2px);}
+  /* FLASH */
+  .flash-fab{position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#f97316);border:none;color:#000;font-size:20px;cursor:pointer;z-index:200;box-shadow:0 6px 20px rgba(245,158,11,.5);display:flex;align-items:center;justify-content:center;transition:transform .2s;}
+  .flash-fab:hover{transform:scale(1.1);}
+  .flash-overlay{position:fixed;inset:0;z-index:300;background:#000;display:none;flex-direction:column;}
+  .flash-overlay.open{display:flex;}
+  .flash-toolbar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#111;flex-shrink:0;}
+  .f-close{padding:7px 13px;background:var(--danger);border:none;border-radius:8px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:1px;}
+  .f-clear{padding:7px 13px;background:var(--muted);border:none;border-radius:8px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:14px;cursor:pointer;}
+  .f-hint{color:var(--muted);font-size:12px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;}
+  .flash-body{flex:1;position:relative;overflow:hidden;}
+  .flash-textarea{position:absolute;inset:0;width:100%;height:100%;background:transparent;border:none;outline:none;color:#fff;font-size:clamp(36px,7vw,86px);font-family:'Cairo',sans-serif;font-weight:900;text-align:center;resize:none;padding:40px;text-shadow:0 0 28px rgba(245,158,11,.8);caret-color:var(--accent);}
+  /* Confetti */
+  .cp{position:fixed;top:-20px;z-index:400;animation:cFall linear forwards;border-radius:2px;}
+  @keyframes cFall{to{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+  /* Slide */
+  .q-slide{animation:slideIn .3s ease;}
+  @keyframes slideIn{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:translateX(0)}}
+</style>
+</head>
+<body>
+
+<!-- WELCOME -->
+<div id="welcomeScreen" class="screen active">
+  <div class="logo-area">
+    <div class="badge">ASPIRE ★ ENGLISH</div>
+    <h1>English Quiz Competition<br>Grade 3 Secondary</h1>
+    <p>The Count of Monte Cristo &mdash; Final Revision</p>
+  </div>
+  <div class="welcome-card">
+    <div class="section-label">Number of Players</div>
+    <div class="player-count-selector">
+      <button class="player-count-btn active" onclick="setPC(1)">1</button>
+      <button class="player-count-btn" onclick="setPC(2)">2</button>
+      <button class="player-count-btn" onclick="setPC(3)">3</button>
+      <button class="player-count-btn" onclick="setPC(4)">4</button>
+    </div>
+    <div class="section-label">Player Names</div>
+    <div class="players-container" id="pContainer"></div>
+    <div class="section-label">Question Type</div>
+    <div class="qtype-grid">
+      <button class="qtype-btn active" id="btn_vocab" onclick="setQt('vocab')"><span class="qi">📚</span>Vocabulary MCQ</button>
+      <button class="qtype-btn" id="btn_grammar" onclick="setQt('grammar')"><span class="qi">📝</span>Grammar MCQ</button>
+      <button class="qtype-btn" id="btn_bracketGrammar" onclick="setQt('bracketGrammar')"><span class="qi">🔡</span>Use the Brackets</button>
+      <button class="qtype-btn" id="btn_dialogue" onclick="setQt('dialogue')"><span class="qi">💬</span>Dialogue</button>
+    </div>
+    <button class="start-btn" onclick="startGame()">🚀 Start Competition</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="gameScreen" class="screen">
+  <div class="game-header">
+    <div class="scores-bar" id="scoresBar"></div>
+    <div class="q-counter" id="qCounter">1/50</div>
+    <div class="timer-circle">
+      <svg viewBox="0 0 44 44" width="46" height="46">
+        <circle class="timer-track" cx="22" cy="22" r="20"/>
+        <circle class="timer-progress" id="timerProg" cx="22" cy="22" r="20"/>
+      </svg>
+      <div class="timer-number" id="timerNum">45</div>
+    </div>
+  </div>
+  <div class="game-content">
+    <div class="turn-wrap">
+      <div class="turn-banner" id="turnBanner">🎯 Player's Turn</div>
+    </div>
+    <div id="qSlide" class="q-slide">
+      <div class="qtype-tag" id="qtTag">VOCABULARY</div>
+      <div class="question-text" id="qText">Loading…</div>
+      <div class="options-grid" id="optGrid"></div>
+      <button class="next-btn" id="nextBtn" onclick="nextQ()" style="display:none">Next Question →</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="resultsScreen" class="screen">
+  <div class="res-title">🏆 Final Results</div>
+  <div class="res-sub">WELL DONE EVERYONE!</div>
+  <div class="podium-area" id="podium"></div>
+  <div class="scores-list" id="scoresList"></div>
+  <button class="again-btn" onclick="playAgain()">🔄 Play Again</button>
+</div>
+
+<!-- Feedback -->
+<div class="fb-overlay"><div class="fb-msg" id="fbMsg"></div></div>
+
+<!-- Flash FAB -->
+<button class="flash-fab" onclick="openFlash()" title="Whiteboard">✏️</button>
+
+<!-- Flash Screen -->
+<div class="flash-overlay" id="flashOv">
+  <div class="flash-toolbar">
+    <button class="f-close" onclick="closeFlash()">✕ CLOSE</button>
+    <button class="f-clear" onclick="clearFlash()">🗑 CLEAR</button>
+    <span class="f-hint">WRITE IN BIG TEXT</span>
+  </div>
+  <div class="flash-body">
+    <textarea class="flash-textarea" id="flashTA" placeholder="Type here…"></textarea>
+  </div>
+</div>
+
+<script>
+// ══════════════ DATA ══════════════
+const vocabQ=[
+  {q:"The nurse met many patients, each with a ………….., human story to tell.",o:["encouraging","heartbreaking","fascinating","heartwarming"],a:1},
+  {q:"The Grand Egyptian Museum ……….. with tourists from all over the world.",o:["buzzes","slows","sneezes","fades"],a:0},
+  {q:"After the earthquake, ………….. spread throughout the streets.",o:["chaos","peace","harmony","quiet"],a:0},
+  {q:"Nurses often ……….. their day by reading updates on each patient's condition.",o:["plug in","turn off","kick off","kick out"],a:2},
+  {q:"Many …………. couples have lived in the same house for decades.",o:["brotherly","orderly","newly","elderly"],a:3},
+  {q:"The patient stopped taking his …………., and needed to be taken to hospital.",o:["medication","vacation","location","dedication"],a:0},
+  {q:"The doctor just started her night …………, so she won't be home until morning.",o:["appointment","round","hesitation","shift"],a:3},
+  {q:"She nursed her mother after the surgery. 'Nursed' can be replaced by ………",o:["cared for","looked for","ignored","neglected"],a:0},
+  {q:"Nurses check the patients' ………… every morning before starting their rounds.",o:["charts","carts","folders","documents"],a:0},
+  {q:"It took my brother months to ……..….. from the car accident.",o:["discover","recover","shiver","deliver"],a:1},
+  {q:"During emergencies, doctors must divide their …………… between several patients.",o:["tension","intention","attention","prevention"],a:2},
+  {q:"The patient's monitor ……..….. loudly when oxygen levels drop.",o:["beeps","whispers","groans","moans"],a:0},
+  {q:"The hospital staff worked hard to make sure the shift …………… smoothly.",o:["walked","sat","leaned","ran"],a:3},
+  {q:"After surgery, patients are connected to ………….. for continuous observation.",o:["stethoscope","monitors","fridges","lamps"],a:1},
+  {q:"Students should ………….. understanding main ideas rather than memorizing details.",o:["interested in","depend","focus on","avoid"],a:2},
+  {q:"After the accident, he remained without ………….. for several minutes.",o:["weakness","brightness","consciousness","darkness"],a:2},
+  {q:"Training helps nurses react correctly when unexpected emergencies ………….",o:["raise","arise","arouse","rise"],a:1},
+  {q:"The driver must ………….. sure the car is safe before starting the trip.",o:["find","do","have","make"],a:3},
+  {q:"Despite the chaos outside, the teacher …………… calm and continued her work.",o:["remained","remind","memorize","maintained"],a:0},
+  {q:"Doctors and nurses are trained to stay calm during …………….",o:["currencies","emergencies","frequencies","agencies"],a:1},
+  {q:"Nurses have to ………….. every medication they give to patients.",o:["implement","score","comment","document"],a:3},
+  {q:"He worked nonstop all week and finally ………….. from exhaustion.",o:["constructed","stretched","jumped","collapsed"],a:3},
+  {q:"He finally felt ………… when he got the job he had always wanted.",o:["disappointed","fulfilled","stressed","unsatisfied"],a:1},
+  {q:"He thanked the …………. for responding so fast and saving his father's life.",o:["paramedics","pharmacists","chemists","biologists"],a:0},
+  {q:"We must take steps to ………….. the survival of rare animals.",o:["ensure","risk","threaten","endanger"],a:0},
+  {q:"In sports, teamwork makes the dream …………., because no player can win alone.",o:["fulfil","work","achieve","collapse"],a:1},
+  {q:"She became ………….. after taking care of her sick child all night.",o:["relaxed","refreshed","exhausted","energetic"],a:2},
+  {q:"If a patient's condition changes, the nurse must quickly …………… into action.",o:["spring","ring","crawl","start"],a:0},
+  {q:"They decided to trade their small flat …………. a bigger one in the countryside.",o:["in","on","with","for"],a:3},
+  {q:"Many ………… of natural disasters lose their families and homes.",o:["criminals","volunteers","victims","rescuers"],a:2},
+  {q:"The couple's relationship is a ……………—they're happy one day and arguing the next.",o:["rollercoaster","routine","cycle","journey"],a:0},
+  {q:"After running, he put his hands on his ………… and tried to breathe slowly.",o:["chess","chest","chase","cheat"],a:1},
+  {q:"Helping others gives us a ……………. feeling as it brings us joy and inner peace.",o:["frustrating","exhausting","stressful","rewarding"],a:3},
+  {q:"The nurse checked the patient's ……………. before giving medication.",o:["pulse","plus","blood","weight"],a:0},
+  {q:"She felt ………….. when she looked down from the tall building.",o:["dizzy","scared","conscious","confident"],a:0},
+  {q:"The problem of traffic jam seemed to be ………… due to the narrow streets.",o:["short-lived","never-ending","temporary","limited"],a:1},
+  {q:"The teacher decided to ……….. the extra mile and explain the lesson with more examples.",o:["come","rest","drive","go"],a:3},
+  {q:"Before giving any …………., blood pressure and pulse should be checked.",o:["application","indication","medication","dedication"],a:2},
+  {q:"Wearing a seatbelt can be ………….. in car accidents.",o:["ineffective","life-damaging","lifeless","life-saving"],a:3},
+  {q:"We should ………….. on our past mistakes so that we can improve ourselves.",o:["reflect","infect","connect","detect"],a:0},
+  {q:"Failing the exam was a painful ……………, but I learned from it.",o:["preference","audience","experiment","experience"],a:3},
+  {q:"Life is full of ……………, so we must stay strong and face challenges with courage.",o:["ins and outs","ups and downs","sad journeys","easy paths"],a:1},
+  {q:"After the long illness, he finally got back his strength. Replace the underlined words:",o:["regained","gained","reminded","regarded"],a:0},
+  {q:"Saying goodbye to my family before moving abroad was an …………… experience.",o:["fictional","emotional","factual","ordinary"],a:1},
+  {q:"The hospital staff prepared the patient before ………….. the operation.",o:["reforming","informing","deforming","performing"],a:3},
+  {q:"The streets were flooded because it rained …………. last night.",o:["hens and dogs","cats and rats","ups and downs","cats and dogs"],a:3},
+  {q:"I was soaked to the ………….. and had to change all my clothes.",o:["skin","shoulder","bone","hair"],a:0},
+  {q:"She jumped into …………. to assist the elderly woman who fell.",o:["fiction","tension","session","action"],a:3},
+  {q:"The children ………… when the teacher gave much more homework.",o:["groaned","clapped","laughed","cheered"],a:0},
+  {q:"I need to ………… an appointment with the dentist before my toothache gets worse.",o:["make","do","take","give"],a:0},
+  {q:"The surgeon had to ………….. the wound quickly to stop the bleeding.",o:["scratch","deepen","widen","stitch"],a:3},
+  {q:"He fell while climbing the tree and got a deep cut on his …………….",o:["spirit","forehead","bone","headphone"],a:1},
+  {q:"The ambulance brought the injured worker straight to the ………… room.",o:["emergency","delicacy","privacy","vacancy"],a:0},
+  {q:"Doctors must always act with ……………… when a patient's life is in danger.",o:["urgency","accountancy","fluency","currency"],a:0},
+  {q:"She …………. her son's hand while crossing the busy road.",o:["hesitated","clutched","comforted","bled"],a:1},
+  {q:"Hospitals are often under ………… when the emergency room is overcrowded.",o:["treasure","leisure","adventure","pressure"],a:3},
+  {q:"Nurses must use …………. equipment when treating open wounds.",o:["sterile","infected","polluted","dirty"],a:0},
+  {q:"Thanks to the ………….. the medical staff made, the patient made a full recovery.",o:["failures","distractions","delays","sacrifices"],a:3},
+  {q:"The patient's ……..…… was faster than the family expected thanks to his strong will.",o:["peeling","healing","dealing","sealing"],a:1},
+  {q:"The nurse's ………….. to her patients is truly admirable and deserves our respect.",o:["dedication","celebration","decoration","hesitation"],a:0},
+  {q:"The doctor thanked the nurses for their …………… during the emergency.",o:["events","errors","efforts","discounts"],a:2},
+  {q:"The medical staff need both skill and …………… to care for patients.",o:["mission","collision","discussion","compassion"],a:3},
+  {q:"The child ………….. his mother's hand tightly while crossing the busy street.",o:["grabbed","grouped","groaned","moaned"],a:0},
+  {q:"Travelling abroad won't be easy, so I'm aware of the ……….. ahead.",o:["pleasures","comforts","changes","challenges"],a:3},
+  {q:"It is important to …………. the vaccine at the correct time so that it works effectively.",o:["destroy","administer","advocate","remove"],a:1},
+  {q:"The man collapsed and paramedics rushed to help. Antonym of 'collapsed':",o:["ruined","uncovered","covered","recovered"],a:3},
+  {q:"The athlete …………. his best during the competition, even though he didn't win.",o:["tried","made","did","a & c"],a:3},
+];
+
+const grammarQ=[
+  {q:"She ............... as a teacher for more than ten years. She loves her job.",o:["works","has been working","worked","was working"],a:1},
+  {q:"She ............... as a teacher for more than ten years, then she retired.",o:["works","has been working","worked","has worked"],a:2},
+  {q:"Maher is very happy. He ………. a medal for writing poetry.",o:["is winning","won","has won","has been won"],a:2},
+  {q:"How happy Maher was when he …………. a medal for writing poetry.",o:["is winning","has been won","has won","won"],a:3},
+  {q:"A: My father ............... in hospital last week. He had a heart attack.",o:["had been","has been","was","will be"],a:2},
+  {q:"A: My father ............... in hospital since last week. B: I will visit him tonight.",o:["had been","has been","was","will be"],a:1},
+  {q:"I have wanted to be a doctor since I .................. secondary school.",o:["finished","was finishing","have finished","finish"],a:0},
+  {q:"It ................ a long time since I met Amal.",o:["has been","was","had been","will be"],a:0},
+  {q:"Maha ………... since she has lost her toy.",o:["crying","is crying","has cried","cry"],a:1},
+  {q:"Sara has lived in Tanta since she ............... a child.",o:["was","has been","will be","is"],a:0},
+  {q:"I haven't seen my close friends since ............... .",o:["we are children","our childhood","we was children","we've been children"],a:1},
+  {q:"Since I .................. my job, I have had a lot of problems with my boss.",o:["have started","had started","was started","started"],a:3},
+  {q:"My pen friend arrived at Cairo Airport a moment ago. This means that he .............",o:["has just arrived","just has arrived","hasn't arrived","will arrive"],a:0},
+  {q:"My uncle has been to Paris. This means that …………",o:["he is coming back tomorrow","he is still in Paris","he has returned from Paris","he will stay there for a long time"],a:2},
+  {q:"It's two months since we ……….our uncle in the village.",o:["had visited","visit","have visited","visited"],a:3},
+  {q:"Have you finished reading that novel ………? That's amazing!",o:["just","yet","already","ever"],a:2},
+  {q:"He had an accident yesterday and he has been in hospital ……….. .",o:["for that time","ever since","Since when","While"],a:1},
+  {q:"My cousin has worked abroad ………. over twenty years.",o:["since","for","while","when"],a:1},
+  {q:"A: Have some tea. B: No thanks. I have ……….. had two cups already.",o:["already","ever","yet","never"],a:0},
+  {q:"Have you finished doing the research? - Not ……….. .",o:["ever","already","just","yet"],a:3},
+  {q:"Since we moved to Cairo, my children .............. their hometown.",o:["didn't visit","haven't been visited","haven't visited","weren't visited"],a:2},
+  {q:"My father travelled to London …………. 2005.",o:["since","in","when","while"],a:1},
+  {q:"When I was at school, I …………. French for three years.",o:["studied","have studied","am studying","study"],a:0},
+  {q:"My father gave up smoking nearly ten years ………….",o:["since","for","ever","ago"],a:3},
+  {q:"No one has …………. been able to explain the mystery of the Bermuda Triangle.",o:["already","just","ever","never"],a:2},
+  {q:"He's been studying hard …………. He's got exams at the end of the month.",o:["never","lately","ever","just"],a:1},
+  {q:"………….. her marriage, Eman has lived with her husband in Cairo.",o:["Since","For","Ago","Just"],a:0},
+  {q:"This is the most interesting book I've ……….. read.",o:["never","yet","ever","since"],a:2},
+  {q:"Have you finished the exam …………? Wonderful!",o:["ever","yet","already","just"],a:2},
+  {q:"A: Where is Farida? B: She …………. to the supermarket.",o:["has been","has gone","was","had"],a:1},
+  {q:"Dad ………… to Paris. Let's see the presents he bought for us.",o:["has been","has gone","is going","is being"],a:0},
+  {q:"I haven't seen my friends in the village………. a long time.",o:["for","since","ago","when"],a:0},
+  {q:"I haven't seen Mr Smith ………. the last conference.",o:["for","since","ago","when"],a:1},
+  {q:"I ………. for Peter for half an hour; he hasn't come yet.",o:["have been waited","have been waiting","had waited","waited"],a:1},
+  {q:"Adel ..………. a taxi driver for 10 years; he hasn't changed his career.",o:["had been","is","was","has been"],a:3},
+  {q:"Sara's father never goes to work. He ……….. ill for more than a year.",o:["has been","was","had been","was being"],a:0},
+  {q:"My teacher is angry with me because I ………… the same mistake twice.",o:["had made","will make","have made","have been made"],a:2},
+  {q:"Heba .............. the housework for three hours, but she hasn't finished it yet.",o:["has done","has been doing","is doing","had done"],a:1},
+  {q:"With their fourth win, Zamalik …………. into second place in the table.",o:["is moving","has been moving","has moved","will be moving"],a:2},
+  {q:"I …………… this enjoyable book three times so far.",o:["have read","have been reading","read","am reading"],a:0},
+  {q:"I've been reading the book you lent me. This means ………….. .",o:["I'll start reading the book","I refused to read it","I'm still reading the book","I've finished the book"],a:2},
+  {q:"I've read the book you lent me. This means ………….. .",o:["I'll start reading the book","I refused to read it","I'm still reading the book","I've finished the book"],a:3},
+  {q:"Dr Salim ………….. the same lecture to students for the last ten years.",o:["had given","is given","has been giving","has been given"],a:2},
+  {q:"Mr Ali …………… nearly a million pounds to the charity this year.",o:["was given","has given","has been giving","has been given"],a:1},
+  {q:"Mr Ali …………… nearly a million pounds to the charity last year.",o:["gave","has given","has been giving","has been given"],a:0},
+  {q:"The pipe's …………… for a few weeks, so we should get it fixed.",o:["been leaking","leaked","to leak","been leaked"],a:0},
+  {q:"You ………….. again, haven't you? I can smell it on your clothes.",o:["have smoked","are smoking","have to smoke","'ve been smoking"],a:3},
+  {q:"I …………. all of his previous books, so I'm looking forward to his new one.",o:["have enjoyed","had been enjoying","had enjoyed","has been enjoying"],a:0},
+  {q:"He ………….. all his exams since he didn't study hard.",o:["has failed","has been failing","failed","has been failed"],a:0},
+  {q:"It's the first time she's ever visited Alazhar Park. This means that ….………",o:["she hasn't visited yet","she has visited many times","she hasn't visited before","she will never visit again"],a:2},
+  {q:"I haven't seen Nadia …………. the last time we met in the village.",o:["yet","when","for","since"],a:3},
+  {q:"Don't worry, …………. .",o:["we have already solved the problem","we haven't solved it yet","the problem had already been solved","we had already solved it"],a:0},
+  {q:"Father: Why are your clothes dirty? Son: I ………… into a pond of water.",o:["fell","was falling","have fallen","fall"],a:2},
+  {q:"Laila …………. short stories since she was eleven.",o:["writes","has been writing","wrote","was writing"],a:1},
+  {q:"He's over the moon; He …………. the final match.",o:["was winning","has been winning","won","has won"],a:3},
+  {q:"A: Have you ever been to Aswan? B: Yes, I …………. there in 2020.",o:["have","have gone","have been","went"],a:3},
+  {q:"How long ago ………. he come back from South Africa?",o:["has","had","did","does"],a:2},
+  {q:"My cousin ………. in Italy for ten years. He enjoys his stay there.",o:["lived","has been living","is living","lives"],a:1},
+  {q:"You can't meet Tamer because he ………. to the supermarket.",o:["has been","was","has gone","had"],a:2},
+  {q:"I started to revise an hour ago. Since then, I ................ any time to go out.",o:["haven't had","don't have","didn't have","hadn't had"],a:0},
+  {q:"I'm sorry the flat is in such a mess. We've ………. for a week.",o:["been decorated","to decorate","decorated","been decorating"],a:3},
+  {q:"I ………….. my new book and am now ready to get it published.",o:["have to complete","have been completing","have completed","completed"],a:2},
+  {q:"What …………. is still a secret. You needn't worry.",o:["has said","has been said","have you said","had been said"],a:1},
+  {q:"Hi Fadi. Have you been decorating your room? We can infer that Fadi …….",o:["is in the middle of decorating","isn't decorating any more","has finished decorating","will start decorating"],a:0},
+  {q:"………. the news programme on Nile News yesterday?",o:["Did you watch","Have you watched","Do you watch","Had you watched"],a:0},
+];
+
+const bracketQ=[
+  {q:"She (work) as a teacher for more than ten years. She loves her job. [Use the brackets]",o:["works","has been working","worked","was working"],a:1},
+  {q:"She (work) as a teacher for ten years, then she retired. [Use the brackets]",o:["works","has been working","worked","has worked"],a:2},
+  {q:"Maher is very happy. He (win) a medal for writing poetry. [Use the brackets]",o:["is winning","won","has won","has been won"],a:2},
+  {q:"I (want) to be a doctor since I finished school. [Use the brackets]",o:["want","wanted","have wanted","am wanting"],a:2},
+  {q:"It (be) a long time since I met Amal. [Use the brackets]",o:["has been","was","had been","will be"],a:0},
+  {q:"Maha (cry) since she lost her toy. [Use the brackets]",o:["cries","is crying","has cried","has been crying"],a:3},
+  {q:"I haven't seen my friends (for / a long time). [Choose the correct form]",o:["since a long time","for a long time","ago a long time","when a long time"],a:1},
+  {q:"My father (travel) to London in 2005. [Use the brackets]",o:["travels","has travelled","travelled","had travelled"],a:2},
+  {q:"He (give up) smoking nearly ten years ago. [Use the brackets]",o:["gives up","has given up","gave up","had given up"],a:2},
+  {q:"She (live) in Tanta since she was a child. [Use the brackets]",o:["lives","has lived","lived","had lived"],a:1},
+  {q:"I (not see) my close friends since our childhood. [Use the brackets]",o:["didn't see","don't see","haven't seen","hadn't seen"],a:2},
+  {q:"It's two months since we (visit) our uncle. [Use the brackets]",o:["visit","have visited","had visited","visited"],a:3},
+  {q:"Heba (do) the housework for three hours, but hasn't finished. [Use the brackets]",o:["has done","has been doing","is doing","had done"],a:1},
+  {q:"I (read) this book three times so far. [Use the brackets]",o:["read","have read","have been reading","am reading"],a:1},
+  {q:"Zamalik (move) into second place with their fourth win. [Use the brackets]",o:["is moving","has been moving","has moved","will be moving"],a:2},
+  {q:"Dr Salim (give) the same lecture for the last ten years. [Use the brackets]",o:["had given","is given","has been giving","has been given"],a:2},
+  {q:"Mr Ali (give) a million pounds to charity this year. [Use the brackets]",o:["was given","has given","has been giving","has been given"],a:1},
+  {q:"The pipe (leak) for a few weeks; we should get it fixed. [Use the brackets]",o:["leaked","has been leaking","to leak","been leaked"],a:1},
+  {q:"She (work) there for five years. She still works there. [Use the brackets]",o:["worked","has worked","had worked","is working"],a:1},
+  {q:"He (not travel) for three weeks. [Use the brackets]",o:["doesn't travel","hasn't travelled","hadn't travelled","won't travel"],a:1},
+  {q:"I (not see) Mr Smith since the last conference. [Use the brackets]",o:["don't see","didn't see","haven't seen","hadn't seen"],a:2},
+  {q:"I (wait) for Peter for half an hour; he hasn't come yet. [Use the brackets]",o:["waited","have been waiting","had waited","am waiting"],a:1},
+  {q:"Adel (be) a taxi driver for 10 years; he hasn't changed. [Use the brackets]",o:["had been","is","was","has been"],a:3},
+  {q:"Sara's father (be) ill for more than a year. He never goes to work. [Use the brackets]",o:["has been","was","had been","was being"],a:0},
+  {q:"I (make) the same mistake twice. My teacher is angry. [Use the brackets]",o:["had made","will make","have made","have been made"],a:2},
+  {q:"Laila (write) short stories since she was eleven. [Use the brackets]",o:["writes","has been writing","wrote","was writing"],a:1},
+  {q:"He's over the moon; He (win) the final match. [Use the brackets]",o:["was winning","has been winning","won","has won"],a:3},
+  {q:"My cousin (live) in Italy for ten years. He enjoys it. [Use the brackets]",o:["lived","has been living","is living","lives"],a:1},
+  {q:"You can't meet Tamer because he (go) to the supermarket. [Use the brackets]",o:["has been","was","has gone","had"],a:2},
+  {q:"I (not have) time to go out since I started revising. [Use the brackets]",o:["haven't had","don't have","didn't have","hadn't had"],a:0},
+  {q:"We (decorate) the flat for a week. That's why it's a mess. [Use the brackets]",o:["been decorated","have been decorating","decorated","been decorating"],a:1},
+  {q:"I (complete) my new book and am ready to publish it. [Use the brackets]",o:["have to complete","have been completing","have completed","completed"],a:2},
+  {q:"What (say) is still a secret. [Use the brackets — passive]",o:["has said","has been said","have you said","had been said"],a:1},
+  {q:"She (not see) the new movie yet. [Use the brackets]",o:["doesn't see","didn't see","hasn't seen","hadn't seen"],a:2},
+  {q:"Mo Salah (play) for Liverpool for five years. [Use the brackets]",o:["played","has played","has been playing","is playing"],a:2},
+  {q:"He (know) his best friend for a long time. (state verb) [Use the brackets]",o:["knows","has known","has been knowing","had known"],a:1},
+  {q:"You (clean) the bathroom! It looks lovely! [Use the brackets]",o:["are cleaning","cleaned","have cleaned","had cleaned"],a:2},
+  {q:"She (do) all her homework, so she can relax. [Use the brackets]",o:["does","did","has done","has been doing"],a:2},
+  {q:"My father (drink) at least a litre of coffee today. (specific quantity) [Use the brackets]",o:["drinks","drank","has drunk","has been drinking"],a:2},
+  {q:"She (study) for five hours. That's why she's tired. [Use the brackets]",o:["studied","is studying","has studied","has been studying"],a:3},
+  {q:"I (just / read) David Copperfield. It's fantastic! [Use the brackets]",o:["just read","have just read","am just reading","had just read"],a:1},
+  {q:"(you / ever / be) to Aswan? [Form a question — use the brackets]",o:["Did you ever been","Have you ever been","Do you ever go","Had you ever been"],a:1},
+  {q:"We (never / eat) Japanese food. [Use the brackets]",o:["never eat","have never eaten","never ate","had never eaten"],a:1},
+  {q:"She (go) to the gym twice this month. [Use the brackets]",o:["goes","went","has gone","has been going"],a:2},
+  {q:"He (just / arrive) at Cairo Airport a moment ago. [Use the brackets]",o:["just arrived","has just arrived","is just arriving","had just arrived"],a:1},
+  {q:"The temperature (already / fall) to minus three. [Use the brackets]",o:["already fell","has already fallen","had already fallen","already falls"],a:1},
+  {q:"She (not phone) me lately. [Use the brackets]",o:["didn't phone","doesn't phone","hasn't phoned","hadn't phoned"],a:2},
+  {q:"It is the strangest match I (ever / watch). [Use the brackets]",o:["ever watched","have ever watched","had ever watched","ever watch"],a:1},
+  {q:"This is the first time she (ever / visit) Alazhar Park. [Use the brackets]",o:["ever visited","has ever visited","had ever visited","ever visits"],a:1},
+  {q:"He (not play) football ever since he (injure) his leg. [First verb — Use the brackets]",o:["doesn't play","hasn't played","didn't play","hadn't played"],a:1},
+];
+
+// Dialogue: q.lines array → each element is one line of the conversation
+const dialogueQ=[
+  {lines:["A: I think I need to see a doctor. My throat has been sore for two days.","B: ____________","A: I'd like to make an appointment today if possible."],o:["You should take a vacation.","Have you tried any medication?","What seems to be the problem?","I'll call the ambulance right away."],a:2},
+  {lines:["A: The patient's pulse is very weak!","B: ____________","A: Yes, I'll bring the emergency kit immediately."],o:["Don't worry about it.","Should I call for backup?","Let's take a break.","I'll order some food."],a:1},
+  {lines:["A: Dr. Ahmed has been working nonstop for 12 hours.","B: ____________","A: I agree. Let's ask him to take a short break."],o:["He should work harder.","He must be exhausted.","He's not tired at all.","He should ignore the patients."],a:1},
+  {lines:["A: I'm sorry, visiting hours are over.","B: But my mother is in the emergency room!","A: ____________"],o:["Then please leave immediately.","Then you'll need to wait outside.","I understand. I'll check with the doctor for you.","We don't allow any visitors."],a:2},
+  {lines:["A: Have you ever been admitted to a hospital?","B: ____________","A: I hope you never have to again."],o:["Yes, I have. It was last year after an accident.","No, I will go next week.","I love hospitals.","Never mind."],a:0},
+  {lines:["A: The doctor wants you to administer the medication every 6 hours.","B: ____________","A: Set an alarm so you don't forget."],o:["I'll ignore that advice.","I understand. I'll follow the schedule.","The patient doesn't need medication.","I'll do it once a day."],a:1},
+  {lines:["A: I haven't slept properly since the surgery.","B: ____________","A: Thank you, I'll try."],o:["That's normal. Try to relax and rest as much as possible.","You should sleep less.","Go for a run.","Eat more food."],a:0},
+  {lines:["A: The patient has been unconscious for three hours.","B: ____________","A: Right away, Doctor."],o:["Let's have lunch.","Check his vital signs immediately!","Leave him to rest.","There's no need to worry."],a:1},
+  {lines:["A: Have you documented the patient's progress today?","B: Not yet. ____________","A: Please do it before the end of your shift."],o:["I'll do it later.","I'll do it in a week.","I don't think it's necessary.","It was done yesterday."],a:0},
+  {lines:["A: I felt dizzy and collapsed at work this morning.","B: ____________","A: It could be low blood pressure."],o:["That sounds serious. Did you see a doctor?","That's funny.","You should exercise more.","Ignore it, it'll pass."],a:0},
+  {lines:["A: ____________","B: What do you want to eat?","A: How about an omelette?","B: I don't think we can make an omelette."],o:["I'm very tired.","Let's order pizza.","I'm hungry. What's for dinner?","Let's go to the cinema."],a:2},
+  {lines:["A: ____________","B: Because there aren't enough eggs in the fridge.","A: Oh! I'll go buy some."],o:["Why can't we make an omelette?","Where is the fridge?","Have you eaten already?","Can you cook pasta?"],a:0},
+  {lines:["A: I'm thinking of changing my career.","B: ____________","A: I want to become a doctor."],o:["What do you want to do instead?","Why would you do that?","Don't change anything.","You can't do that."],a:0},
+  {lines:["A: The nurse showed great dedication during the emergency.","B: ____________","A: I'll make sure to mention it in her report."],o:["She should have worked harder.","Indeed. She deserves to be recognized.","I didn't notice anything special.","That's not important."],a:1},
+  {lines:["A: How long have you been working as a paramedic?","B: ____________","A: That's impressive!"],o:["I started last week.","For about ten years.","I don't know.","I quit last month."],a:1},
+  {lines:["A: I've been feeling chest pain since yesterday.","B: ____________","A: Yes, I'll call them now."],o:["Don't worry about it.","You should contact the emergency services immediately!","Take some painkillers and sleep.","Drink more water."],a:1},
+  {lines:["A: The medical team has been under pressure all day.","B: ____________","A: That's true. We need more staff."],o:["It's not that hard.","They should work faster.","They need a break. It's been a really tough shift.","They're just complaining."],a:2},
+  {lines:["A: Have you recovered from your surgery yet?","B: ____________","A: Take your time. Don't rush it."],o:["Not fully. I still need a few more days of rest.","I'm completely fine.","I don't need to recover.","I had no surgery."],a:0},
+  {lines:["A: The patient needs an operation immediately.","B: ____________","A: The operating room is ready."],o:["Let's wait until tomorrow.","Get the team ready. We'll perform it now.","Call the patient's family first.","Let the patient decide."],a:1},
+  {lines:["A: I want to be a nurse when I grow up.","B: ____________","A: Yes, I love helping people."],o:["That's a difficult job with no rewards.","That's a wonderful goal! Do you enjoy caring for others?","You should choose an easier career.","Nurses don't earn much."],a:1},
+  {lines:["A: The bleeding hasn't stopped yet.","B: ____________","A: I'll apply more pressure."],o:["Leave it alone.","Apply pressure to the wound immediately!","It will stop on its own.","Give him some food."],a:1},
+  {lines:["A: Have you ever worked a night shift?","B: ____________","A: It takes some getting used to."],o:["Night shifts are illegal.","Yes, many times. They can be exhausting.","I prefer not to answer.","I always work in the morning."],a:1},
+  {lines:["A: I think the patient's condition has worsened.","B: ____________","A: I'll update the charts."],o:["Let's ignore it.","Inform the doctor at once and document everything.","Wait until morning.","Tell the patient to rest."],a:1},
+  {lines:["A: I've just read about the importance of teamwork in hospitals.","B: ____________","A: Exactly! Teamwork makes the dream work."],o:["I disagree completely.","It's not important.","Indeed, no doctor can do everything alone.","That's only for sports."],a:2},
+  {lines:["A: Do you think working in the emergency room is stressful?","B: ____________","A: I can imagine. But it must also be very rewarding."],o:["It's the most relaxing job.","Not at all, it's quite easy.","Absolutely. You have to make life-saving decisions quickly.","I've never been to a hospital."],a:2},
+  {lines:["A: My grandfather has been in hospital for two weeks.","B: ____________","A: The doctors say he's improving slowly."],o:["How is he doing?","Forget about him.","Why did he go?","That's not your concern."],a:0},
+  {lines:["A: The stethoscope isn't working properly.","B: ____________","A: There's a spare one in the supply room."],o:["Throw it away.","We'll need to use another one then.","Buy an expensive one.","Ignore it."],a:1},
+  {lines:["A: Have you administered the medication yet?","B: ____________","A: Perfect. Now check on the patient in room 5."],o:["Not yet, I'll do it.","Yes, I've just done it.","I forgot about it.","I'll do it tomorrow."],a:1},
+  {lines:["A: Can you focus on the patient in bay 3? He's very anxious.","B: ____________","A: Thank you. He needs reassurance."],o:["Of course. I'll go to him right away and try to comfort him.","I'm too busy.","He's not my patient.","I'll do it later."],a:0},
+  {lines:["A: ____________","B: I've been working here for five years.","A: Wow, you must know the hospital very well!"],o:["When did you start working here?","Where do you live?","How old are you?","What's your name?"],a:0},
+  {lines:["A: The patient has just arrived. He's bleeding badly.","B: ____________","A: Already done, Doctor."],o:["Get me sterile equipment and call the surgical team immediately!","Let's wait for more staff.","Give him some water.","Ask him to take a seat."],a:0},
+  {lines:["A: I'm exhausted after my 12-hour shift.","B: ____________","A: That's kind of you. I really appreciate it."],o:["Work harder next time.","You should rest. I'll cover for you for a while.","Stop complaining.","I'm tired too."],a:1},
+  {lines:["A: The monitor keeps beeping.","B: ____________","A: His oxygen levels are dropping."],o:["Turn it off.","What does it say?","Ignore it.","It always does that."],a:1},
+  {lines:["A: Have the nurses documented the patient's charts?","B: ____________","A: Good. The doctor will review them shortly."],o:["I'm not sure.","Yes, they've already done it.","No, they forgot.","They'll do it tomorrow."],a:1},
+  {lines:["A: I've been having severe headaches for a week now.","B: ____________","A: You're right. I'll call and make one now."],o:["Try to sleep more.","You should make an appointment with your doctor as soon as possible.","Take a painkiller.","It's probably nothing."],a:1},
+  {lines:["A: Are you sure the patient has given consent for the surgery?","B: ____________","A: Great. Let's proceed then."],o:["I haven't asked him yet.","Yes, he has already signed the consent form.","We don't need his permission.","I'll ask him later."],a:1},
+  {lines:["A: The new intern seems to be struggling with her duties.","B: ____________","A: That's a great idea. I'll speak to her supervisor."],o:["Let's just ignore her.","Maybe she needs more guidance and support.","She should quit.","She's fine, don't worry."],a:1},
+  {lines:["A: We've just received five emergency cases at once!","B: ____________","A: Agreed. Let's move quickly."],o:["Let's go home.","We need to stay calm and prioritize the most critical cases first.","Call the manager.","There's nothing we can do."],a:1},
+  {lines:["A: The patient's family keeps calling for updates.","B: ____________","A: That's fair. Let me speak to the doctor first."],o:["Tell them to stop calling.","That's understandable. We should update them regularly.","Ignore their calls.","It's not our job."],a:1},
+  {lines:["A: Have you ever had to perform CPR on a patient?","B: ____________","A: That must have been a very stressful experience."],o:["CPR is not important.","Yes, once. It was the most intense moment of my career.","I don't know how to do it.","I've never worked in a hospital."],a:1},
+  {lines:["A: The surgery took over six hours.","B: ____________","A: Yes, it was a very complex case."],o:["That's quite short actually.","Really? The surgeon must have been under enormous pressure.","The surgeon was probably bored.","Six hours is too long for any surgery."],a:1},
+];
+
+// ══════════════ STATE ══════════════
+let players=[], qt='vocab', curQs=[], qIdx=0, pIdx=0, timer=null, tLeft=45, answered=false;
+const TOTAL=45, CIRC=125.6;
+const pColors=[
+  {bg:'linear-gradient(135deg,#f59e0b,#f97316)',tx:'#000'},
+  {bg:'linear-gradient(135deg,#3b82f6,#8b5cf6)',tx:'#fff'},
+  {bg:'linear-gradient(135deg,#10b981,#06b6d4)',tx:'#fff'},
+  {bg:'linear-gradient(135deg,#ec4899,#f43f5e)',tx:'#fff'},
+];
+const emojis=['🥇','🥈','🥉','🎯'];
+
+// ══════════════ WELCOME ══════════════
+let nPlayers=1;
+function setPC(n){nPlayers=n;document.querySelectorAll('.player-count-btn').forEach((b,i)=>b.classList.toggle('active',i+1===n));renderInputs();}
+function renderInputs(){
+  const c=document.getElementById('pContainer'),cls=['p1','p2','p3','p4'];c.innerHTML='';
+  for(let i=0;i<nPlayers;i++)c.innerHTML+=`<div class="player-input-group"><div class="player-icon ${cls[i]}">${emojis[i]}</div><input type="text" id="p${i+1}" placeholder="Player ${i+1} name"></div>`;
+}
+function setQt(t){qt=t;document.querySelectorAll('.qtype-btn').forEach(b=>b.classList.remove('active'));document.getElementById('btn_'+t).classList.add('active');}
+function startGame(){
+  players=[];
+  for(let i=0;i<nPlayers;i++){const v=document.getElementById('p'+(i+1))?.value.trim();players.push({name:v||'Player '+(i+1),score:0,color:pColors[i]});}
+  const pool=qt==='vocab'?vocabQ:qt==='grammar'?grammarQ:qt==='bracketGrammar'?bracketQ:dialogueQ;
+  curQs=shuffle([...pool]).slice(0,50);qIdx=0;pIdx=0;
+  show('gameScreen');renderBar();loadQ();
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// ══════════════ GAME ══════════════
+function renderBar(){
+  document.getElementById('scoresBar').innerHTML=players.map((p,i)=>`
+    <div class="player-score-chip ${i===pIdx?'active-player':''}" id="chip${i}">
+      <div class="chip-avatar" style="background:${p.color.bg};color:${p.color.tx}">${emojis[i]}</div>
+      <span class="chip-name">${p.name}</span>
+      <span class="chip-score" id="sc${i}">${p.score}</span>
+    </div>`).join('');
+}
+function loadQ(){
+  if(qIdx>=curQs.length){showResults();return;}
+  answered=false;
+  const q=curQs[qIdx],p=players[pIdx];
+  document.getElementById('qCounter').textContent=`${qIdx+1}/${curQs.length}`;
+  document.getElementById('turnBanner').innerHTML=`<span style="background:${p.color.bg};-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900">${emojis[pIdx]}</span>&nbsp;${p.name}'s Turn`;
+  const tags={vocab:'📚 VOCABULARY',grammar:'📝 GRAMMAR',bracketGrammar:'🔡 USE THE BRACKETS',dialogue:'💬 DIALOGUE'};
+  document.getElementById('qtTag').textContent=tags[qt];
+  // Question box
+  const qBox=document.getElementById('qText');
+  if(qt==='dialogue'&&q.lines){
+    qBox.className='question-text dlg';
+    qBox.innerHTML=q.lines.map(line=>{
+      return `<span class="dlg-line">${line.replace(/^A:/,'<span class="sp-a">A:</span>').replace(/^B:/,'<span class="sp-b">B:</span>')}</span>`;
+    }).join('');
+  } else {
+    qBox.className='question-text';
+    qBox.textContent=q.q;
+  }
+  // Options
+  const letters=['A','B','C','D'];
+  document.getElementById('optGrid').innerHTML=q.o.map((o,i)=>`
+    <button class="option-btn" id="opt${i}" onclick="pick(${i})">
+      <span class="opt-letter">${letters[i]}</span>${o}
+    </button>`).join('');
+  document.getElementById('nextBtn').style.display='none';
+  // Animate
+  const s=document.getElementById('qSlide');s.classList.remove('q-slide');void s.offsetWidth;s.classList.add('q-slide');
+  renderBar();startTimer();
+}
+function pick(i){
+  if(answered)return;answered=true;clearInterval(timer);
+  const q=curQs[qIdx];
+  document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+  document.getElementById('opt'+q.a).classList.add('correct');
+  if(i===q.a){
+    players[pIdx].score++;
+    document.getElementById('sc'+pIdx).textContent=players[pIdx].score;
+    showFb('✅');
+  } else {
+    document.getElementById('opt'+i).classList.add('wrong');
+    // Score unchanged — wrong answers don't affect score at all
+    showFb('❌');
+  }
+  // Always show Next button — no auto-advance
+  document.getElementById('nextBtn').style.display='block';
+}
+function nextQ(){qIdx++;pIdx=(pIdx+1)%players.length;loadQ();}
+function startTimer(){
+  tLeft=TOTAL;updateTimer();clearInterval(timer);
+  timer=setInterval(()=>{
+    tLeft--;updateTimer();
+    if(tLeft<=0){
+      clearInterval(timer);
+      if(!answered){
+        answered=true;
+        const q=curQs[qIdx];
+        document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+        document.getElementById('opt'+q.a).classList.add('correct');
+        showFb('⏰');
+        document.getElementById('nextBtn').style.display='block';
+      }
+    }
+  },1000);
+}
+function updateTimer(){
+  document.getElementById('timerNum').textContent=tLeft;
+  const p=document.getElementById('timerProg');
+  p.style.strokeDashoffset=CIRC-(tLeft/TOTAL)*CIRC;
+  if(tLeft<=10){p.style.stroke='#ef4444';document.getElementById('timerNum').style.color='#ef4444';}
+  else if(tLeft<=20){p.style.stroke='#f59e0b';document.getElementById('timerNum').style.color='#f59e0b';}
+  else{p.style.stroke='#10b981';document.getElementById('timerNum').style.color='#e2e8f0';}
+}
+function showFb(e){const m=document.getElementById('fbMsg');m.textContent=e;m.style.animation='none';void m.offsetWidth;m.style.animation='fbAnim .8s forwards';}
+
+// ══════════════ RESULTS ══════════════
+function showResults(){
+  clearInterval(timer);show('resultsScreen');confetti();
+  const s=[...players].sort((a,b)=>b.score-a.score);
+  document.getElementById('scoresList').innerHTML=s.map((p,i)=>{
+    const oi=players.indexOf(p);
+    return `<div class="score-row"><div class="s-rank">${i+1}</div>
+      <div class="chip-avatar" style="background:${p.color.bg};color:${p.color.tx};width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">${emojis[oi]}</div>
+      <div class="s-name">${p.name}</div><div class="s-pts">${p.score} pts</div></div>`;
+  }).join('');
+  if(s.length>=2){
+    const ord=s.length>=3?[s[1],s[0],s[2]]:[null,s[0],s[1]];
+    const ranks=['rank2','rank1','rank3'],hs=[72,100,52],m=['🥈','🥇','🥉'];
+    document.getElementById('podium').innerHTML=ord.map((p,i)=>{
+      if(!p)return'<div class="podium-item"></div>';
+      const oi=players.indexOf(p);
+      return `<div class="podium-item ${ranks[i]}"><div class="pod-avatar" style="background:${p.color.bg}">${emojis[oi]}</div>
+        <div class="pod-name">${p.name}</div><div class="pod-score">${p.score}</div>
+        <div class="pod-block" style="height:${hs[i]}px">${m[i]}</div></div>`;
+    }).join('');
+  } else document.getElementById('podium').style.display='none';
+}
+function confetti(){
+  const c=['#f59e0b','#3b82f6','#10b981','#ec4899','#f97316','#8b5cf6'];
+  for(let i=0;i<80;i++){
+    const e=document.createElement('div');e.className='cp';
+    e.style.cssText=`left:${Math.random()*100}vw;background:${c[~~(Math.random()*c.length)]};animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*1.5}s;width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;`;
+    document.body.appendChild(e);setTimeout(()=>e.remove(),4000);
+  }
+}
+function playAgain(){show('welcomeScreen');}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+// ══════════════ FLASH ══════════════
+function openFlash(){document.getElementById('flashOv').classList.add('open');document.getElementById('flashTA').focus();}
+function closeFlash(){document.getElementById('flashOv').classList.remove('open');}
+function clearFlash(){document.getElementById('flashTA').value='';}
+
+renderInputs();
+</script>
+</body>
+</html>
