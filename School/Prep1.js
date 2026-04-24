@@ -9,7 +9,7 @@
 //       <script src="Prep1.js"></script>
 // ═══════════════════════════════════════════════════════════════════
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyVK_ePlkmoOaK_ajMcsPeMHuBOvcKjlcE6915_qI2d9WQ-bBilzlN006xpvgmBF1zv/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzgNS2e0ncSL-sz7kPSxlI2Bie8XA5mqDnNrPpeg58UvYor9q7jHxgwJRSqwLOAJHSh/exec";
 // ☝️  Replace with your deployed Apps Script Web App URL
 // Example: "https://script.google.com/macros/s/AKfycbxXXXXXX/exec"
 
