@@ -9,7 +9,7 @@
 //       <script src="Prep1.js"></script>
 // ═══════════════════════════════════════════════════════════════════
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxHnpibKvydPGjgCt8wTd3V-eh1ZFwwV_AyxTXwHcsJdYRxsTGJcvmOrxdTapUaP6PB/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxrHCYz20vSGK9hXns5Yz4N7qfUy5Fuv6_sraQrkDon5yQJNt-emwuvOBUsh9Ye5-k6/exec";
 // ☝️  Replace with your deployed Apps Script Web App URL
 // Example: "https://script.google.com/macros/s/AKfycbxXXXXXX/exec"
 
@@ -613,14 +613,26 @@ function isSessionExpired() {
 // ────────────────────────────────────────────────────────────────────
 // APPS SCRIPT API CALL
 // ────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────
+// APPS SCRIPT API CALL — Daddy Code Optimized for CORS
+// ────────────────────────────────────────────────────────────────────
 async function gasPost(payload) {
+  // نستخدم text/plain لتجنب الـ Preflight Request (CORS)
+  // ونقوم بوضع الـ JSON داخل النص
   const res = await fetch(GAS_URL, {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify(payload)
+    method: "POST",
+    mode: "cors", 
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8" 
+    },
+    body: JSON.stringify(payload)
   });
+
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  
+  // جوجل تقوم دائماً بعمل Redirect، والـ fetch يعالجها تلقائياً
+  // لكننا بحاجة للتأكد من قراءة الرد كـ JSON
+  return await res.json();
 }
 
 // ────────────────────────────────────────────────────────────────────
