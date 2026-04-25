@@ -1,27 +1,15 @@
 // ═══════════════════════════════════════════════════════════════════
-//  Prep1.js  —  Auth / Session / Score Manager
-//  Works with: prep1_quiz.html  +  Code.gs (Google Apps Script)
-//
-//  HOW TO USE:
-//  1. Deploy Code.gs as a Web App → copy the URL
-//  2. Paste URL into GAS_URL below
-//  3. Include this file BEFORE the closing </body> in prep1_quiz.html:
-//       <script src="Prep1.js"></script>
+//  Prep1.js  —  Auth / Session / Score Manager (Razor Integrated)
 // ═══════════════════════════════════════════════════════════════════
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxrHCYz20vSGK9hXns5Yz4N7qfUy5Fuv6_sraQrkDon5yQJNt-emwuvOBUsh9Ye5-k6/exec";
-// ☝️  Replace with your deployed Apps Script Web App URL
-// Example: "https://script.google.com/macros/s/AKfycbxXXXXXX/exec"
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwgKBk4P5Q46ifdD_HLj2perD3rQHkVoGlxAK0Jydg_bqbffnyDenQ-gl-CDna17ZCo/exec";
 
-// ────────────────────────────────────────────────────────────────────
-// INTERNAL STATE
-// ────────────────────────────────────────────────────────────────────
 const P1 = {
-  student:        null,   // { name, code, score, sessionExpiry }
-  sessionTimer:   null,   // countdown interval
-  scoreQueue:     0,      // points earned this session, not yet synced
-  syncTimer:      null,   // debounce timer for score sync
-  modalOpen:      false
+  student:      null,
+  sessionTimer:  null,
+  scoreQueue:    0,
+  syncTimer:     null,
+  modalOpen:     false
 };
 
 const LS = {
@@ -31,22 +19,41 @@ const LS = {
   clear()      { localStorage.removeItem(this.KEY); }
 };
 
-// ────────────────────────────────────────────────────────────────────
-// BOOTSTRAP — runs when DOM is ready
-// ────────────────────────────────────────────────────────────────────
+// ── BOOTSTRAP & GUARD ──
+const blockStyle = document.createElement("style");
+blockStyle.textContent = `
+  body.not-logged #welcomeScreen, 
+  body.not-logged #gameScreen, 
+  body.not-logged #poetryScreen { 
+    display: none !important; 
+  }
+  body.not-logged {
+    background: #0d1117;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+`;
+document.head.appendChild(blockStyle);
+
 document.addEventListener("DOMContentLoaded", () => {
   injectAuthUI();
-  tryRestoreSession();
+  const session = LS.load();
+  if (!session || isSessionExpired()) {
+    document.body.classList.add("not-logged");
+    openLoginModal();
+    document.getElementById("p1-modal-overlay").onclick = null;
+    const closeBtn = document.querySelector(".p1-m-close");
+    if(closeBtn) closeBtn.style.display = "none";
+  } else {
+    tryRestoreSession();
+  }
 });
 
-// ────────────────────────────────────────────────────────────────────
-// INJECT AUTH UI (modal + login button + session bar)
-// ────────────────────────────────────────────────────────────────────
+// ── INJECT AUTH UI ──
 function injectAuthUI() {
-  // ── CSS ──
   const style = document.createElement("style");
   style.textContent = `
-    /* ── Login Button (floating, both corners) ── */
     .p1-login-fab {
       position: fixed; top: 14px; z-index: 1000;
       padding: 8px 18px; border-radius: 20px;
@@ -63,7 +70,6 @@ function injectAuthUI() {
     .p1-login-fab.right { right: 14px; }
     .p1-login-fab.logged { background: linear-gradient(135deg,#58a6ff,#bc8cff); }
 
-    /* ── Session Bar ── */
     #p1-session-bar {
       position: fixed; top: 0; left: 0; right: 0; z-index: 999;
       background: #161b22; border-bottom: 1px solid #21262d;
@@ -89,7 +95,6 @@ function injectAuthUI() {
     }
     #p1-sb-logout:hover { border-color: #f85149; color: #f85149; }
 
-    /* ── Modal Overlay ── */
     #p1-modal-overlay {
       position: fixed; inset: 0; z-index: 1100;
       background: rgba(0,0,0,.75);
@@ -99,7 +104,6 @@ function injectAuthUI() {
     }
     #p1-modal-overlay.show { display: flex; }
 
-    /* ── Modal Card ── */
     #p1-modal {
       background: #1c2333; border: 1px solid #21262d;
       border-radius: 20px; padding: 32px 28px;
@@ -117,12 +121,8 @@ function injectAuthUI() {
       padding: 3px 12px; border-radius: 20px; letter-spacing: 2px;
       font-family: 'Rajdhani', sans-serif; margin-bottom: 14px;
     }
-    #p1-modal h2 {
-      font-size: 22px; font-weight: 900; color: #e6edf3; margin-bottom: 6px;
-    }
-    #p1-modal .p1-m-sub {
-      font-size: 13px; color: #7d8590; margin-bottom: 22px; line-height: 1.5;
-    }
+    #p1-modal h2 { font-size: 22px; font-weight: 900; color: #e6edf3; margin-bottom: 6px; }
+    #p1-modal .p1-m-sub { font-size: 13px; color: #7d8590; margin-bottom: 22px; line-height: 1.5; }
     #p1-modal .p1-m-label {
       font-size: 11px; font-weight: 700; color: #7d8590;
       letter-spacing: 1.5px; text-transform: uppercase;
@@ -170,16 +170,12 @@ function injectAuthUI() {
     }
     #p1-modal .p1-m-close:hover { color: #f85149; }
 
-    /* ── Wait Screen (inside modal) ── */
-    #p1-wait-panel {
-      display: none; text-align: center;
-    }
+    #p1-wait-panel { display: none; text-align: center; }
     #p1-wait-panel .p1-w-icon  { font-size: 48px; margin-bottom: 12px; }
     #p1-wait-panel .p1-w-title { font-size: 18px; font-weight: 900; color: #e6edf3; margin-bottom: 8px; }
     #p1-wait-panel .p1-w-msg   { font-size: 13px; color: #7d8590; line-height: 1.6; margin-bottom: 16px; }
     #p1-wait-panel .p1-w-time  { font-family: 'Rajdhani',sans-serif; font-size: 28px; font-weight: 900; color: #e3b341; }
 
-    /* ── Success flash ── */
     #p1-success-panel { display: none; text-align: center; }
     #p1-success-panel .p1-s-icon  { font-size: 52px; margin-bottom: 10px; }
     #p1-success-panel .p1-s-name  { font-size: 22px; font-weight: 900; color: #3fb950; margin-bottom: 4px; }
@@ -191,7 +187,6 @@ function injectAuthUI() {
       cursor: pointer; letter-spacing: 1px;
     }
 
-    /* ── Expired overlay ── */
     #p1-expired-overlay {
       position: fixed; inset: 0; z-index: 1200;
       background: rgba(0,0,0,.9);
@@ -209,13 +204,10 @@ function injectAuthUI() {
       border: 1px solid #484f58; border-radius: 10px; color: #7d8590;
       font-family: 'Rajdhani',sans-serif; font-size: 15px; cursor: pointer;
     }
-
-    /* push content below session bar */
     body.p1-session-active { padding-top: 38px !important; }
   `;
   document.head.appendChild(style);
 
-  // ── Login FABs (left and right) ──
   ["left","right"].forEach(side => {
     const btn = document.createElement("button");
     btn.className = `p1-login-fab ${side}`;
@@ -225,7 +217,6 @@ function injectAuthUI() {
     document.body.appendChild(btn);
   });
 
-  // ── Session bar ──
   document.body.insertAdjacentHTML("afterbegin", `
     <div id="p1-session-bar">
       <span id="p1-sb-name">👤 —</span>
@@ -235,13 +226,10 @@ function injectAuthUI() {
     </div>
   `);
 
-  // ── Auth Modal ──
   document.body.insertAdjacentHTML("beforeend", `
     <div id="p1-modal-overlay">
       <div id="p1-modal">
         <button class="p1-m-close" onclick="closeLoginModal()" title="Close">✕</button>
-
-        <!-- Login panel -->
         <div id="p1-login-panel">
           <div class="p1-m-badge">NEW VISION SCHOOL</div>
           <h2>Student Login</h2>
@@ -255,16 +243,12 @@ function injectAuthUI() {
             <span id="p1-btn-text">🚀 Enter</span>
           </button>
         </div>
-
-        <!-- Wait panel -->
         <div id="p1-wait-panel">
           <div class="p1-w-icon">⏳</div>
           <div class="p1-w-title">Come back tomorrow!</div>
           <div class="p1-w-msg">You've used your 30-minute session for today.<br>Your next session will be available in:</div>
           <div class="p1-w-time" id="p1-wait-countdown">—</div>
         </div>
-
-        <!-- Success panel -->
         <div id="p1-success-panel">
           <div class="p1-s-icon">🎉</div>
           <div class="p1-s-name" id="p1-s-name-text">Welcome!</div>
@@ -275,7 +259,6 @@ function injectAuthUI() {
     </div>
   `);
 
-  // ── Session Expired Overlay ──
   document.body.insertAdjacentHTML("beforeend", `
     <div id="p1-expired-overlay">
       <div class="p1-exp-icon">⌛</div>
@@ -286,19 +269,11 @@ function injectAuthUI() {
     </div>
   `);
 
-  // ── Intercept all activity buttons ──
   interceptActivityButtons();
 }
 
-// ────────────────────────────────────────────────────────────────────
-// INTERCEPT ACTIVITY BUTTONS — require login
-// ────────────────────────────────────────────────────────────────────
 function interceptActivityButtons() {
-  // We patch the global startGame and startPoetry functions
-  // They are defined in the inline <script> of prep1_quiz.html
-  // We wrap them after DOM loads
   document.addEventListener("DOMContentLoaded", () => {
-    // Wrap startGame
     if (typeof window.startGame === "function") {
       const _orig = window.startGame.bind(window);
       window.startGame = function () {
@@ -307,8 +282,6 @@ function interceptActivityButtons() {
         _orig();
       };
     }
-
-    // Wrap startPoetry
     if (typeof window.startPoetry === "function") {
       const _orig = window.startPoetry.bind(window);
       window.startPoetry = function () {
@@ -317,8 +290,6 @@ function interceptActivityButtons() {
         _orig();
       };
     }
-
-    // Wrap show() to guard game/poetry screens
     if (typeof window.show === "function") {
       const _orig = window.show.bind(window);
       window.show = function (id) {
@@ -331,32 +302,22 @@ function interceptActivityButtons() {
   });
 }
 
-// ────────────────────────────────────────────────────────────────────
-// RESTORE SESSION FROM LOCALSTORAGE
-// ────────────────────────────────────────────────────────────────────
 function tryRestoreSession() {
   const saved = LS.load();
   if (!saved) return;
-
   const now = Date.now();
   if (saved.sessionExpiry && now < saved.sessionExpiry) {
-    // Still valid — restore silently
     P1.student = saved;
     updateSessionBar();
     startSessionCountdown();
     updateFABs();
   } else {
-    // Expired — check cooldown
     LS.clear();
   }
 }
 
-// ────────────────────────────────────────────────────────────────────
-// MODAL OPEN / CLOSE
-// ────────────────────────────────────────────────────────────────────
 function openLoginModal() {
   if (P1.student && !isSessionExpired()) {
-    // Already logged in — show status instead
     showSuccessPanel(P1.student.name, P1.student.score);
     document.getElementById("p1-modal-overlay").classList.add("show");
     P1.modalOpen = true;
@@ -374,16 +335,14 @@ function closeLoginModal() {
   clearError();
 }
 
-// ── Close on backdrop click ──
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("p1-modal-overlay").addEventListener("click", (e) => {
-    if (e.target.id === "p1-modal-overlay") closeLoginModal();
+    if (e.target.id === "p1-modal-overlay") {
+      if(!document.body.classList.contains("not-logged")) closeLoginModal();
+    }
   });
 });
 
-// ────────────────────────────────────────────────────────────────────
-// PANEL SWITCHES
-// ────────────────────────────────────────────────────────────────────
 function showLoginPanel() {
   document.getElementById("p1-login-panel").style.display  = "block";
   document.getElementById("p1-wait-panel").style.display   = "none";
@@ -406,57 +365,43 @@ function showSuccessPanel(name, score) {
   document.getElementById("p1-s-score-text").textContent    = `Total score: ${score} pts`;
 }
 
-// ────────────────────────────────────────────────────────────────────
-// LOGIN
-// ────────────────────────────────────────────────────────────────────
+// ── LOGIN MODIFIED ──
 async function P1_login() {
   const code = document.getElementById("p1-code-input").value.trim();
   if (!code) { showError("Please enter your student code."); return; }
-
   setLoginLoading(true);
 
   try {
     const res = await gasPost({ action: "login", code });
-
     if (!res.ok) {
-      if (res.msg === "CHECK_TEACHER") {
-        showError("❌ Code not found. Check with your teacher.");
-      } else if (res.msg === "WAIT_24H") {
+      if (res.msg === "WAIT_24H") {
         showWaitPanel(res.waitHrs, res.waitMins);
       } else {
-        showError(res.msg || "Login failed.");
+        showError(res.msg);
       }
-      setLoginLoading(false);
-      return;
+    } else {
+      document.getElementById("p1-expired-overlay").classList.remove("show");
+      P1.student = {
+        code,
+        name: res.name,
+        score: res.score,
+        sessionExpiry: res.sessionExpiry
+      };
+      LS.save(P1.student);
+      document.body.classList.remove("not-logged");
+      updateSessionBar();
+      startSessionCountdown();
+      updateFABs();
+      showSuccessPanel(res.name, res.score);
     }
-
-    // ── Success ──
-    P1.student = {
-      code,
-      name:          res.name,
-      score:         res.score,
-      sessionExpiry: res.sessionExpiry
-    };
-    LS.save(P1.student);
-
-    updateSessionBar();
-    startSessionCountdown();
-    updateFABs();
-    showSuccessPanel(res.name, res.score);
-
   } catch (err) {
-    showError("Connection error. Check internet and try again.");
+    showError("Connection error.");
   }
-
   setLoginLoading(false);
 }
 
-// ────────────────────────────────────────────────────────────────────
-// LOGOUT
-// ────────────────────────────────────────────────────────────────────
 function P1_logout() {
   if (!confirm("Sign out? Your progress is saved.")) return;
-  // Sync any pending score first
   if (P1.scoreQueue > 0) syncScore(true);
   clearInterval(P1.sessionTimer);
   P1.student = null;
@@ -465,34 +410,19 @@ function P1_logout() {
   updateSessionBar();
   updateFABs();
   document.body.classList.remove("p1-session-active");
-  // Go back to welcome
   if (typeof window.show === "function") {
-    // Call original show to avoid auth guard loop
     document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
     document.getElementById("welcomeScreen").classList.add("active");
   }
 }
 
-// ────────────────────────────────────────────────────────────────────
-// SCORE MANAGEMENT
-// ────────────────────────────────────────────────────────────────────
-
-/**
- * Call this from quiz logic whenever a student gets a correct answer.
- * Example: P1_addScore(1);
- */
 window.P1_addScore = function(points = 1) {
   if (!P1.student) return;
   if (isSessionExpired()) { showExpiredOverlay(); return; }
-
   P1.student.score  += points;
-  P1.scoreQueue     += points;
+  P1.scoreQueue      += points;
   LS.save(P1.student);
-
-  // Update score display
   document.getElementById("p1-sb-score").textContent = `${P1.student.score} pts`;
-
-  // Debounce sync — send to server after 3s of inactivity
   clearTimeout(P1.syncTimer);
   P1.syncTimer = setTimeout(() => syncScore(false), 3000);
 };
@@ -504,14 +434,10 @@ async function syncScore(immediate = false) {
   try {
     await gasPost({ action: "addScore", code: P1.student.code, points: pts });
   } catch {
-    // Re-queue if failed
     P1.scoreQueue += pts;
   }
 }
 
-// ────────────────────────────────────────────────────────────────────
-// SESSION COUNTDOWN
-// ────────────────────────────────────────────────────────────────────
 function startSessionCountdown() {
   clearInterval(P1.sessionTimer);
   document.getElementById("p1-session-bar").classList.add("show");
@@ -525,12 +451,13 @@ function startSessionCountdown() {
     const display   = `${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
     const el        = document.getElementById("p1-sb-timer");
 
-    el.textContent = `⏱ ${display}`;
-    el.className   = remaining < 5 * 60000 ? "warning" : "";
+    if(el) {
+      el.textContent = `⏱ ${display}`;
+      el.className   = remaining < 5 * 60000 ? "warning" : "";
+    }
 
     if (remaining <= 0) {
       clearInterval(P1.sessionTimer);
-      // Sync remaining score
       if (P1.scoreQueue > 0) syncScore(true);
       showExpiredOverlay();
       LS.clear();
@@ -541,13 +468,8 @@ function startSessionCountdown() {
   }, 1000);
 }
 
-// ────────────────────────────────────────────────────────────────────
-// EXPIRED OVERLAY
-// ────────────────────────────────────────────────────────────────────
 function showExpiredOverlay() {
   document.getElementById("p1-expired-overlay").classList.add("show");
-  // Countdown until next available (24h from last session start)
-  // We show a rough "come back in 24h" message
   startExpiredCountdown();
 }
 
@@ -558,15 +480,12 @@ function startExpiredCountdown() {
     const hrs   = Math.floor(diff / 3600000);
     const mins  = Math.floor((diff % 3600000) / 60000);
     const secs  = Math.floor((diff % 60000) / 1000);
-    document.getElementById("p1-exp-countdown").textContent =
-      `${String(hrs).padStart(2,"0")}:${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
+    const el = document.getElementById("p1-exp-countdown");
+    if(el) el.textContent = `${String(hrs).padStart(2,"0")}:${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
     if (diff === 0) clearInterval(interval);
   }, 1000);
 }
 
-// ────────────────────────────────────────────────────────────────────
-// UI HELPERS
-// ────────────────────────────────────────────────────────────────────
 function updateSessionBar() {
   const bar = document.getElementById("p1-session-bar");
   if (!P1.student) {
@@ -588,21 +507,24 @@ function updateFABs() {
 
 function showError(msg) {
   const el = document.getElementById("p1-error-msg");
-  el.textContent = msg;
+  if(el) el.textContent = msg;
   const inp = document.getElementById("p1-code-input");
-  inp.classList.add("error");
-  setTimeout(() => inp.classList.remove("error"), 600);
+  if(inp) {
+    inp.classList.add("error");
+    setTimeout(() => inp.classList.remove("error"), 600);
+  }
 }
 
 function clearError() {
-  document.getElementById("p1-error-msg").textContent = "";
+  const el = document.getElementById("p1-error-msg");
+  if(el) el.textContent = "";
 }
 
 function setLoginLoading(loading) {
   const btn  = document.getElementById("p1-login-btn");
   const text = document.getElementById("p1-btn-text");
-  btn.disabled  = loading;
-  text.textContent = loading ? "⏳ Checking…" : "🚀 Enter";
+  if(btn) btn.disabled  = loading;
+  if(text) text.textContent = loading ? "⏳ Checking…" : "🚀 Enter";
 }
 
 function isSessionExpired() {
@@ -610,60 +532,33 @@ function isSessionExpired() {
   return Date.now() > P1.student.sessionExpiry;
 }
 
-// ────────────────────────────────────────────────────────────────────
-// APPS SCRIPT API CALL
-// ────────────────────────────────────────────────────────────────────
-// ────────────────────────────────────────────────────────────────────
-// APPS SCRIPT API CALL — Daddy Code Optimized for CORS
-// ────────────────────────────────────────────────────────────────────
 async function gasPost(payload) {
-  // نستخدم text/plain لتجنب الـ Preflight Request (CORS)
-  // ونقوم بوضع الـ JSON داخل النص
   const res = await fetch(GAS_URL, {
     method: "POST",
     mode: "cors", 
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8" 
-    },
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify(payload)
   });
-
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  
-  // جوجل تقوم دائماً بعمل Redirect، والـ fetch يعالجها تلقائياً
-  // لكننا بحاجة للتأكد من قراءة الرد كـ JSON
   return await res.json();
 }
 
-// ────────────────────────────────────────────────────────────────────
-// HOOK INTO QUIZ SCORE EVENTS
-// ────────────────────────────────────────────────────────────────────
-// We override the `pick` function from prep1_quiz.html so that
-// every correct answer automatically calls P1_addScore.
-// This runs AFTER the DOM loads (inline script already defined).
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     if (typeof window.pick === "function") {
       const _origPick = window.pick.bind(window);
       window.pick = function(i) {
         _origPick(i);
-        // Check if this was correct
         const q = typeof curQs !== "undefined" && curQs[typeof qIdx !== "undefined" ? qIdx : 0];
-        if (q && i === q.a) {
-          P1_addScore(1);
-        }
+        if (q && i === q.a) P1_addScore(1);
       };
     }
-    // Also hook poetry quiz
     if (typeof window.pickPQ === "function") {
       const _origPickPQ = window.pickPQ.bind(window);
       window.pickPQ = function(i) {
         _origPickPQ(i);
-        const q = typeof poems !== "undefined" && poems[currentPoem]
-          && poems[currentPoem].quizQuestions[pqIndex];
-        if (q && i === q.a) {
-          P1_addScore(1);
-        }
+        const q = typeof poems !== "undefined" && poems[currentPoem] && poems[currentPoem].quizQuestions[pqIndex];
+        if (q && i === q.a) P1_addScore(1);
       };
     }
   }, 500);
