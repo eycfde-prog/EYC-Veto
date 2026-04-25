@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veto Conquest | Character Panic</title>
+    <title>Veto Conquest | Grammar Battle</title>
     <style>
         :root {
             --p1-color: #00d2ff;
@@ -20,11 +20,13 @@
             overflow: hidden;
         }
 
+        /* 1. Battle Arena Area (70%) */
         .battle-ground {
             display: flex;
-            height: 70vh;
+            height: 65vh;
             width: 100%;
             transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border-bottom: 5px solid #333;
         }
 
         .territory {
@@ -33,22 +35,17 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: flex 0.6s ease-in-out;
+            transition: flex 0.8s ease-in-out;
             overflow: hidden;
-            border: 2px solid rgba(255,255,255,0.1);
         }
 
         #p1-zone { background: linear-gradient(to bottom, #001a2c, #004e7a); flex: 50; }
         #p2-zone { background: linear-gradient(to bottom, #2c000b, #7a001e); flex: 50; }
 
-        /* Character Container */
         .char-wrapper {
-            width: 250px;
-            height: 250px;
-            transition: transform 0.4s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 280px;
+            height: 280px;
+            transition: transform 0.5s ease;
         }
 
         /* Panic Animation */
@@ -57,52 +54,77 @@
             20% { transform: translate(-3px, 0px) rotate(-1deg); }
             40% { transform: translate(3px, 2px) rotate(1deg); }
             60% { transform: translate(-3px, 1px) rotate(-1deg); }
-            80% { transform: translate(3px, 1px) rotate(1deg); }
             100% { transform: translate(1px, -2px) rotate(0deg); }
         }
+        .panic { animation: shake 0.15s infinite; }
 
-        .panic { animation: shake 0.2s infinite; }
+        .status-label {
+            font-size: 2.2rem;
+            margin-top: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
 
-        /* UI Panel */
+        /* 2. Question Panel (35%) */
         .ui-panel {
-            height: 30vh;
+            height: 35vh;
             background: #111;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-evenly;
-            border-top: 5px solid #444;
+            justify-content: center;
+            padding: 10px 40px;
         }
 
-        .controls {
-            display: flex;
-            gap: 20px;
+        .question-box {
+            font-size: 2.4rem;
+            margin-bottom: 25px;
+            text-align: center;
+            color: #fff;
+            min-height: 80px;
         }
 
-        .btn {
-            padding: 15px 30px;
-            font-size: 1.2rem;
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 85%;
+        }
+
+        .opt-btn {
+            background: transparent;
+            border: 2px solid #555;
+            color: #ccc;
+            padding: 18px;
+            font-size: 1.6rem;
+            border-radius: 12px;
             cursor: pointer;
-            border-radius: 8px;
-            border: none;
-            font-weight: bold;
-            transition: 0.3s;
+            transition: 0.2s;
+            text-align: left;
+            padding-left: 30px;
         }
 
-        .p1-btn { background: var(--p1-color); color: #000; }
-        .p2-btn { background: var(--p2-color); color: #fff; }
-        .btn:active { transform: scale(0.9); }
+        .opt-btn:hover {
+            border-color: var(--p1-color);
+            color: white;
+            background: rgba(255,255,255,0.05);
+        }
 
-        .status-text { font-size: 2rem; text-transform: uppercase; }
+        .turn-indicator {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--p1-color);
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="battle-ground">
+    <div class="battle-ground" id="war-map">
         <div id="p1-zone" class="territory">
-            <div class="status-text">Commander 1</div>
+            <div id="p1-name" class="status-label" style="color: var(--p1-color);">Commander 1</div>
             <div class="char-wrapper" id="p1-char-wrap">
-                <svg viewBox="0 0 100 100" id="p1-svg" width="100%" height="100%">
+                <svg viewBox="0 0 100 100" id="p1-svg">
                     <path id="p1-body" d="M20,80 Q50,10 80,80 T20,80" fill="var(--p1-color)" />
                     <g id="p1-eyes">
                         <circle cx="40" cy="55" r="5" fill="white" />
@@ -110,13 +132,13 @@
                     </g>
                 </svg>
             </div>
-            <div id="p1-label" style="font-size: 1.5rem;">SECURE</div>
+            <div id="p1-status" style="font-size: 1.5rem;">STABLE</div>
         </div>
 
         <div id="p2-zone" class="territory">
-            <div class="status-text">Commander 2</div>
+            <div id="p2-name" class="status-label" style="color: var(--p2-color);">Commander 2</div>
             <div class="char-wrapper" id="p2-char-wrap">
-                <svg viewBox="0 0 100 100" id="p2-svg" width="100%" height="100%">
+                <svg viewBox="0 0 100 100" id="p2-svg">
                     <path id="p2-body" d="M20,80 Q50,10 80,80 T20,80" fill="var(--p2-color)" />
                     <g id="p2-eyes">
                         <circle cx="40" cy="55" r="5" fill="white" />
@@ -124,32 +146,80 @@
                     </g>
                 </svg>
             </div>
-            <div id="p2-label" style="font-size: 1.5rem;">SECURE</div>
+            <div id="p2-status" style="font-size: 1.5rem;">STABLE</div>
         </div>
     </div>
 
     <div class="ui-panel">
-        <div id="game-msg" style="font-size: 1.5rem;">CONQUEST IN PROGRESS...</div>
-        <div class="controls">
-            <button class="btn p1-btn" onclick="updateWar(10)">P1 CONQUEST</button>
-            <button class="btn p2-btn" onclick="updateWar(-10)">P2 CONQUEST</button>
+        <div id="turn-txt" class="turn-indicator">PLAYER 1 TURN</div>
+        <div class="question-box" id="q-text">Loading Question...</div>
+        <div class="options-grid">
+            <button class="opt-btn" onclick="checkAnswer(0)" id="opt0">Option 1</button>
+            <button class="opt-btn" onclick="checkAnswer(1)" id="opt1">Option 2</button>
+            <button class="opt-btn" onclick="checkAnswer(2)" id="opt2">Option 3</button>
+            <button class="opt-btn" onclick="checkAnswer(3)" id="opt3">Option 4</button>
         </div>
     </div>
 
 <script>
+    const quizData = [
+        { q: "She ____ to school every day.", options: ["go", "goes", "going", "gone"], correct: 1 },
+        { q: "They ____ football right now.", options: ["play", "plays", "are playing", "played"], correct: 2 },
+        { q: "____ you see the match yesterday?", options: ["Do", "Does", "Did", "Have"], correct: 2 },
+        { q: "Look! The birds ____ in the sky.", options: ["fly", "is flying", "are flying", "flies"], correct: 2 },
+        { q: "I have ____ my homework already.", options: ["finish", "finishing", "finished", "finishes"], correct: 2 },
+        { q: "If it rains, I ____ stay at home.", options: ["will", "would", "am", "was"], correct: 0 },
+        { q: "This is the ____ film I’ve ever seen.", options: ["good", "better", "best", "well"], correct: 2 },
+        { q: "He is ____ than his brother.", options: ["tall", "taller", "tallest", "as tall"], correct: 1 },
+        { q: "We ____ in Cairo since 2010.", options: ["live", "are living", "have lived", "lived"], correct: 2 },
+        { q: "While I ____, the phone rang.", options: ["sleep", "was sleeping", "slept", "sleeping"], correct: 1 }
+    ];
+
+    let currentQ = 0;
+    let currentPlayer = 1;
     let p1Flex = 50;
 
-    function updateWar(amount) {
-        p1Flex += amount;
+    function initGame() {
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if (currentQ >= quizData.length) {
+            document.getElementById('q-text').innerText = "CONQUEST COMPLETE!";
+            return;
+        }
+        const data = quizData[currentQ];
+        document.getElementById('q-text').innerText = data.q;
+        document.getElementById('turn-txt').innerText = `PLAYER ${currentPlayer} TURN`;
+        document.getElementById('turn-txt').style.color = currentPlayer === 1 ? 'var(--p1-color)' : 'var(--p2-color)';
         
-        // Limits
+        for (let i = 0; i < 4; i++) {
+            document.getElementById(`opt${i}`).innerText = data.options[i];
+        }
+    }
+
+    function checkAnswer(idx) {
+        const isCorrect = (idx === quizData[currentQ].correct);
+        
+        if (currentPlayer === 1) {
+            p1Flex += isCorrect ? 10 : -10;
+        } else {
+            p1Flex += isCorrect ? -10 : 10;
+        }
+
+        // Constraints
         if (p1Flex > 85) p1Flex = 85;
         if (p1Flex < 15) p1Flex = 15;
 
-        render();
+        applyVisuals();
+        
+        // Switch turn and move to next question
+        currentPlayer = (currentPlayer === 1) ? 2 : 1;
+        currentQ++;
+        setTimeout(loadQuestion, 600);
     }
 
-    function render() {
+    function applyVisuals() {
         const p1Zone = document.getElementById('p1-zone');
         const p2Zone = document.getElementById('p2-zone');
         const p1Wrap = document.getElementById('p1-char-wrap');
@@ -158,41 +228,38 @@
         p1Zone.style.flex = p1Flex;
         p2Zone.style.flex = (100 - p1Flex);
 
-        // Logic for Player 1 Stress
+        // Player 1 Stress Logic
         if (p1Flex <= 30) {
-            applyStress(p1Wrap, 'p1-eyes', 'p1-label', "PANIC!");
+            setPanic(p1Wrap, 'p1-eyes', 'p1-status', "UNDER SIEGE!");
         } else {
-            removeStress(p1Wrap, 'p1-eyes', 'p1-label', "SECURE");
-            p1Wrap.style.transform = `scale(${p1Flex/50})`; // Grow if winning
+            setSafe(p1Wrap, 'p1-eyes', 'p1-status', "STABLE", p1Flex/50);
         }
 
-        // Logic for Player 2 Stress
+        // Player 2 Stress Logic
         if (p1Flex >= 70) {
-            applyStress(p2Wrap, 'p2-eyes', 'p2-label', "PANIC!");
+            setPanic(p2Wrap, 'p2-eyes', 'p2-status', "UNDER SIEGE!");
         } else {
-            removeStress(p2Wrap, 'p2-eyes', 'p2-label', "SECURE");
-            p2Wrap.style.transform = `scale(${(100-p1Flex)/50})`; // Grow if winning
+            setSafe(p2Wrap, 'p2-eyes', 'p2-status', "STABLE", (100-p1Flex)/50);
         }
     }
 
-    function applyStress(wrapper, eyeId, labelId, text) {
-        wrapper.classList.add('panic');
-        wrapper.style.transform = "scaleX(0.6) scaleY(1.3)"; // Squash effect
-        document.getElementById(eyeId).innerHTML = `
-            <path d="M35,50 L45,60 M45,50 L35,60" stroke="white" stroke-width="3"/>
-            <path d="M55,50 L65,60 M65,50 L55,60" stroke="white" stroke-width="3"/>`;
-        document.getElementById(labelId).innerText = text;
-        document.getElementById(labelId).style.color = "yellow";
+    function setPanic(wrap, eyeId, statusId, msg) {
+        wrap.classList.add('panic');
+        wrap.style.transform = "scaleX(0.5) scaleY(1.4)";
+        document.getElementById(eyeId).innerHTML = `<path d="M35,50 L45,60 M45,50 L35,60" stroke="white" stroke-width="4"/><path d="M55,50 L65,60 M65,50 L55,60" stroke="white" stroke-width="4"/>`;
+        document.getElementById(statusId).innerText = msg;
+        document.getElementById(statusId).style.color = "yellow";
     }
 
-    function removeStress(wrapper, eyeId, labelId, text) {
-        wrapper.classList.remove('panic');
-        document.getElementById(eyeId).innerHTML = `
-            <circle cx="40" cy="55" r="5" fill="white" />
-            <circle cx="60" cy="55" r="5" fill="white" />`;
-        document.getElementById(labelId).innerText = text;
-        document.getElementById(labelId).style.color = "white";
+    function setSafe(wrap, eyeId, statusId, msg, scaleVal) {
+        wrap.classList.remove('panic');
+        wrap.style.transform = `scale(${scaleVal})`;
+        document.getElementById(eyeId).innerHTML = `<circle cx="40" cy="55" r="5" fill="white"/><circle cx="60" cy="55" r="5" fill="white"/>`;
+        document.getElementById(statusId).innerText = msg;
+        document.getElementById(statusId).style.color = "white";
     }
+
+    window.onload = initGame;
 </script>
 </body>
 </html>
