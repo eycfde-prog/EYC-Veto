@@ -2,7 +2,7 @@
 //  Prep1.js  —  Auth / Session / Score Manager (Razor Integrated)
 // ═══════════════════════════════════════════════════════════════════
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxaZOX5p38Ce74hp_o33biMZZ0WiMDARO8wnBJ1TL_WDr9UQK7TuFCuKwiWTiLPufPZ/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyh8FSP06-D1v5OOf2lOuysow3Qcih7UMbkgk0wrSn35m1Oio7ju-sWa9pMVA92_LlF/exec";
 
 const P1 = {
   student:      null,
@@ -484,32 +484,38 @@ async function syncScore(immediate = false) {
   }
 }
 
+// أضف هذا التعديل داخل دالة startSessionCountdown في ملف Prep1.js
 function startSessionCountdown() {
   clearInterval(P1.sessionTimer);
   document.getElementById("p1-session-bar").classList.add("show");
   document.body.classList.add("p1-session-active");
 
   P1.sessionTimer = setInterval(() => {
-    const now       = Date.now();
+    const now = Date.now();
     const remaining = Math.max(0, P1.student.sessionExpiry - now);
-    const mins      = Math.floor(remaining / 60000);
-    const secs      = Math.floor((remaining % 60000) / 1000);
-    const display   = `${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
-    const el        = document.getElementById("p1-sb-timer");
-
-    if(el) {
-      el.textContent = `⏱ ${display}`;
-      el.className   = remaining < 5 * 60000 ? "warning" : "";
-    }
+    
+    // ... (كود عرض التايمر) ...
 
     if (remaining <= 0) {
       clearInterval(P1.sessionTimer);
+      
+      // تنفيذ المزامنة الأخيرة للدرجات
       if (P1.scoreQueue > 0) syncScore(true);
+      
+      // قفل فوري
+      LS.clear(); // مسح البيانات من جهاز الطالب لمنع الدخول بالـ Refresh
       showExpiredOverlay();
-      LS.clear();
+      
+      // إخفاء أي شاشات تدريب مفتوحة حالياً
+      if (typeof window.show === "function") {
+          document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+          document.getElementById("welcomeScreen").classList.add("active");
+      }
+      
       P1.student = null;
       updateFABs();
       updateSessionBar();
+      document.body.classList.add("not-logged"); // تفعيل القفل البصري
     }
   }, 1000);
 }
