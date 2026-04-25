@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veto Conquest | Territory War</title>
+    <style>
+        :root {
+            --p1-color: #00d2ff;
+            --p2-color: #ff0058;
+            --bg-dark: #050505;
+            --q-panel-h: 30vh;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            height: 100%; width: 100%;
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Arial Black', sans-serif;
+            overflow: hidden;
+        }
+
+        /* Battle Ground (Flexbox is the key here) */
+        .battle-ground {
+            display: flex;
+            height: 70vh; /* 70% of screen */
+            width: 100%;
+            transition: all 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+            border-bottom: 5px solid white;
+        }
+
+        .territory {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: flex 0.8s ease-in-out;
+            overflow: hidden;
+        }
+
+        /* Player 1 Side */
+        #p1-zone {
+            background: linear-gradient(45deg, #00334e, var(--p1-color));
+            flex: 1; /* Initial 50% */
+        }
+
+        /* Player 2 Side */
+        #p2-zone {
+            background: linear-gradient(45deg, var(--p2-color), #4e0019);
+            flex: 1; /* Initial 50% */
+        }
+
+        /* Base Icons (SVG) */
+        .base-icon {
+            width: 150px;
+            height: 150px;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.5));
+        }
+
+        .player-label {
+            font-size: 3rem;
+            text-shadow: 2px 2px 10px black;
+            margin-bottom: 20px;
+        }
+
+        /* Question Area */
+        .question-area {
+            height: var(--q-panel-h);
+            background: #111;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0 50px;
+        }
+
+        .question-text {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #eee;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            width: 90%;
+        }
+
+        .btn-conquest {
+            padding: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            border: 3px solid white;
+            background: transparent;
+            color: white;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+
+        .p1-btn:hover { background: var(--p1-color); color: black; }
+        .p2-btn:hover { background: var(--p2-color); color: black; }
+
+        /* Territorial Warnings */
+        .danger-zone {
+            animation: pulse-red 0.5s infinite alternate;
+        }
+
+        @keyframes pulse-red {
+            from { box-shadow: inset 0 0 20px transparent; }
+            to { box-shadow: inset 0 0 100px rgba(255,0,0,0.8); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="battle-ground" id="war-map">
+        <div id="p1-zone" class="territory">
+            <h2 class="player-label">COMMANDER 1</h2>
+            <div class="base-icon">
+                <svg viewBox="0 0 100 100">
+                    <polygon points="50,5 95,95 5,95" fill="none" stroke="white" stroke-width="3"/>
+                    <circle cx="50" cy="65" r="15" fill="white">
+                        <animate attributeName="r" values="12;18;12" dur="2s" repeatCount="indefinite" />
+                    </circle>
+                </svg>
+            </div>
+            <div class="percentage" style="font-size: 2rem;" id="p1-percent">50%</div>
+        </div>
+
+        <div id="p2-zone" class="territory">
+            <h2 class="player-label">COMMANDER 2</h2>
+            <div class="base-icon">
+                <svg viewBox="0 0 100 100">
+                    <rect x="20" y="20" width="60" height="60" fill="none" stroke="white" stroke-width="3"/>
+                    <rect x="35" y="35" width="30" height="30" fill="white">
+                        <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" />
+                    </rect>
+                </svg>
+            </div>
+            <div class="percentage" style="font-size: 2rem;" id="p2-percent">50%</div>
+        </div>
+    </div>
+
+    <div class="question-area">
+        <div class="question-text" id="q-box">TERRITORY WAR: ANSWER TO CONQUER!</div>
+        <div class="controls">
+            <button class="btn-conquest p1-btn" onclick="conquer(1, true)">P1 Correct (+10%)</button>
+            <button class="btn-conquest p1-btn" onclick="conquer(1, false)">P1 Wrong (-10%)</button>
+            <button class="btn-conquest p2-btn" onclick="conquer(2, true)">P2 Correct (+10%)</button>
+            <button class="btn-conquest p2-btn" onclick="conquer(2, false)">P2 Wrong (-10%)</button>
+        </div>
+    </div>
+
+<script>
+    let p1Share = 50; // Initial percentage
+
+    function conquer(player, isCorrect) {
+        let change = 10;
+        
+        if (player === 1) {
+            p1Share += isCorrect ? change : -change;
+        } else {
+            p1Share += isCorrect ? -change : change;
+        }
+
+        // Keep within bounds (10% to 90%)
+        if (p1Share > 90) p1Share = 90;
+        if (p1Share < 10) p1Share = 10;
+
+        applyChanges();
+    }
+
+    function applyChanges() {
+        const p1Zone = document.getElementById('p1-zone');
+        const p2Zone = document.getElementById('p2-zone');
+        
+        p1Zone.style.flex = p1Share;
+        p2Zone.style.flex = (100 - p1Share);
+
+        document.getElementById('p1-percent').innerText = p1Share + "%";
+        document.getElementById('p2-percent').innerText = (100 - p1Share) + "%";
+
+        // Danger effects
+        if (p1Share <= 20) p1Zone.classList.add('danger-zone');
+        else p1Zone.classList.remove('danger-zone');
+
+        if (p1Share >= 80) p2Zone.classList.add('danger-zone');
+        else p2Zone.classList.remove('danger-zone');
+    }
+</script>
+</body>
+</html>
