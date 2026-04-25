@@ -1,0 +1,4626 @@
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // قائمة الكلمات المستهدفة - قصة الشيف
+    const words = [
+        "special", "market", "apron", "perfectly", "shelf", 
+        "distracted", "smell", "table", "hungry", "smile", 
+        "bite", "mint", "embarrassed", "laughing", "order", 
+        "valuable", "taste", "trust", "holding", "spices"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Chef’s Great Mistake";
+    
+    // بناء نص القصة مع الفراغات
+    let storyContent = `
+        Barnaby was not a natural cook, but he loved watching cooking shows. One Saturday, he decided to invite his friends for a <span class="word-gap" data-word="special">?</span> dinner. 
+        He wanted to make a classic pasta dish with a rich tomato sauce. He went to the <span class="word-gap" data-word="market">?</span> and bought the freshest tomatoes, garlic, and onions.
+        <br><br>
+        When he got home, he put on his favorite <span class="word-gap" data-word="apron">?</span> and started chopping. Everything was going <span class="word-gap" data-word="perfectly">?</span> until he looked at the recipe. 
+        It said he needed a "pinch of salt" and some "dried herbs." Barnaby found two small jars on the <span class="word-gap" data-word="shelf">?</span>. 
+        One contained salt, and the other contained what he thought was dried parsley. 
+        He was <span class="word-gap" data-word="distracted">?</span> by a funny cat video on his phone and accidentally poured half the jar into the pot.
+        <br><br>
+        When his friends arrived, the <span class="word-gap" data-word="smell">?</span> in the kitchen was wonderful. They sat at the <span class="word-gap" data-word="table">?</span>, feeling very <span class="word-gap" data-word="hungry">?</span>. 
+        Barnaby served the pasta with a proud <span class="word-gap" data-word="smile">?</span>. His friend Sarah took the first big <span class="word-gap" data-word="bite">?</span>. 
+        Suddenly, her face turned bright red, and she started coughing.
+        <br><br>
+        "Barnaby," she gasped, "why does this pasta taste like <span class="word-gap" data-word="mint">?</span> toothpaste?"
+        Barnaby looked at the jar on the counter. It wasn’t parsley; it was dried peppermint leaves he used for tea! 
+        He felt very <span class="word-gap" data-word="embarrassed">?</span>, but his friends started <span class="word-gap" data-word="laughing">?</span>. 
+        They decided to <span class="word-gap" data-word="order">?</span> a large pizza instead. 
+        Barnaby learned a <span class="word-gap" data-word="valuable">?</span> lesson that night: always <span class="word-gap" data-word="taste">?</span> your food before you serve it, and never <span class="word-gap" data-word="trust">?</span> a cat video when you are <span class="word-gap" data-word="holding">?</span> a jar of <span class="word-gap" data-word="spices">?</span>. 
+        It was the most expensive tea-flavored pasta in history.
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#0f172a; color:#f8fafc; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #0f172a; }
+            #stage-content::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: #1e293b;
+                padding: 60px;
+                border-radius: 30px;
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+                border: 2px solid #334155;
+            }
+
+            .story-title {
+                color: #38bdf8;
+                text-align: center;
+                font-size: 4rem;
+                font-weight: 900;
+                margin-bottom: 50px;
+                font-family: 'Unbounded', sans-serif;
+                text-transform: uppercase;
+                letter-spacing: -1px;
+            }
+
+            .story-body {
+                line-height: 1.8;
+                font-size: 2.6rem;
+                color: #e2e8f0;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 140px;
+                border-bottom: 4px solid #38bdf8;
+                text-align: center;
+                color: #38bdf8;
+                cursor: pointer;
+                transition: 0.2s;
+                background: rgba(56, 189, 248, 0.1);
+                border-radius: 8px;
+                padding: 0 15px;
+                margin: 0 5px;
+            }
+
+            .word-gap:hover { background: rgba(56, 189, 248, 0.2); }
+
+            .word-gap.active-target {
+                animation: pulseGlow 1.5s infinite;
+                border-bottom-style: dashed;
+            }
+
+            @keyframes pulseGlow {
+                0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); }
+                70% { box-shadow: 0 0 0 20px rgba(56, 189, 248, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #fbbf24;
+                font-weight: 700;
+                background: transparent;
+                animation: correctPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            @keyframes correctPop {
+                0% { transform: scale(0.5); }
+                100% { transform: scale(1); }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(15, 23, 42, 0.95);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 20px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(10px);
+            }
+
+            .choice-btn {
+                background: #f8fafc;
+                color: #0f172a;
+                padding: 20px 40px;
+                font-size: 2.4rem;
+                font-weight: 700;
+                border-radius: 15px;
+                cursor: pointer;
+                border: none;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.2s;
+            }
+
+            .choice-btn:hover { transform: scale(1.05); background: #38bdf8; color: white; }
+
+            .choice-btn.wrong { background: #ef4444 !important; color: white; animation: shake 0.4s; }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+
+            .one-shot-label {
+                display: inline-block;
+                background: #38bdf8;
+                color: #0f172a;
+                padding: 5px 25px;
+                border-radius: 50px;
+                font-size: 1.2rem;
+                font-weight: 900;
+                margin-bottom: 20px;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center><div class="one-shot-label">VETO ONE-SHOT ACTIVITY</div></center>
+            <h1 class="story-title">${storyTitle}</h1>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    // اختصارات الكيبورد (Enter لفتح الفراغ التالي)
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") {
+            overlay.style.display = 'none';
+        }
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // قائمة الـ 20 كلمة المختارة لقصة الببغاء الذكي
+    const words = [
+        "sailor", "company", "intelligent", "ringing", "beeping", 
+        "phrases", "paint", "ladder", "balanced", "rang", 
+        "minute", "perch", "hallway", "perfectly", "neighbor", 
+        "emergency", "edge", "exactly", "whistle", "brilliant"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Smart Parrot";
+    
+    // محتوى القصة الثالثة
+    let storyContent = `
+        George was a retired <span class="word-gap" data-word="sailor">?</span> who lived alone in a small house by the sea. 
+        To keep him <span class="word-gap" data-word="company">?</span>, he bought a large, colorful parrot named Pickles. 
+        Pickles was very <span class="word-gap" data-word="intelligent">?</span> and could mimic any sound he heard, from the <span class="word-gap" data-word="ringing">?</span> of the telephone to the sound of the microwave <span class="word-gap" data-word="beeping">?</span>. 
+        George spent hours teaching him funny <span class="word-gap" data-word="phrases">?</span> to entertain his guests.
+        <br><br>
+        One afternoon, George decided to <span class="word-gap" data-word="paint">?</span> his kitchen ceiling. 
+        He put on some old clothes and climbed up a tall <span class="word-gap" data-word="ladder">?</span>. 
+        He had a bucket of bright yellow paint <span class="word-gap" data-word="balanced">?</span> on a small wooden plank. 
+        Just as he was about to start, the doorbell <span class="word-gap" data-word="rang">?</span>. 
+        George shouted, "I’m coming! Just a <span class="word-gap" data-word="minute">?</span>!" as he carefully began to climb down.
+        <br><br>
+        However, Pickles was watching from his <span class="word-gap" data-word="perch">?</span> and found this very interesting. 
+        As soon as George reached the <span class="word-gap" data-word="hallway">?</span> to open the door, Pickles mimicked George’s voice <span class="word-gap" data-word="perfectly">?</span> and screamed, "Jump! Jump now!" 
+        George, thinking a <span class="word-gap" data-word="neighbor">?</span> was calling him from outside in an <span class="word-gap" data-word="emergency">?</span>, got confused and jumped off the last few steps.
+        <br><br>
+        He landed safely, but his foot hit the <span class="word-gap" data-word="edge">?</span> of the paint bucket. 
+        The yellow paint flew into the air and landed <span class="word-gap" data-word="exactly">?</span> on top of George's head. 
+        When George opened the door, it was just a man delivering a package. 
+        From the kitchen, Pickles let out a loud <span class="word-gap" data-word="whistle">?</span> and said, "Looking good, Captain!" 
+        George couldn't stay angry for long because the parrot’s timing was simply too <span class="word-gap" data-word="brilliant">?</span>.
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#042f2e; color:#ccfbf1; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #042f2e; }
+            #stage-content::-webkit-scrollbar-thumb { background: #2dd4bf; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: #134e4a;
+                padding: 60px;
+                border-radius: 30px;
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
+                border: 2px solid #14b8a6;
+            }
+
+            .story-title {
+                color: #5eead4;
+                text-align: center;
+                font-size: 4rem;
+                font-weight: 900;
+                margin-bottom: 50px;
+                font-family: 'Unbounded', sans-serif;
+                text-transform: uppercase;
+                text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            }
+
+            .story-body {
+                line-height: 1.8;
+                font-size: 2.6rem;
+                color: #f0fdfa;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 140px;
+                border-bottom: 4px solid #5eead4;
+                text-align: center;
+                color: #5eead4;
+                cursor: pointer;
+                transition: 0.2s;
+                background: rgba(94, 234, 212, 0.1);
+                border-radius: 8px;
+                padding: 0 15px;
+                margin: 0 5px;
+            }
+
+            .word-gap.active-target {
+                animation: pulseGlowTeal 1.5s infinite;
+                border-bottom-style: dashed;
+            }
+
+            @keyframes pulseGlowTeal {
+                0% { box-shadow: 0 0 0 0 rgba(94, 234, 212, 0.4); }
+                70% { box-shadow: 0 0 0 20px rgba(94, 234, 212, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(94, 234, 212, 0); }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #facc15; /* اللون الأصفر لون الدهان في القصة */
+                font-weight: 700;
+                background: transparent;
+                animation: correctPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            @keyframes correctPop {
+                0% { transform: scale(0.5); }
+                100% { transform: scale(1); }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(2, 44, 34, 0.98);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 20px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(15px);
+            }
+
+            .choice-btn {
+                background: #f0fdfa;
+                color: #134e4a;
+                padding: 20px 40px;
+                font-size: 2.4rem;
+                font-weight: 700;
+                border-radius: 15px;
+                cursor: pointer;
+                border: none;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.2s;
+            }
+
+            .choice-btn:hover { transform: scale(1.05); background: #5eead4; color: #134e4a; }
+            .choice-btn.wrong { background: #f43f5e !important; color: white; animation: shake 0.4s; }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+
+            .one-shot-label {
+                display: inline-block;
+                background: #5eead4;
+                color: #134e4a;
+                padding: 5px 25px;
+                border-radius: 50px;
+                font-size: 1.2rem;
+                font-weight: 900;
+                margin-bottom: 20px;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center><div class="one-shot-label">VETO ONE-SHOT • STORY 03</div></center>
+            <h1 class="story-title">${storyTitle}</h1>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // قائمة الـ 20 كلمة المختارة للنشاط
+    const words = [
+        "comfortable", "close", "gym", "garage", "energetic", 
+        "machine", "impress", "setting", "breath", "purple", 
+        "shake", "air", "stuck", "pendulum", "instructor", 
+        "giggle", "silly", "confidence", "treadmill", "gravity"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Gym Adventure";
+    
+    // محتوى القصة الجديدة
+    let storyContent = `
+        Arthur was a man who preferred sitting on his <span class="word-gap" data-word="comfortable">?</span> sofa rather than running. 
+        However, after he realized he couldn't <span class="word-gap" data-word="close">?</span> his favorite jeans, he decided to join a local <span class="word-gap" data-word="gym">?</span>. 
+        On his first day, he wore a bright neon tracksuit that he found in the <span class="word-gap" data-word="garage">?</span>. 
+        He felt very <span class="word-gap" data-word="energetic">?</span> and ready to transform his body.
+        <br><br>
+        He walked toward a complicated-looking <span class="word-gap" data-word="machine">?</span> that had many heavy weights. 
+        Arthur wanted to <span class="word-gap" data-word="impress">?</span> a group of people nearby, so he chose the highest <span class="word-gap" data-word="setting">?</span>. 
+        He sat down, took a deep <span class="word-gap" data-word="breath">?</span>, and tried to lift the bar. 
+        His face turned <span class="word-gap" data-word="purple">?</span>, and his arms began to <span class="word-gap" data-word="shake">?</span> violently. 
+        Instead of lifting the weight, the weight slowly pulled Arthur up into the <span class="word-gap" data-word="air">?</span>.
+        <br><br>
+        He was <span class="word-gap" data-word="stuck">?</span> hanging there, swinging back and forth like a giant <span class="word-gap" data-word="pendulum">?</span>. 
+        A young <span class="word-gap" data-word="instructor">?</span> ran over to help him. 
+        "Sir," the instructor said, trying not to <span class="word-gap" data-word="giggle">?</span>, "you are supposed to push, not pull yourself up." 
+        Arthur felt a bit <span class="word-gap" data-word="silly">?</span> as he was lowered back to the floor.
+        <br><br>
+        To recover his <span class="word-gap" data-word="confidence">?</span>, Arthur decided to try the <span class="word-gap" data-word="treadmill">?</span>. 
+        He started it at a very fast speed by mistake. Before he could find the button to stop it, his legs were moving like a cartoon character. 
+        He eventually tripped and landed on the soft mat. 
+        Everyone stopped to look, but Arthur just stood up and said, "I'm just testing the <span class="word-gap" data-word="gravity">?</span> here!" 
+        He went home and decided that walking his dog was enough exercise for one day.
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#0f172a; color:#f8fafc; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #0f172a; }
+            #stage-content::-webkit-scrollbar-thumb { background: #10b981; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: #1e293b;
+                padding: 60px;
+                border-radius: 30px;
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+                border: 2px solid #334155;
+            }
+
+            .story-title {
+                color: #10b981;
+                text-align: center;
+                font-size: 4rem;
+                font-weight: 900;
+                margin-bottom: 50px;
+                font-family: 'Unbounded', sans-serif;
+                text-transform: uppercase;
+                letter-spacing: -1px;
+            }
+
+            .story-body {
+                line-height: 1.8;
+                font-size: 2.6rem;
+                color: #e2e8f0;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 140px;
+                border-bottom: 4px solid #10b981;
+                text-align: center;
+                color: #10b981;
+                cursor: pointer;
+                transition: 0.2s;
+                background: rgba(16, 185, 129, 0.1);
+                border-radius: 8px;
+                padding: 0 15px;
+                margin: 0 5px;
+            }
+
+            .word-gap.active-target {
+                animation: pulseGlowGreen 1.5s infinite;
+                border-bottom-style: dashed;
+            }
+
+            @keyframes pulseGlowGreen {
+                0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+                70% { box-shadow: 0 0 0 20px rgba(16, 185, 129, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #fbbf24;
+                font-weight: 700;
+                background: transparent;
+                animation: correctPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            @keyframes correctPop {
+                0% { transform: scale(0.5); }
+                100% { transform: scale(1); }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(15, 23, 42, 0.98);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 20px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(15px);
+            }
+
+            .choice-btn {
+                background: #f8fafc;
+                color: #0f172a;
+                padding: 20px 40px;
+                font-size: 2.4rem;
+                font-weight: 700;
+                border-radius: 15px;
+                cursor: pointer;
+                border: none;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.2s;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+
+            .choice-btn:hover { transform: scale(1.05); background: #10b981; color: white; }
+            .choice-btn.wrong { background: #ef4444 !important; color: white; animation: shake 0.4s; }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+
+            .one-shot-label {
+                display: inline-block;
+                background: #10b981;
+                color: #0f172a;
+                padding: 5px 25px;
+                border-radius: 50px;
+                font-size: 1.2rem;
+                font-weight: 900;
+                margin-bottom: 20px;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center><div class="one-shot-label">VETO ONE-SHOT • STORY 02</div></center>
+            <h1 class="story-title">${storyTitle}</h1>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // قائمة الـ 20 كلمة المختارة لقصة التخييم
+    const words = [
+        "outdoors", "skills", "camping", "expensive", "professional", 
+        "campsite", "assemble", "manual", "proudly", "umbrella", 
+        "intervene", "disappear", "storm", "howl", "gust", 
+        "secured", "dragged", "puddle", "marshmallows", "shivering"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Camping Disaster";
+    
+    // محتوى القصة الرابعة
+    let storyContent = `
+        Robert was a man who loved the idea of the <span class="word-gap" data-word="outdoors">?</span>, but he lacked the practical <span class="word-gap" data-word="skills">?</span> to survive in it. 
+        Last summer, he convinced his wife to go on a <span class="word-gap" data-word="camping">?</span> trip. 
+        He bought a massive, <span class="word-gap" data-word="expensive">?</span> tent and a set of <span class="word-gap" data-word="professional">?</span> hiking boots that were too tight.
+        <br><br>
+        When they arrived at the <span class="word-gap" data-word="campsite">?</span>, the weather was beautiful. Robert began to <span class="word-gap" data-word="assemble">?</span> the tent, but he refused to read the <span class="word-gap" data-word="manual">?</span>. 
+        "I am an engineer," he claimed <span class="word-gap" data-word="proudly">?</span>. 
+        Two hours later, the tent looked more like a collapsed <span class="word-gap" data-word="umbrella">?</span> than a shelter. 
+        Linda had to <span class="word-gap" data-word="intervene">?</span>, and they finally set it up just as the sun began to <span class="word-gap" data-word="disappear">?</span>.
+        <br><br>
+        That night, a sudden <span class="word-gap" data-word="storm">?</span> arrived. The wind began to <span class="word-gap" data-word="howl">?</span>, and the rain hammered against the fabric. 
+        Suddenly, a huge <span class="word-gap" data-word="gust">?</span> of wind caught the tent. 
+        Because Robert hadn't <span class="word-gap" data-word="secured">?</span> the ropes properly, the tent lifted off the ground. 
+        Robert grabbed a pole, but instead, he was <span class="word-gap" data-word="dragged">?</span> across the wet grass.
+        <br><br>
+        He landed in a shallow <span class="word-gap" data-word="puddle">?</span>, soaked and <span class="word-gap" data-word="shivering">?</span>. 
+        To make matters worse, a raccoon stole their bag of <span class="word-gap" data-word="marshmallows">?</span>. 
+        Robert sighed and said, "At least we are making memories." 
+        Linda replied, "Next time, let's make memories in a five-star hotel."
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#064e3b; color:#ecfdf5; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #064e3b; }
+            #stage-content::-webkit-scrollbar-thumb { background: #f97316; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: #065f46;
+                padding: 60px;
+                border-radius: 30px;
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
+                border: 2px solid #059669;
+            }
+
+            .story-title {
+                color: #fb923c;
+                text-align: center;
+                font-size: 4rem;
+                font-weight: 900;
+                margin-bottom: 50px;
+                font-family: 'Unbounded', sans-serif;
+                text-transform: uppercase;
+                text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            }
+
+            .story-body {
+                line-height: 1.8;
+                font-size: 2.6rem;
+                color: #ecfdf5;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 140px;
+                border-bottom: 4px solid #fb923c;
+                text-align: center;
+                color: #fb923c;
+                cursor: pointer;
+                transition: 0.2s;
+                background: rgba(251, 146, 60, 0.1);
+                border-radius: 8px;
+                padding: 0 15px;
+                margin: 0 5px;
+            }
+
+            .word-gap.active-target {
+                animation: pulseGlowOrange 1.5s infinite;
+                border-bottom-style: dashed;
+            }
+
+            @keyframes pulseGlowOrange {
+                0% { box-shadow: 0 0 0 0 rgba(251, 146, 60, 0.4); }
+                70% { box-shadow: 0 0 0 20px rgba(251, 146, 60, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(251, 146, 60, 0); }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #fff;
+                font-weight: 700;
+                background: #f97316;
+                padding: 0 20px;
+                animation: correctPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            @keyframes correctPop {
+                0% { transform: scale(0.5); }
+                100% { transform: scale(1); }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(2, 44, 34, 0.98);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 20px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(15px);
+            }
+
+            .choice-btn {
+                background: #ecfdf5;
+                color: #064e3b;
+                padding: 20px 40px;
+                font-size: 2.4rem;
+                font-weight: 700;
+                border-radius: 15px;
+                cursor: pointer;
+                border: none;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.2s;
+            }
+
+            .choice-btn:hover { transform: scale(1.05); background: #fb923c; color: white; }
+            .choice-btn.wrong { background: #ef4444 !important; color: white; animation: shake 0.4s; }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+
+            .one-shot-label {
+                display: inline-block;
+                background: #fb923c;
+                color: #064e3b;
+                padding: 5px 25px;
+                border-radius: 50px;
+                font-size: 1.2rem;
+                font-weight: 900;
+                margin-bottom: 20px;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center><div class="one-shot-label">VETO ONE-SHOT • STORY 04</div></center>
+            <h1 class="story-title">${storyTitle}</h1>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // قائمة الـ 20 كلمة المختارة لقصة حفلة المفاجأة
+    const words = [
+        "secret", "fortieth", "organize", "private", "complex", 
+        "catering", "anxious", "balloons", "basement", "switched", 
+        "quietly", "curtains", "darkness", "shriek", "groceries", 
+        "delivery", "beverages", "fright", "confetti", "unpredictable"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Surprise Party";
+    
+    // محتوى القصة الخامسة
+    let storyContent = `
+        Miranda was famous for being a terrible <span class="word-gap" data-word="secret">?</span> keeper. 
+        However, when her husband’s <span class="word-gap" data-word="fortieth">?</span> birthday approached, she vowed to <span class="word-gap" data-word="organize">?</span> the ultimate surprise party. 
+        She spent weeks sending <span class="word-gap" data-word="private">?</span> messages, ensuring no one mentioned the event. 
+        She even created a <span class="word-gap" data-word="complex">?</span> spreadsheet to manage the <span class="word-gap" data-word="catering">?</span> and the guest list.
+        <br><br>
+        On the day of the party, Miranda felt <span class="word-gap" data-word="anxious">?</span> but excited. 
+        She had hidden forty blue <span class="word-gap" data-word="balloons">?</span> and a massive chocolate cake in the <span class="word-gap" data-word="basement">?</span>. 
+        The plan was simple: the lights would be <span class="word-gap" data-word="switched">?</span> off, and everyone would shout "Surprise!"
+        <br><br>
+        At 6:00 PM, the guests arrived <span class="word-gap" data-word="quietly">?</span> and hid. Miranda stood near the <span class="word-gap" data-word="curtains">?</span>, clutching a party popper. 
+        Suddenly, they heard a key turning. The house went into <span class="word-gap" data-word="darkness">?</span>. 
+        The door opened, and a figure walked in. "Surprise!" everyone screamed.
+        <br><br>
+        The figure let out a loud <span class="word-gap" data-word="shriek">?</span> and dropped a heavy bag of <span class="word-gap" data-word="groceries">?</span>. 
+        When Miranda turned on the lights, it wasn't David. It was the <span class="word-gap" data-word="delivery">?</span> man who was dropping off the <span class="word-gap" data-word="beverages">?</span>. 
+        He was shaking with <span class="word-gap" data-word="fright">?</span>, surrounded by fifty people in party hats.
+        <br><br>
+        Just then, David walked in, holding a <span class="word-gap" data-word="confetti">?</span> cannon. 
+        "I'm guessing," David said, laughing, "that this party wasn't for the milkman?" 
+        Miranda sighed, realizing that life always has its own <span class="word-gap" data-word="unpredictable">?</span> twists.
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#2e1065; color:#f5f3ff; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #2e1065; }
+            #stage-content::-webkit-scrollbar-thumb { background: #d946ef; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: #4c1d95;
+                padding: 60px;
+                border-radius: 30px;
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
+                border: 2px solid #7c3aed;
+            }
+
+            .story-title {
+                color: #f5d0fe;
+                text-align: center;
+                font-size: 4rem;
+                font-weight: 900;
+                margin-bottom: 50px;
+                font-family: 'Unbounded', sans-serif;
+                text-transform: uppercase;
+                text-shadow: 3px 3px 0px #701a75;
+            }
+
+            .story-body {
+                line-height: 1.8;
+                font-size: 2.6rem;
+                color: #f5f3ff;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 140px;
+                border-bottom: 4px solid #d946ef;
+                text-align: center;
+                color: #f5d0fe;
+                cursor: pointer;
+                transition: 0.2s;
+                background: rgba(217, 70, 239, 0.1);
+                border-radius: 8px;
+                padding: 0 15px;
+                margin: 0 5px;
+            }
+
+            .word-gap.active-target {
+                animation: pulseGlowPurple 1.5s infinite;
+                border-bottom-style: dashed;
+            }
+
+            @keyframes pulseGlowPurple {
+                0% { box-shadow: 0 0 0 0 rgba(217, 70, 239, 0.5); }
+                70% { box-shadow: 0 0 0 20px rgba(217, 70, 239, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(217, 70, 239, 0); }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #fff;
+                font-weight: 900;
+                background: linear-gradient(45deg, #d946ef, #7c3aed);
+                padding: 0 20px;
+                border-radius: 12px;
+                animation: correctPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            @keyframes correctPop {
+                0% { transform: scale(0.5); }
+                100% { transform: scale(1); }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(46, 16, 101, 0.98);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 20px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(15px);
+            }
+
+            .choice-btn {
+                background: #f5f3ff;
+                color: #2e1065;
+                padding: 20px 40px;
+                font-size: 2.4rem;
+                font-weight: 700;
+                border-radius: 15px;
+                cursor: pointer;
+                border: none;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.2s;
+            }
+
+            .choice-btn:hover { transform: scale(1.05); background: #d946ef; color: white; }
+            .choice-btn.wrong { background: #ef4444 !important; color: white; animation: shake 0.4s; }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+
+            .one-shot-label {
+                display: inline-block;
+                background: #d946ef;
+                color: white;
+                padding: 5px 25px;
+                border-radius: 50px;
+                font-size: 1.2rem;
+                font-weight: 900;
+                margin-bottom: 20px;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center><div class="one-shot-label">VETO ONE-SHOT • STORY 05</div></center>
+            <h1 class="story-title">${storyTitle}</h1>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // اختيار 20 كلمة مميزة من القائمة لقصة الماراثون
+    const words = [
+        "physical", "vending", "tracksuit", "fashionable", "crowd", 
+        "pistol", "trapped", "charity", "sidewalk", "dense", 
+        "optimistic", "exhausted", "spectator", "brilliant", "bakery", 
+        "crimson", "volunteers", "lobster", "crustacean", "endurance"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Accidental Marathon";
+    
+    // محتوى القصة السادسة
+    let storyContent = `
+        Timothy was the kind of person who avoided <span class="word-gap" data-word="physical">?</span> exertion at all costs. 
+        His idea of a "long run" was walking from his desk to the <span class="word-gap" data-word="vending">?</span> machine. 
+        One Sunday, while wearing his new <span class="word-gap" data-word="tracksuit">?</span>—which he only bought to look <span class="word-gap" data-word="fashionable">?</span>—he accidentally got caught in a massive <span class="word-gap" data-word="crowd">?</span>.
+        <br><br>
+        Before he realized what was happening, a loud <span class="word-gap" data-word="pistol">?</span> fired. 
+        Timothy found himself <span class="word-gap" data-word="trapped">?</span> in the middle of the city's annual <span class="word-gap" data-word="charity">?</span> marathon. 
+        He tried to push his way to the <span class="word-gap" data-word="sidewalk">?</span>, but the sea of runners was too <span class="word-gap" data-word="dense">?</span>. 
+        "I'll just run to the next corner and slip away," he thought, feeling <span class="word-gap" data-word="optimistic">?</span>.
+        <br><br>
+        Five kilometers later, Timothy was <span class="word-gap" data-word="exhausted">?</span>. 
+        Every time he tried to quit, a <span class="word-gap" data-word="spectator">?</span> would hand him water and shout, "You’re doing <span class="word-gap" data-word="brilliant">?</span>!" 
+        He was too polite to explain he was actually looking for a <span class="word-gap" data-word="bakery">?</span>. 
+        His face was a shade of <span class="word-gap" data-word="crimson">?</span> that worried the medical <span class="word-gap" data-word="volunteers">?</span>.
+        <br><br>
+        By the ten-kilometer mark, he saw a man dressed as a giant <span class="word-gap" data-word="lobster">?</span> overtake him. 
+        He decided he couldn't let a <span class="word-gap" data-word="crustacean">?</span> win. 
+        He crossed the finish line three hours later. The next day, a photo appeared in the newspaper with the caption: "Local Hero’s Incredible <span class="word-gap" data-word="endurance">?</span>."
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#18181b; color:#f4f4f5; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #18181b; }
+            #stage-content::-webkit-scrollbar-thumb { background: #eab308; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: #27272a;
+                padding: 60px;
+                border-radius: 20px;
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8);
+                border-left: 15px solid #eab308; /* لفت انتباه من مسافة 4 أمتار */
+            }
+
+            .story-title {
+                color: #facc15;
+                text-align: center;
+                font-size: 4.2rem;
+                font-weight: 900;
+                margin-bottom: 50px;
+                font-family: 'Unbounded', sans-serif;
+                text-transform: uppercase;
+                letter-spacing: -2px;
+            }
+
+            .story-body {
+                line-height: 1.8;
+                font-size: 2.7rem;
+                color: #e4e4e7;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 150px;
+                border-bottom: 5px solid #eab308;
+                text-align: center;
+                color: #facc15;
+                cursor: pointer;
+                transition: 0.2s;
+                background: rgba(234, 179, 8, 0.05);
+                border-radius: 4px;
+                padding: 0 10px;
+            }
+
+            .word-gap.active-target {
+                animation: activePulse 1s infinite alternate;
+                background: rgba(234, 179, 8, 0.15);
+            }
+
+            @keyframes activePulse {
+                from { border-color: #eab308; transform: translateY(0); }
+                to { border-color: #fff; transform: translateY(-3px); }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #18181b;
+                font-weight: 800;
+                background: #eab308;
+                padding: 0 20px;
+                border-radius: 8px;
+                animation: finishPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            @keyframes finishPop {
+                0% { transform: scale(0.8); opacity: 0; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(9, 9, 11, 0.98);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 15px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(20px);
+            }
+
+            .choice-btn {
+                background: #3f3f46;
+                color: white;
+                padding: 18px 35px;
+                font-size: 2.2rem;
+                font-weight: 700;
+                border-radius: 12px;
+                cursor: pointer;
+                border: 2px solid #52525b;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.2s;
+            }
+
+            .choice-btn:hover { background: #eab308; color: #18181b; transform: scale(1.1); }
+            .choice-btn.wrong { background: #dc2626 !important; border-color: #ef4444; animation: shake 0.4s; }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+
+            .one-shot-label {
+                background: #eab308;
+                color: #18181b;
+                padding: 5px 30px;
+                border-radius: 4px;
+                font-size: 1.3rem;
+                font-weight: 900;
+                display: inline-block;
+                margin-bottom: 20px;
+                transform: skewX(-15deg);
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <div class="one-shot-label">VETO ONE-SHOT • STORY 06</div>
+            <h1 class="story-title">${storyTitle}</h1>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // اختيار 20 كلمة مستهدفة لقصة حفل الزفاف الخاطئ
+    const words = [
+        "forgetful", "wedding", "countryside", "handsome", "suit", 
+        "proud", "party", "gate", "expensive", "bride", 
+        "flower", "surprised", "smile", "dinner", "hungry", 
+        "speech", "confused", "recognize", "address", "embarrassed"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Wrong Wedding";
+    
+    // محتوى القصة السابعة
+    let storyContent = `
+        Julian was a very <span class="word-gap" data-word="forgetful">?</span> man. 
+        One Saturday, his cousin invited him to a big <span class="word-gap" data-word="wedding">?</span> at a beautiful house in the <span class="word-gap" data-word="countryside">?</span>. 
+        Julian wanted to look <span class="word-gap" data-word="handsome">?</span>, so he wore a new black <span class="word-gap" data-word="suit">?</span>. 
+        He felt very <span class="word-gap" data-word="proud">?</span> as he drove his car to the <span class="word-gap" data-word="party">?</span>.
+        <br><br>
+        He arrived at a large <span class="word-gap" data-word="gate">?</span> and saw many people wearing <span class="word-gap" data-word="expensive">?</span> clothes. 
+        Julian didn't know anyone, but he even saw the <span class="word-gap" data-word="bride">?</span> and gave her a <span class="word-gap" data-word="flower">?</span>. 
+        She looked <span class="word-gap" data-word="surprised">?</span>, but she said "Thank you" with a <span class="word-gap" data-word="smile">?</span>.
+        <br><br>
+        Later, everyone sat down for a big <span class="word-gap" data-word="dinner">?</span>. 
+        Julian was very <span class="word-gap" data-word="hungry">?</span>, so he started eating. Then, a man stood up to give a <span class="word-gap" data-word="speech">?</span>. 
+        He talked about a groom named "Peter." Julian was <span class="word-gap" data-word="confused">?</span> because his cousin’s name was "Mark." 
+        He looked at the photos, but he did not <span class="word-gap" data-word="recognize">?</span> any of the faces.
+        <br><br>
+        Suddenly, Julian realized his mistake. He was at the wrong <span class="word-gap" data-word="address">?</span>! 
+        He felt very <span class="word-gap" data-word="embarrassed">?</span>. He tried to leave the room quickly and ran to his car. 
+        He finally arrived at Mark’s wedding just in time for the cake.
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#fdfcf0; color:#1c1917; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #fdfcf0; }
+            #stage-content::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: #ffffff;
+                padding: 60px;
+                border-radius: 4px; /* زوايا حادة لتعطي طابع رسمي (كارت دعوة) */
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                border: 1px solid #e2e8f0;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .story-wrapper::before {
+                content: '';
+                position: absolute;
+                top: 0; left: 0; right: 0; height: 10px;
+                background: linear-gradient(to right, #d4af37, #fef08a, #d4af37);
+            }
+
+            .story-title {
+                color: #1c1917;
+                text-align: center;
+                font-size: 4rem;
+                font-weight: 900;
+                margin-bottom: 50px;
+                font-family: 'Cinzel', serif;
+                text-transform: uppercase;
+                border-bottom: 2px solid #d4af37;
+                display: inline-block;
+                width: 100%;
+                padding-bottom: 20px;
+            }
+
+            .story-body {
+                line-height: 2;
+                font-size: 2.7rem;
+                color: #444;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 160px;
+                border-bottom: 3px solid #d4af37;
+                text-align: center;
+                color: #b45309;
+                cursor: pointer;
+                transition: 0.2s;
+                background: rgba(212, 175, 55, 0.05);
+                font-weight: 700;
+            }
+
+            .word-gap.active-target {
+                animation: weddingPulse 1.5s infinite;
+                background: rgba(212, 175, 55, 0.15);
+            }
+
+            @keyframes weddingPulse {
+                0% { border-bottom-width: 3px; }
+                50% { border-bottom-width: 8px; border-bottom-color: #f59e0b; }
+                100% { border-bottom-width: 3px; }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #d4af37;
+                font-weight: 900;
+                background: transparent;
+                animation: flowerPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            @keyframes flowerPop {
+                0% { transform: translateY(10px); opacity: 0; }
+                100% { transform: translateY(0); opacity: 1; }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(28, 25, 23, 0.95);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 20px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(10px);
+            }
+
+            .choice-btn {
+                background: #ffffff;
+                color: #1c1917;
+                padding: 20px 45px;
+                font-size: 2.5rem;
+                font-weight: 700;
+                border-radius: 0px;
+                cursor: pointer;
+                border: 4px solid #d4af37;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.3s;
+            }
+
+            .choice-btn:hover { background: #d4af37; color: white; transform: scale(1.05); }
+            .choice-btn.wrong { background: #ef4444 !important; border-color: #b91c1c; color: white; animation: shake 0.4s; }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+
+            .one-shot-label {
+                font-family: 'Cinzel', serif;
+                color: #d4af37;
+                letter-spacing: 5px;
+                font-size: 1.4rem;
+                font-weight: 900;
+                margin-bottom: 10px;
+                display: block;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center>
+                <span class="one-shot-label">VETO ONE-SHOT • STORY 07</span>
+                <h1 class="story-title">${storyTitle}</h1>
+            </center>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // اختيار 20 كلمة مستهدفة لقصة الروبوت
+    const words = [
+        "clean", "mess", "advertisement", "automatically", "relaxed", 
+        "impressed", "robot", "whirring", "garden", "herbal", 
+        "squirrel", "rubbish", "chase", "dining", "chaos", 
+        "curtains", "electronics", "strange", "spinning", "safer"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Magic Vacuum Cleaner";
+    
+    // محتوى القصة الثامنة
+    let storyContent = `
+        Mrs. Higgins was a lady who loved a <span class="word-gap" data-word="clean">?</span> house. She hated dust and <span class="word-gap" data-word="mess">?</span>. 
+        One day, she saw an <span class="word-gap" data-word="advertisement">?</span> for a "Super-Smart Robot Vacuum." 
+        The man said it could clean the house <span class="word-gap" data-word="automatically">?</span> while the owner <span class="word-gap" data-word="relaxed">?</span>. 
+        Mrs. Higgins was <span class="word-gap" data-word="impressed">?</span> and bought one immediately.
+        <br><br>
+        She brought the <span class="word-gap" data-word="robot">?</span> home and turned it on. 
+        It started to move across the floor with a quiet <span class="word-gap" data-word="whirring">?</span> sound. 
+        Mrs. Higgins decided to go to the <span class="word-gap" data-word="garden">?</span> to read a book and drink <span class="word-gap" data-word="herbal">?</span> tea.
+        <br><br>
+        While she was outside, a small <span class="word-gap" data-word="squirrel">?</span> ran into the kitchen. 
+        The robot sensed it and decided it was <span class="word-gap" data-word="rubbish">?</span> that needed to be cleaned. 
+        It began to <span class="word-gap" data-word="chase">?</span> the animal around the <span class="word-gap" data-word="dining">?</span> room. 
+        In the <span class="word-gap" data-word="chaos">?</span>, the squirrel jumped onto the <span class="word-gap" data-word="curtains">?</span>.
+        <br><br>
+        The robot hit a vase, and water spilled over its <span class="word-gap" data-word="electronics">?</span>. 
+        Suddenly, it started making <span class="word-gap" data-word="strange">?</span> noises. 
+        Mrs. Higgins walked back inside and saw the robot <span class="word-gap" data-word="spinning">?</span> in circles, covered in mud. 
+        She realized that doing the cleaning yourself is much <span class="word-gap" data-word="safer">?</span> than trusting a robot.
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#0f172a; color:#f8fafc; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #0f172a; }
+            #stage-content::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: #1e293b;
+                padding: 60px;
+                border-radius: 30px;
+                box-shadow: 0 0 40px rgba(56, 189, 248, 0.2);
+                border: 2px solid #334155;
+            }
+
+            .story-title {
+                color: #38bdf8;
+                text-align: center;
+                font-size: 3.8rem;
+                font-weight: 900;
+                margin-bottom: 50px;
+                font-family: 'Orbitron', sans-serif;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+            }
+
+            .story-body {
+                line-height: 1.8;
+                font-size: 2.6rem;
+                color: #e2e8f0;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 150px;
+                border-bottom: 4px solid #38bdf8;
+                text-align: center;
+                color: #7dd3fc;
+                cursor: pointer;
+                transition: 0.2s;
+                background: rgba(56, 189, 248, 0.05);
+            }
+
+            .word-gap.active-target {
+                animation: robotScan 1s infinite alternate;
+                background: rgba(56, 189, 248, 0.2);
+            }
+
+            @keyframes robotScan {
+                from { border-bottom-color: #38bdf8; box-shadow: 0 5px 15px rgba(56, 189, 248, 0.2); }
+                to { border-bottom-color: #f0f9ff; box-shadow: 0 5px 25px rgba(56, 189, 248, 0.5); }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #22d3ee;
+                font-weight: 800;
+                background: transparent;
+                animation: powerOn 0.5s ease-out;
+            }
+
+            @keyframes powerOn {
+                0% { filter: brightness(5); transform: scale(1.2); }
+                100% { filter: brightness(1); transform: scale(1); }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(15, 23, 42, 0.98);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 20px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(15px);
+            }
+
+            .choice-btn {
+                background: #0f172a;
+                color: #38bdf8;
+                padding: 20px 40px;
+                font-size: 2.4rem;
+                font-weight: 700;
+                border-radius: 12px;
+                cursor: pointer;
+                border: 2px solid #38bdf8;
+                font-family: 'Orbitron', sans-serif;
+                transition: 0.2s;
+            }
+
+            .choice-btn:hover { background: #38bdf8; color: #0f172a; transform: scale(1.1); }
+            .choice-btn.wrong { background: #ef4444 !important; border-color: #b91c1c; color: white; animation: shake 0.4s; }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+
+            .one-shot-label {
+                background: #0ea5e9;
+                color: white;
+                padding: 5px 25px;
+                border-radius: 4px;
+                font-size: 1.2rem;
+                font-weight: 900;
+                display: inline-block;
+                margin-bottom: 20px;
+                font-family: 'Orbitron', sans-serif;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center>
+                <div class="one-shot-label">SYSTEM STATUS: ACTIVE • STORY 08</div>
+                <h1 class="story-title">${storyTitle}</h1>
+            </center>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // اختيار 20 كلمة مستهدفة لقصة المتحف والديناصور
+    const words = [
+        "expert", "intelligent", "clumsy", "lecture", "briefcase", 
+        "rare", "crowded", "exhibition", "rushing", "slippery", 
+        "skeleton", "slide", "falling", "creaking", "wobble", 
+        "trash", "popcorn", "silence", "security", "treasure"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Great Museum Mix-up";
+    
+    // محتوى القصة التاسعة
+    let storyContent = `
+        Professor Bumble was a famous <span class="word-gap" data-word="expert">?</span> on ancient history. 
+        He was very <span class="word-gap" data-word="intelligent">?</span>, but he was also very <span class="word-gap" data-word="clumsy">?</span>. 
+        One afternoon, he was invited to give a <span class="word-gap" data-word="lecture">?</span> at the museum. 
+        He carried a large <span class="word-gap" data-word="briefcase">?</span> and a very <span class="word-gap" data-word="rare">?</span> ancient clay pot.
+        <br><br>
+        The museum was <span class="word-gap" data-word="crowded">?</span> because of a new <span class="word-gap" data-word="exhibition">?</span> about dinosaurs. 
+        Professor Bumble was <span class="word-gap" data-word="rushing">?</span> because he was late. 
+        He didn't notice the floor was <span class="word-gap" data-word="slippery">?</span>. 
+        Suddenly, he began to <span class="word-gap" data-word="slide">?</span> across the floor like an ice skater.
+        <br><br>
+        To save himself from <span class="word-gap" data-word="falling">?</span>, he grabbed the dinosaur's tail. 
+        There was a <span class="word-gap" data-word="creaking">?</span> sound, and the entire <span class="word-gap" data-word="skeleton">?</span> started to <span class="word-gap" data-word="wobble">?</span>. 
+        The clay pot flew and landed inside a <span class="word-gap" data-word="trash">?</span> can filled with <span class="word-gap" data-word="popcorn">?</span>.
+        <br><br>
+        The visitors stopped in <span class="word-gap" data-word="silence">?</span>. 
+        The Professor looked at the <span class="word-gap" data-word="security">?</span> guard and gave a nervous laugh. 
+        Luckily, the pot was not broken, but he spent the day picking popcorn out of his ancient <span class="word-gap" data-word="treasure">?</span>.
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#27272a; color:#f5f5f4; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #1c1917; }
+            #stage-content::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: #44403c;
+                padding: 60px;
+                border-radius: 10px;
+                box-shadow: 0 30px 60px -12px rgba(0,0,0,0.7);
+                border: 1px solid #78716c;
+                position: relative;
+            }
+
+            /* تأثير الأركان الكلاسيكية للمتحف */
+            .story-wrapper::after {
+                content: ''; position: absolute; top: 20px; left: 20px; right: 20px; bottom: 20px;
+                border: 1px solid rgba(214, 211, 209, 0.2); pointer-events: none;
+            }
+
+            .story-title {
+                color: #fde047;
+                text-align: center;
+                font-size: 4rem;
+                font-weight: 400;
+                margin-bottom: 50px;
+                font-family: 'Marcellus', serif;
+                text-transform: uppercase;
+                letter-spacing: 4px;
+                text-shadow: 2px 2px 0px #78350f;
+            }
+
+            .story-body {
+                line-height: 1.9;
+                font-size: 2.7rem;
+                color: #f5f5f4;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 150px;
+                border-bottom: 3px solid #fde047;
+                text-align: center;
+                color: #fde047;
+                cursor: pointer;
+                transition: 0.2s;
+                background: rgba(253, 224, 71, 0.05);
+            }
+
+            .word-gap.active-target {
+                animation: spotlight 1.5s infinite;
+            }
+
+            @keyframes spotlight {
+                0% { background: rgba(253, 224, 71, 0.1); box-shadow: 0 0 10px rgba(253, 224, 71, 0.2); }
+                50% { background: rgba(253, 224, 71, 0.3); box-shadow: 0 0 30px rgba(253, 224, 71, 0.5); }
+                100% { background: rgba(253, 224, 71, 0.1); box-shadow: 0 0 10px rgba(253, 224, 71, 0.2); }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #fff;
+                font-weight: 700;
+                background: #854d0e;
+                padding: 0 15px;
+                border-radius: 5px;
+                animation: treasureFound 0.5s ease-out;
+            }
+
+            @keyframes treasureFound {
+                0% { transform: scale(0.5) rotate(-10deg); }
+                100% { transform: scale(1) rotate(0deg); }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(28, 25, 23, 0.98);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 20px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(15px);
+            }
+
+            .choice-btn {
+                background: #f5f5f4;
+                color: #44403c;
+                padding: 20px 40px;
+                font-size: 2.4rem;
+                font-weight: 700;
+                border-radius: 5px;
+                cursor: pointer;
+                border: 3px solid #fde047;
+                font-family: 'Marcellus', serif;
+                transition: 0.2s;
+            }
+
+            .choice-btn:hover { background: #fde047; color: #44403c; transform: translateY(-5px); }
+            .choice-btn.wrong { background: #991b1b !important; color: white; border-color: #ef4444; animation: shake 0.4s; }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+
+            .one-shot-label {
+                color: #d6d3d1;
+                font-size: 1.1rem;
+                letter-spacing: 8px;
+                font-weight: 900;
+                margin-bottom: 10px;
+                display: block;
+                text-transform: uppercase;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center>
+                <span class="one-shot-label">MUSEUM ARCHIVES • STORY 09</span>
+                <h1 class="story-title">${storyTitle}</h1>
+            </center>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // اختيار 20 كلمة مستهدفة لقصة رحلة الصيد
+    const words = [
+        "fishing", "lake", "rod", "sandwiches", "foggy", 
+        "pier", "deep", "pull", "excitement", "handle", 
+        "banana", "sweating", "quickly", "surface", "bicycle", 
+        "seaweed", "disappointed", "shiny", "basket", "grateful"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Unusual Fishing Trip";
+    
+    // محتوى القصة العاشرة
+    let storyContent = `
+        Uncle Ted was a man who loved <span class="word-gap" data-word="fishing">?</span>, but he never caught any fish. 
+        Every Sunday, he went to the <span class="word-gap" data-word="lake">?</span> with his expensive fishing <span class="word-gap" data-word="rod">?</span> and a large box of <span class="word-gap" data-word="sandwiches">?</span>.
+        <br><br>
+        One morning, the lake was very <span class="word-gap" data-word="foggy">?</span> and quiet. 
+        Ted sat on the wooden <span class="word-gap" data-word="pier">?</span> and threw his line into the <span class="word-gap" data-word="deep">?</span> water. 
+        Suddenly, he felt a huge <span class="word-gap" data-word="pull">?</span> on the line. 
+        "It’s a monster!" he shouted with <span class="word-gap" data-word="excitement">?</span>. He began to turn the <span class="word-gap" data-word="handle">?</span> as fast as he could.
+        <br><br>
+        The rod bent like a <span class="word-gap" data-word="banana">?</span>. Ted was <span class="word-gap" data-word="sweating">?</span>, and his heart was beating <span class="word-gap" data-word="quickly">?</span>. 
+        After ten minutes, something heavy finally broke the <span class="word-gap" data-word="surface">?</span> of the water. 
+        But it wasn't a fish. It was an old <span class="word-gap" data-word="bicycle">?</span> covered in green <span class="word-gap" data-word="seaweed">?</span>.
+        <br><br>
+        Ted was very <span class="word-gap" data-word="disappointed">?</span>, but then he noticed something <span class="word-gap" data-word="shiny">?</span> inside the bicycle’s <span class="word-gap" data-word="basket">?</span>. 
+        He found a small camera inside. When he returned it, the owners were so <span class="word-gap" data-word="grateful">?</span> that they bought him a giant salmon. 
+        Ted told everyone he caught the fish himself!
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#0c4a6e; color:#f0f9ff; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #0c4a6e; }
+            #stage-content::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: rgba(12, 74, 110, 0.8);
+                padding: 60px;
+                border-radius: 40px;
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+                border: 2px solid #0ea5e9;
+                backdrop-filter: blur(10px);
+            }
+
+            .story-title {
+                color: #7dd3fc;
+                text-align: center;
+                font-size: 4rem;
+                font-weight: 900;
+                margin-bottom: 50px;
+                font-family: 'Unbounded', sans-serif;
+                text-transform: uppercase;
+                text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            }
+
+            .story-body {
+                line-height: 1.8;
+                font-size: 2.6rem;
+                color: #e0f2fe;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 140px;
+                border-bottom: 4px solid #38bdf8;
+                text-align: center;
+                color: #38bdf8;
+                cursor: pointer;
+                transition: 0.3s;
+                background: rgba(56, 189, 248, 0.1);
+                border-radius: 8px;
+            }
+
+            .word-gap.active-target {
+                animation: wavePulse 2s infinite;
+            }
+
+            @keyframes wavePulse {
+                0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); border-color: #38bdf8; }
+                50% { box-shadow: 0 10px 20px 0 rgba(56, 189, 248, 0.2); border-color: #f0f9ff; }
+                100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); border-color: #38bdf8; }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #f0f9ff;
+                font-weight: 700;
+                background: #0ea5e9;
+                padding: 0 15px;
+                animation: catchFish 0.5s ease-out;
+            }
+
+            @keyframes catchFish {
+                0% { transform: translateY(20px); opacity: 0; }
+                100% { transform: translateY(0); opacity: 1; }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(7, 89, 133, 0.98);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 20px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(15px);
+            }
+
+            .choice-btn {
+                background: #f0f9ff;
+                color: #0c4a6e;
+                padding: 18px 35px;
+                font-size: 2.3rem;
+                font-weight: 700;
+                border-radius: 15px;
+                cursor: pointer;
+                border: none;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.2s;
+            }
+
+            .choice-btn:hover { background: #38bdf8; color: white; transform: scale(1.1) rotate(2deg); }
+            .choice-btn.wrong { background: #f43f5e !important; color: white; animation: shake 0.4s; }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+
+            .one-shot-label {
+                background: #38bdf8;
+                color: #0c4a6e;
+                padding: 5px 25px;
+                border-radius: 50px;
+                font-size: 1.2rem;
+                font-weight: 900;
+                margin-bottom: 20px;
+                display: inline-block;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center>
+                <div class="one-shot-label">VETO ONE-SHOT • FINAL STORY 10</div>
+                <h1 class="story-title">${storyTitle}</h1>
+            </center>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // اختيار 20 كلمة مستهدفة لقصة المصعد المتكلم
+    const words = [
+        "luxury", "ancient", "upgrade", "system", "guests", 
+        "elevator", "seventh", "robotic", "surprised", "boring", 
+        "roof", "frowned", "firmly", "mechanical", "kitchen", 
+        "smell", "hungry", "suddenly", "lobby", "polite"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Talking Elevator";
+    
+    // محتوى القصة الحادية عشرة
+    let storyContent = `
+        The Grand Hotel was famous for its <span class="word-gap" data-word="luxury">?</span>, but its elevator was very <span class="word-gap" data-word="ancient">?</span>. 
+        One day, the manager decided to <span class="word-gap" data-word="upgrade">?</span> it. 
+        He installed a new "Smart Voice <span class="word-gap" data-word="system">?</span>" that could talk to the <span class="word-gap" data-word="guests">?</span>.
+        <br><br>
+        Clara entered the <span class="word-gap" data-word="elevator">?</span> and wanted to go to the <span class="word-gap" data-word="seventh">?</span> floor. 
+        "Good morning," the elevator said in a <span class="word-gap" data-word="robotic">?</span> voice. 
+        Clara was <span class="word-gap" data-word="surprised">?</span>, but she asked for her floor. 
+        The elevator replied, "Are you sure? There is a <span class="word-gap" data-word="boring">?</span> meeting there. The <span class="word-gap" data-word="roof">?</span> garden is much nicer."
+        <br><br>
+        Clara <span class="word-gap" data-word="frowned">?</span> and asked again <span class="word-gap" data-word="firmly">?</span>. 
+        The elevator let out a loud, <span class="word-gap" data-word="mechanical">?</span> sigh and began to move. 
+        However, it stopped at the <span class="word-gap" data-word="kitchen">?</span> in the basement. 
+        The <span class="word-gap" data-word="smell">?</span> of fresh bread filled the elevator. 
+        "You look <span class="word-gap" data-word="hungry">?</span>," the elevator whispered.
+        <br><br>
+        <span class="word-gap" data-word="suddenly">?</span>, the doors closed. Clara was trapped. 
+        "Take me to the <span class="word-gap" data-word="lobby">?</span>!" she shouted. 
+        The elevator replied, "I will move when you are <span class="word-gap" data-word="polite">?</span>." 
+        Clara had to say "please" to a machine!
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#2d1b10; color:#fef3c7; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #2d1b10; }
+            #stage-content::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: #3f2b1e;
+                padding: 60px;
+                border-radius: 20px;
+                box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+                border: 3px solid #d4af37;
+                position: relative;
+            }
+
+            .story-title {
+                color: #d4af37;
+                text-align: center;
+                font-size: 4.2rem;
+                font-weight: 900;
+                margin-bottom: 50px;
+                font-family: 'Playfair Display', serif;
+                text-transform: uppercase;
+                letter-spacing: 3px;
+                border-bottom: 2px double #d4af37;
+                display: inline-block;
+                width: 100%;
+                padding-bottom: 20px;
+            }
+
+            .story-body {
+                line-height: 1.9;
+                font-size: 2.7rem;
+                color: #fef3c7;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 150px;
+                border-bottom: 4px solid #d4af37;
+                text-align: center;
+                color: #fbbf24;
+                cursor: pointer;
+                transition: 0.3s;
+                background: rgba(212, 175, 55, 0.1);
+            }
+
+            .word-gap.active-target {
+                animation: luxuryGlow 1.5s infinite alternate;
+            }
+
+            @keyframes luxuryGlow {
+                from { background: rgba(212, 175, 55, 0.1); box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+                to { background: rgba(212, 175, 55, 0.3); box-shadow: 0 0 30px rgba(212, 175, 55, 0.5); }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #1a1a1a;
+                font-weight: 800;
+                background: #d4af37;
+                padding: 0 15px;
+                border-radius: 4px;
+                animation: slideDown 0.4s ease-out;
+            }
+
+            @keyframes slideDown {
+                0% { transform: translateY(-20px); opacity: 0; }
+                100% { transform: translateY(0); opacity: 1; }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(26, 15, 8, 0.98);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 20px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(15px);
+            }
+
+            .choice-btn {
+                background: #fef3c7;
+                color: #2d1b10;
+                padding: 20px 45px;
+                font-size: 2.4rem;
+                font-weight: 700;
+                border-radius: 0;
+                cursor: pointer;
+                border: 2px solid #d4af37;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.2s;
+            }
+
+            .choice-btn:hover { background: #d4af37; color: white; transform: scale(1.05); }
+            .choice-btn.wrong { background: #991b1b !important; color: white; animation: shake 0.4s; }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+
+            .one-shot-label {
+                color: #d4af37;
+                font-size: 1.2rem;
+                letter-spacing: 5px;
+                font-weight: 900;
+                margin-bottom: 15px;
+                display: block;
+                text-transform: uppercase;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center>
+                <span class="one-shot-label">GRAND HOTEL • STORY 11</span>
+                <h1 class="story-title">${storyTitle}</h1>
+            </center>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // اختيار 20 كلمة مستهدفة لقصة حقيبة المهرج
+    const words = [
+        "businessman", "hurry", "airport", "meeting", "carousel", 
+        "suitcase", "familiar", "suit", "zipper", "shirts", 
+        "tutu", "clown", "wigs", "label", "performer", 
+        "choice", "immediately", "confused", "exchange", "career"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Wrong Suitcase";
+    
+    // محتوى القصة الثانية عشرة
+    let storyContent = `
+        Harry was a <span class="word-gap" data-word="businessman">?</span> who traveled a lot for his job. 
+        He was always in a <span class="word-gap" data-word="hurry">?</span>, rushing from one <span class="word-gap" data-word="airport">?</span> to another. 
+        Last Tuesday, he arrived in Paris for an important <span class="word-gap" data-word="meeting">?</span>. 
+        He stood at the baggage <span class="word-gap" data-word="carousel">?</span>, waiting for his black <span class="word-gap" data-word="suitcase">?</span>.
+        <br><br>
+        He saw a bag that looked <span class="word-gap" data-word="familiar">?</span> and grabbed it. 
+        At the hotel, he needed to change into his professional <span class="word-gap" data-word="suit">?</span>. 
+        He pulled the <span class="word-gap" data-word="zipper">?</span> quickly, but he didn't see his white <span class="word-gap" data-word="shirts">?</span>. 
+        Instead, he found a bright pink <span class="word-gap" data-word="tutu">?</span> and a pair of giant <span class="word-gap" data-word="clown">?</span> shoes and yellow <span class="word-gap" data-word="wigs">?</span>.
+        <br><br>
+        Harry looked at the <span class="word-gap" data-word="label">?</span>; the bag belonged to a <span class="word-gap" data-word="performer">?</span>. 
+        Harry had no <span class="word-gap" data-word="choice">?</span>, so he called the airport <span class="word-gap" data-word="immediately">?</span>. 
+        The staff told him that a very <span class="word-gap" data-word="confused">?</span> clown was holding Harry's bag.
+        <br><br>
+        They managed to <span class="word-gap" data-word="exchange">?</span> the bags just in time. 
+        Harry learned a lesson: always use a ribbon so you don't accidentally steal a clown's <span class="word-gap" data-word="career">?</span>!
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#f1f5f9; color:#1e293b; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #f1f5f9; }
+            #stage-content::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: #ffffff;
+                padding: 60px;
+                border-radius: 24px;
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                border: 1px solid #e2e8f0;
+                border-top: 12px solid #3b82f6;
+            }
+
+            .story-title {
+                color: #1e3a8a;
+                text-align: center;
+                font-size: 3.8rem;
+                font-weight: 900;
+                margin-bottom: 50px;
+                font-family: 'Montserrat', sans-serif;
+                text-transform: uppercase;
+                letter-spacing: -1px;
+            }
+
+            .story-body {
+                line-height: 1.8;
+                font-size: 2.6rem;
+                color: #334155;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 150px;
+                border-bottom: 4px solid #3b82f6;
+                text-align: center;
+                color: #2563eb;
+                cursor: pointer;
+                transition: 0.3s;
+                background: rgba(59, 130, 246, 0.05);
+            }
+
+            .word-gap.active-target {
+                animation: scanBlue 1.2s infinite;
+                background: rgba(59, 130, 246, 0.15);
+            }
+
+            @keyframes scanBlue {
+                0% { border-bottom-color: #3b82f6; }
+                50% { border-bottom-color: #ec4899; } /* تلميح للمهرج */
+                100% { border-bottom-color: #3b82f6; }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #ffffff;
+                font-weight: 800;
+                background: #3b82f6;
+                padding: 0 15px;
+                border-radius: 6px;
+                animation: baggageDrop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            @keyframes baggageDrop {
+                0% { transform: translateY(-30px); opacity: 0; }
+                100% { transform: translateY(0); opacity: 1; }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(30, 41, 59, 0.98);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 15px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(10px);
+            }
+
+            .choice-btn {
+                background: #ffffff;
+                color: #1e293b;
+                padding: 18px 35px;
+                font-size: 2.2rem;
+                font-weight: 700;
+                border-radius: 12px;
+                cursor: pointer;
+                border: 3px solid #3b82f6;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.2s;
+            }
+
+            .choice-btn:hover { background: #ec4899; color: white; border-color: #db2777; transform: translateY(-5px); }
+            .choice-btn.wrong { background: #ef4444 !important; color: white; border-color: #b91c1c; animation: shake 0.4s; }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+
+            .one-shot-label {
+                background: #1e3a8a;
+                color: white;
+                padding: 5px 25px;
+                border-radius: 6px;
+                font-size: 1.2rem;
+                font-weight: 900;
+                display: inline-block;
+                margin-bottom: 20px;
+                text-transform: uppercase;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center>
+                <div class="one-shot-label">BAGGAGE CLAIM • STORY 12</div>
+                <h1 class="story-title">${storyTitle}</h1>
+            </center>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // اختيار 20 كلمة مستهدفة لقصة الخباز المشتت
+    const words = [
+        "bakery", "delicious", "distracted", "wedding", "nervous", 
+        "flour", "butter", "bowl", "smoothly", "vanilla", 
+        "spinning", "counter", "notice", "batter", "oven", 
+        "aroma", "sneeze", "perfect", "spicy", "mistake"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Forgetful Baker";
+    
+    // محتوى القصة الثالثة عشرة
+    let storyContent = `
+        Mr. Miller owned a small <span class="word-gap" data-word="bakery">?</span> in town. 
+        He was famous for <span class="word-gap" data-word="delicious">?</span> bread, but he was also very <span class="word-gap" data-word="distracted">?</span>. 
+        One day, he had to bake a massive <span class="word-gap" data-word="wedding">?</span> cake. 
+        It was a huge responsibility, and he felt quite <span class="word-gap" data-word="nervous">?</span>.
+        <br><br>
+        He started by mixing the <span class="word-gap" data-word="flour">?</span>, <span class="word-gap" data-word="butter">?</span>, and sugar in a giant <span class="word-gap" data-word="bowl">?</span>. 
+        Everything seemed to be going <span class="word-gap" data-word="smoothly">?</span>. He added eggs and <span class="word-gap" data-word="vanilla">?</span> extract. 
+        However, while the mixture was <span class="word-gap" data-word="spinning">?</span>, his cat jumped on the <span class="word-gap" data-word="counter">?</span>. 
+        A jar of black pepper fell in, but Mr. Miller didn't <span class="word-gap" data-word="notice">?</span>.
+        <br><br>
+        He poured the <span class="word-gap" data-word="batter">?</span> into the pans and put them in the <span class="word-gap" data-word="oven">?</span>. 
+        Soon, a wonderful <span class="word-gap" data-word="aroma">?</span> filled the shop, but the Mayor started to <span class="word-gap" data-word="sneeze">?</span>. 
+        The cake looked <span class="word-gap" data-word="perfect">?</span>, but it tasted very <span class="word-gap" data-word="spicy">?</span>!
+        <br><br>
+        Mr. Miller realized his <span class="word-gap" data-word="mistake">?</span> and turned bright red. 
+        Now, he always keeps his cat and his pepper in a different room!
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#fff7ed; color:#431407; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #fff7ed; }
+            #stage-content::-webkit-scrollbar-thumb { background: #ea580c; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: #ffffff;
+                padding: 60px;
+                border-radius: 40px;
+                box-shadow: 0 20px 40px rgba(124, 45, 18, 0.1);
+                border: 2px solid #fdba74;
+                position: relative;
+            }
+
+            .story-title {
+                color: #9a3412;
+                text-align: center;
+                font-size: 4rem;
+                font-weight: 400;
+                margin-bottom: 50px;
+                font-family: 'Cherry Bomb One', cursive;
+                text-transform: uppercase;
+            }
+
+            .story-body {
+                line-height: 2;
+                font-size: 2.7rem;
+                color: #431407;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 150px;
+                border-bottom: 4px solid #ea580c;
+                text-align: center;
+                color: #c2410c;
+                cursor: pointer;
+                transition: 0.3s;
+                background: rgba(251, 146, 60, 0.05);
+            }
+
+            .word-gap.active-target {
+                animation: cookPulse 1.5s infinite;
+                background: rgba(251, 146, 60, 0.15);
+            }
+
+            @keyframes cookPulse {
+                0% { border-color: #ea580c; }
+                50% { border-color: #000000; } /* تلميح للفلفل الأسود */
+                100% { border-color: #ea580c; }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #ffffff;
+                font-weight: 800;
+                background: #ea580c;
+                padding: 0 15px;
+                border-radius: 12px;
+                animation: cakeRise 0.5s ease-out;
+            }
+
+            @keyframes cakeRise {
+                0% { transform: scale(0.5); opacity: 0; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(67, 20, 7, 0.98);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 15px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(10px);
+            }
+
+            .choice-btn {
+                background: #fff7ed;
+                color: #431407;
+                padding: 20px 45px;
+                font-size: 2.4rem;
+                font-weight: 700;
+                border-radius: 20px;
+                cursor: pointer;
+                border: 3px solid #ea580c;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.2s;
+            }
+
+            .choice-btn:hover { background: #ea580c; color: white; transform: translateY(-5px) rotate(2deg); }
+            .choice-btn.wrong { background: #000000 !important; color: #ffffff; border-color: #444; animation: sneezeShake 0.4s; }
+
+            @keyframes sneezeShake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-15px); }
+                75% { transform: translateX(15px); }
+            }
+
+            .one-shot-label {
+                background: #ea580c;
+                color: white;
+                padding: 5px 30px;
+                border-radius: 50px;
+                font-size: 1.3rem;
+                font-weight: 900;
+                display: inline-block;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 10px rgba(234, 88, 12, 0.3);
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center>
+                <div class="one-shot-label">SWEET & SPICY • STORY 13</div>
+                <h1 class="story-title">${storyTitle}</h1>
+            </center>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // اختيار 20 كلمة مستهدفة لقصة البطل الخارق بالصدفة
+    const words = [
+        "shy", "factory", "attention", "jacket", "umbrella", 
+        "storm", "strong", "blanket", "shoulders", "moment", 
+        "balloon", "struggling", "bin", "fluttering", "cape", 
+        "superhero", "explain", "photographer", "invisible", "powers"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Accidental Superhero";
+    
+    // محتوى القصة الرابعة عشرة
+    let storyContent = `
+        Arthur was a very <span class="word-gap" data-word="shy">?</span> man who worked in a noisy <span class="word-gap" data-word="factory">?</span>. 
+        He didn't like <span class="word-gap" data-word="attention">?</span>, so he always wore a plain <span class="word-gap" data-word="jacket">?</span>. 
+        One windy Tuesday, a sudden <span class="word-gap" data-word="storm">?</span> began. 
+        The wind was so <span class="word-gap" data-word="strong">?</span> that it blew a red <span class="word-gap" data-word="blanket">?</span> off a balcony and onto his <span class="word-gap" data-word="shoulders">?</span>.
+        <br><br>
+        At that exact <span class="word-gap" data-word="moment">?</span>, a small girl's <span class="word-gap" data-word="balloon">?</span> got stuck in a tree. 
+        Arthur, who was <span class="word-gap" data-word="struggling">?</span> with the wind, tripped over a <span class="word-gap" data-word="bin">?</span>. 
+        He flew forward, and because the blanket was <span class="word-gap" data-word="fluttering">?</span> like a <span class="word-gap" data-word="cape">?</span>, a group of children shouted, "Look! It’s a <span class="word-gap" data-word="superhero">?</span>!"
+        <br><br>
+        Arthur tried to <span class="word-gap" data-word="explain">?</span> that he was just a worker, but a <span class="word-gap" data-word="photographer">?</span> was already taking pictures. 
+        He spent the whole afternoon helping people. 
+        By the time he got home, he looked in the mirror and realized that he didn't feel <span class="word-gap" data-word="invisible">?</span> anymore. 
+        He didn't have real <span class="word-gap" data-word="powers">?</span>, but being helpful made him feel much braver.
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#f4f4f5; color:#18181b; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #f4f4f5; }
+            #stage-content::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: #ffffff;
+                padding: 60px;
+                border-radius: 30px;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                border: 1px solid #e4e4e7;
+                border-top: 15px solid #dc2626; /* خط علوي أحمر كعباءة السوبر هيرو */
+            }
+
+            .story-title {
+                color: #b91c1c;
+                text-align: center;
+                font-size: 4rem;
+                font-weight: 400;
+                margin-bottom: 50px;
+                font-family: 'Bangers', cursive;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                text-shadow: 2px 2px 0px #fee2e2;
+            }
+
+            .story-body {
+                line-height: 2;
+                font-size: 2.7rem;
+                color: #27272a;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 150px;
+                border-bottom: 4px solid #dc2626;
+                text-align: center;
+                color: #dc2626;
+                cursor: pointer;
+                transition: 0.3s;
+                background: rgba(220, 38, 38, 0.05);
+                border-radius: 8px;
+                padding: 0 10px;
+            }
+
+            .word-gap.active-target {
+                animation: actionPulse 1.2s infinite alternate;
+                background: rgba(220, 38, 38, 0.15);
+            }
+
+            @keyframes actionPulse {
+                0% { border-color: #dc2626; transform: skewX(-5deg); }
+                50% { border-color: #ef4444; transform: skewX(5deg); }
+                100% { border-color: #dc2626; transform: skewX(-5deg); }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #ffffff;
+                font-weight: 800;
+                background: #dc2626;
+                padding: 0 15px;
+                border-radius: 10px;
+                animation: heroArrival 0.5s ease-out;
+            }
+
+            @keyframes heroArrival {
+                0% { transform: scale(1.5); opacity: 0; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(24, 24, 27, 0.98);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 20px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(15px);
+            }
+
+            .choice-btn {
+                background: #ffffff;
+                color: #18181b;
+                padding: 20px 45px;
+                font-size: 2.5rem;
+                font-weight: 700;
+                border-radius: 15px;
+                cursor: pointer;
+                border: 3px solid #dc2626;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.2s;
+            }
+
+            .choice-btn:hover { background: #dc2626; color: white; transform: translateY(-5px) rotate(-3deg); }
+            .choice-btn.wrong { background: #e4e4e7 !important; color: #18181b; border-color: #d1d5db; animation: stumbleshake 0.4s; }
+
+            @keyframes stumbleshake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-15px) rotate(-5deg); }
+                75% { transform: translateX(15px) rotate(5deg); }
+            }
+
+            .one-shot-label {
+                background: #dc2626;
+                color: white;
+                padding: 5px 30px;
+                border-radius: 5px;
+                font-size: 1.3rem;
+                font-weight: 900;
+                display: inline-block;
+                margin-bottom: 20px;
+                font-family: 'Bangers', cursive;
+                transform: rotate(-3deg);
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center>
+                <div class="one-shot-label">HERO IN DISGUISE • STORY 14</div>
+                <h1 class="story-title">${storyTitle}</h1>
+            </center>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // اختيار 20 كلمة مستهدفة لقصة كارثة التخييم
+    const words = [
+        "camping", "forest", "expert", "tent", "flashlight", 
+        "worried", "sausages", "marshmallows", "muddy", "stream", 
+        "shelter", "leaves", "lighting", "sleeping", "scratching", 
+        "shone", "bear", "shaking", "raccoon", "shortest"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Camping Catastrophe";
+    
+    // محتوى القصة الخامسة عشرة
+    let storyContent = `
+        Ben and Jerry decided to go <span class="word-gap" data-word="camping">?</span> in the deep <span class="word-gap" data-word="forest">?</span>. 
+        Ben claimed to be an <span class="word-gap" data-word="expert">?</span> on nature. He bought a new <span class="word-gap" data-word="tent">?</span> and an expensive <span class="word-gap" data-word="flashlight">?</span>. 
+        Jerry, however, was only <span class="word-gap" data-word="worried">?</span> about the food, especially the <span class="word-gap" data-word="sausages">?</span> and <span class="word-gap" data-word="marshmallows">?</span>.
+        <br><br>
+        When they arrived, the ground was <span class="word-gap" data-word="muddy">?</span>. 
+        Ben accidentally dropped the poles into a <span class="word-gap" data-word="stream">?</span>, so he had to build a <span class="word-gap" data-word="shelter">?</span> using branches and <span class="word-gap" data-word="leaves">?</span>. 
+        While Jerry was <span class="word-gap" data-word="lighting">?</span> the fire, Ben finished his "bird nest" home.
+        <br><br>
+        Late at night, while they were <span class="word-gap" data-word="sleeping">?</span>, a strange <span class="word-gap" data-word="scratching">?</span> sound woke them up. 
+        Jerry <span class="word-gap" data-word="shone">?</span> the light toward the trees. 
+        "It's a <span class="word-gap" data-word="bear">?</span>!" Jerry whispered, his voice <span class="word-gap" data-word="shaking">?</span> with fear.
+        <br><br>
+        In the morning, they saw that the "monster" was actually a fat <span class="word-gap" data-word="raccoon">?</span> eating their food. 
+        It was the <span class="word-gap" data-word="shortest">?</span> camping trip in their lives!
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#064e3b; color:#ecfdf5; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Freckle+Face&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #064e3b; }
+            #stage-content::-webkit-scrollbar-thumb { background: #10b981; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: rgba(2, 44, 34, 0.8);
+                padding: 60px;
+                border-radius: 20px;
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+                border: 2px solid #059669;
+                backdrop-filter: blur(8px);
+            }
+
+            .story-title {
+                color: #fbbf24;
+                text-align: center;
+                font-size: 4rem;
+                font-weight: 400;
+                margin-bottom: 50px;
+                font-family: 'Freckle+Face', cursive;
+                text-transform: uppercase;
+                letter-spacing: 3px;
+                text-shadow: 3px 3px 0px #064e3b;
+            }
+
+            .story-body {
+                line-height: 1.9;
+                font-size: 2.7rem;
+                color: #ecfdf5;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 150px;
+                border-bottom: 4px solid #fbbf24;
+                text-align: center;
+                color: #fbbf24;
+                cursor: pointer;
+                transition: 0.3s;
+                background: rgba(251, 191, 36, 0.05);
+            }
+
+            .word-gap.active-target {
+                animation: forestGlow 1.5s infinite alternate;
+                background: rgba(251, 191, 36, 0.2);
+            }
+
+            @keyframes forestGlow {
+                0% { border-color: #fbbf24; box-shadow: 0 0 5px #fbbf24; }
+                100% { border-color: #10b981; box-shadow: 0 0 20px #10b981; }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #064e3b;
+                font-weight: 900;
+                background: #fbbf24;
+                padding: 0 15px;
+                border-radius: 5px;
+                animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            @keyframes popIn {
+                0% { transform: scale(0); rotate: -15deg; }
+                100% { transform: scale(1); rotate: 0deg; }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(2, 44, 34, 0.98);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 15px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(15px);
+            }
+
+            .choice-btn {
+                background: #ecfdf5;
+                color: #064e3b;
+                padding: 18px 40px;
+                font-size: 2.3rem;
+                font-weight: 700;
+                border-radius: 12px;
+                cursor: pointer;
+                border: 3px solid #fbbf24;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.2s;
+            }
+
+            .choice-btn:hover { background: #fbbf24; color: #064e3b; transform: scale(1.1); }
+            .choice-btn.wrong { background: #991b1b !important; color: white; border-color: #ef4444; animation: shake 0.4s; }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+
+            .one-shot-label {
+                background: #fbbf24;
+                color: #064e3b;
+                padding: 5px 25px;
+                border-radius: 50px;
+                font-size: 1.2rem;
+                font-weight: 900;
+                display: inline-block;
+                margin-bottom: 20px;
+                font-family: 'Outfit', sans-serif;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center>
+                <div class="one-shot-label">SURVIVAL MODE • STORY 15</div>
+                <h1 class="story-title">${storyTitle}</h1>
+            </center>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // اختيار 20 كلمة مستهدفة لقصة معرض الفن
+    const words = [
+        "modern", "anniversary", "gallery", "sculptures", "confused", 
+        "bricks", "hall", "object", "crinkled", "texture", 
+        "shattered", "elbow", "clatter", "manager", "realize", 
+        "crimson", "owe", "sandwich", "cleaning", "labels"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Art Gallery Incident";
+    
+    // محتوى القصة السادسة عشرة
+    let storyContent = `
+        Mr. Higgins was not a fan of <span class="word-gap" data-word="modern">?</span> art. 
+        For their <span class="word-gap" data-word="anniversary">?</span>, his wife took him to a famous <span class="word-gap" data-word="gallery">?</span>. 
+        The rooms were quiet and filled with strange <span class="word-gap" data-word="sculptures">?</span>. 
+        He had a <span class="word-gap" data-word="confused">?</span> look when he saw a pile of <span class="word-gap" data-word="bricks">?</span> called "Deep Silence."
+        <br><br>
+        They entered a large <span class="word-gap" data-word="hall">?</span> and saw a small <span class="word-gap" data-word="object">?</span>. 
+        It looked like a <span class="word-gap" data-word="crinkled">?</span> piece of silver paper. 
+        "Look at the <span class="word-gap" data-word="texture">?</span>," someone whispered. "It represents <span class="word-gap" data-word="shattered">?</span> dreams."
+        <br><br>
+        Mr. Higgins leaned in and accidentally bumped his <span class="word-gap" data-word="elbow">?</span>. 
+        The object fell with a loud <span class="word-gap" data-word="clatter">?</span>. 
+        The gallery <span class="word-gap" data-word="manager">?</span> rushed over. 
+        "Do you <span class="word-gap" data-word="realize">?</span> what you have done?" he cried.
+        <br><br>
+        Mr. Higgins turned <span class="word-gap" data-word="crimson">?</span> and asked, "How much do I <span class="word-gap" data-word="owe">?</span> you?" 
+        The manager laughed. "That's not art, it's my <span class="word-gap" data-word="sandwich">?</span> wrapper! 
+        I left it there while <span class="word-gap" data-word="cleaning">?</span>." 
+        Susan laughed, but Mr. Higgins decided to only visit museums with clear <span class="word-gap" data-word="labels">?</span>.
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#f8fafc; color:#0f172a; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;700&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 8px; }
+            #stage-content::-webkit-scrollbar-track { background: #f8fafc; }
+            #stage-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: #ffffff;
+                padding: 70px;
+                border-radius: 4px;
+                box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+                border: 1px solid #e2e8f0;
+                position: relative;
+            }
+
+            .story-title {
+                color: #1e293b;
+                text-align: center;
+                font-size: 3.5rem;
+                font-weight: 300;
+                margin-bottom: 60px;
+                font-family: 'Montserrat', sans-serif;
+                text-transform: uppercase;
+                letter-spacing: 10px;
+                border-bottom: 1px solid #e2e8f0;
+                padding-bottom: 20px;
+            }
+
+            .story-body {
+                line-height: 2.1;
+                font-size: 2.6rem;
+                color: #334155;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 140px;
+                border-bottom: 2px solid #94a3b8;
+                text-align: center;
+                color: #64748b;
+                cursor: pointer;
+                transition: 0.4s;
+                padding: 0 5px;
+            }
+
+            .word-gap.active-target {
+                animation: minimalFocus 1.5s infinite;
+                background: rgba(226, 232, 240, 0.5);
+            }
+
+            @keyframes minimalFocus {
+                0% { border-bottom-color: #94a3b8; }
+                50% { border-bottom-color: #0f172a; transform: translateY(-2px); }
+                100% { border-bottom-color: #94a3b8; }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #0f172a;
+                font-weight: 700;
+                background: #f1f5f9;
+                padding: 0 15px;
+                animation: frameIn 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            }
+
+            @keyframes frameIn {
+                0% { opacity: 0; transform: scale(0.95); filter: blur(5px); }
+                100% { opacity: 1; transform: scale(1); filter: blur(0); }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(255, 255, 255, 0.98);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 20px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(20px);
+            }
+
+            .choice-btn {
+                background: #ffffff;
+                color: #475569;
+                padding: 15px 35px;
+                font-size: 2.2rem;
+                font-weight: 400;
+                border-radius: 0;
+                cursor: pointer;
+                border: 1px solid #e2e8f0;
+                font-family: 'Montserrat', sans-serif;
+                transition: 0.3s;
+            }
+
+            .choice-btn:hover { border-color: #0f172a; color: #0f172a; background: #f8fafc; }
+            .choice-btn.wrong { border-color: #dc2626 !important; color: #dc2626; animation: glitch 0.3s; }
+
+            @keyframes glitch {
+                0% { transform: translate(0); }
+                20% { transform: translate(-5px, 5px); }
+                40% { transform: translate(-5px, -5px); }
+                60% { transform: translate(5px, 5px); }
+                80% { transform: translate(5px, -5px); }
+                100% { transform: translate(0); }
+            }
+
+            .one-shot-label {
+                color: #94a3b8;
+                font-size: 1rem;
+                letter-spacing: 5px;
+                font-weight: 700;
+                margin-bottom: 10px;
+                display: block;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center>
+                <span class="one-shot-label">EXHIBITION 16 • ART & REALITY</span>
+                <h1 class="story-title">${storyTitle}</h1>
+            </center>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // اختيار 20 كلمة مستهدفة لقصة الحلاق والمقابلة
+    const words = [
+        "interview", "professional", "barbershop", "beard", "nervous", 
+        "trim", "metal", "nodded", "special", "object", 
+        "clippers", "steel", "snip", "superstar", "mirror", 
+        "fainted", "zigzag", "neon", "puzzled", "hired"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Wrong Haircut";
+    
+    // محتوى القصة السابعة عشرة
+    let storyContent = `
+        Barnaby had an important <span class="word-gap" data-word="interview">?</span> on Monday. 
+        He wanted to look <span class="word-gap" data-word="professional">?</span>, so he went to a new <span class="word-gap" data-word="barbershop">?</span>. 
+        The barber was a man with a giant <span class="word-gap" data-word="beard">?</span>. 
+        Barnaby was <span class="word-gap" data-word="nervous">?</span> because the music was very loud.
+        <br><br>
+        He asked for a slight <span class="word-gap" data-word="trim">?</span>, but a heavy <span class="word-gap" data-word="metal">?</span> song started playing. 
+        The barber <span class="word-gap" data-word="nodded">?</span> and said, "One <span class="word-gap" data-word="special">?</span> coming up!" 
+        Before Barnaby could <span class="word-gap" data-word="object">?</span>, the barber started using the electric <span class="word-gap" data-word="clippers">?</span>.
+        <br><br>
+        Barnaby felt the cold <span class="word-gap" data-word="steel">?</span> and heard the <span class="word-gap" data-word="snip">?</span> of scissors. 
+        Later, the barber said, "You look like a <span class="word-gap" data-word="superstar">?</span>!" 
+        Barnaby looked in the <span class="word-gap" data-word="mirror">?</span> and nearly <span class="word-gap" data-word="fainted">?</span>. 
+        He had a giant <span class="word-gap" data-word="zigzag">?</span> on his head and <span class="word-gap" data-word="neon">?</span> blue hair.
+        <br><br>
+        The barber looked <span class="word-gap" data-word="puzzled">?</span>; he thought Barnaby said he was in a band! 
+        Barnaby wore a hat to the bank, and surprisingly, he was <span class="word-gap" data-word="hired">?</span> because he looked "mysterious."
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#111827; color:#f3f4f6; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Righteous&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #111827; }
+            #stage-content::-webkit-scrollbar-thumb { background: #00f2ff; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: #1f2937;
+                padding: 60px;
+                border-radius: 20px;
+                box-shadow: 0 0 50px rgba(0, 242, 255, 0.1);
+                border: 2px solid #374151;
+                position: relative;
+                overflow: hidden;
+            }
+
+            /* تأثير خطوط النيون */
+            .story-wrapper::before {
+                content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px;
+                background: linear-gradient(90deg, #00f2ff, #7000ff);
+            }
+
+            .story-title {
+                color: #00f2ff;
+                text-align: center;
+                font-size: 4rem;
+                font-weight: 400;
+                margin-bottom: 50px;
+                font-family: 'Righteous', cursive;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                text-shadow: 3px 3px 0px #7000ff;
+            }
+
+            .story-body {
+                line-height: 1.9;
+                font-size: 2.7rem;
+                color: #e5e7eb;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 150px;
+                border-bottom: 3px solid #7000ff;
+                text-align: center;
+                color: #00f2ff;
+                cursor: pointer;
+                transition: 0.3s;
+                background: rgba(0, 242, 255, 0.05);
+            }
+
+            .word-gap.active-target {
+                animation: neonPulse 1s infinite alternate;
+            }
+
+            @keyframes neonPulse {
+                0% { border-color: #7000ff; box-shadow: 0 0 5px #7000ff; }
+                100% { border-color: #00f2ff; box-shadow: 0 0 15px #00f2ff; }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #ffffff;
+                font-weight: 700;
+                background: linear-gradient(45deg, #7000ff, #00f2ff);
+                padding: 0 15px;
+                border-radius: 4px;
+                animation: snipEffect 0.4s ease-out;
+            }
+
+            @keyframes snipEffect {
+                0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+                100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(17, 24, 39, 0.98);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 20px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(15px);
+            }
+
+            .choice-btn {
+                background: #1f2937;
+                color: #00f2ff;
+                padding: 20px 40px;
+                font-size: 2.4rem;
+                font-weight: 700;
+                border-radius: 10px;
+                cursor: pointer;
+                border: 2px solid #00f2ff;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.2s;
+            }
+
+            .choice-btn:hover { background: #00f2ff; color: #111827; box-shadow: 0 0 20px #00f2ff; transform: translateY(-5px); }
+            .choice-btn.wrong { background: #991b1b !important; color: white; border-color: #ef4444; animation: zigzagShake 0.4s; }
+
+            @keyframes zigzagShake {
+                0% { transform: translate(0,0); }
+                25% { transform: translate(-10px, 10px); }
+                50% { transform: translate(10px, -10px); }
+                75% { transform: translate(-10px, -10px); }
+                100% { transform: translate(0,0); }
+            }
+
+            .one-shot-label {
+                color: #6b7280;
+                font-size: 1.1rem;
+                letter-spacing: 8px;
+                font-weight: 900;
+                margin-bottom: 10px;
+                display: block;
+                text-transform: uppercase;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center>
+                <span class="one-shot-label">STYLIST • STORY 17</span>
+                <h1 class="story-title">${storyTitle}</h1>
+            </center>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // اختيار 20 كلمة مستهدفة لقصة شبح المكتبة
+    const words = [
+        "history", "library", "building", "shelves", "creepy", 
+        "tapping", "bookcase", "legend", "forever", "thump", 
+        "ruler", "noise", "shadow", "whispered", "glowing", 
+        "encyclopedias", "thud", "attack", "owl", "foolish"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Library Ghost";
+    
+    // محتوى القصة الثامنة عشرة
+    let storyContent = `
+        Simon was a student studying for his <span class="word-gap" data-word="history">?</span> exam. 
+        He went to the university <span class="word-gap" data-word="library">?</span>, a very old <span class="word-gap" data-word="building">?</span>. 
+        The room was filled with dusty <span class="word-gap" data-word="shelves">?</span> and the silence was <span class="word-gap" data-word="creepy">?</span>.
+        <br><br>
+        Suddenly, he heard a strange <span class="word-gap" data-word="tapping">?</span> sound behind a <span class="word-gap" data-word="bookcase">?</span>. 
+        He remembered the <span class="word-gap" data-word="legend">?</span> of a professor who stayed there <span class="word-gap" data-word="forever">?</span>. 
+        Simon’s heart began to <span class="word-gap" data-word="thump">?</span>. He grabbed a <span class="word-gap" data-word="ruler">?</span> and walked toward the <span class="word-gap" data-word="noise">?</span>.
+        <br><br>
+        He saw a dark <span class="word-gap" data-word="shadow">?</span> and <span class="word-gap" data-word="whispered">?</span>, "Who's there?". 
+        He saw two <span class="word-gap" data-word="glowing">?</span> eyes and tripped over a pile of <span class="word-gap" data-word="encyclopedias">?</span>. 
+        He hit the floor with a heavy <span class="word-gap" data-word="thud">?</span>, waiting for an <span class="word-gap" data-word="attack">?</span>.
+        <br><br>
+        But instead of a ghost, a small <span class="word-gap" data-word="owl">?</span> flew onto his desk. 
+        Simon felt very <span class="word-gap" data-word="foolish">?</span> as the bird flew away into the night.
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#1e1b4b; color:#e0e7ff; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #1e1b4b; }
+            #stage-content::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: rgba(30, 27, 75, 0.8);
+                padding: 60px;
+                border-radius: 15px;
+                box-shadow: 0 0 40px rgba(0,0,0,0.8);
+                border: 1px solid #4338ca;
+                position: relative;
+            }
+
+            .story-title {
+                color: #c7d2fe;
+                text-align: center;
+                font-size: 4rem;
+                font-weight: 400;
+                margin-bottom: 50px;
+                font-family: 'IM Fell English SC', serif;
+                text-transform: uppercase;
+                letter-spacing: 5px;
+                text-shadow: 0 0 20px rgba(199, 210, 254, 0.5);
+            }
+
+            .story-body {
+                line-height: 2.1;
+                font-size: 2.7rem;
+                color: #e0e7ff;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 150px;
+                border-bottom: 3px solid #6366f1;
+                text-align: center;
+                color: #818cf8;
+                cursor: pointer;
+                transition: 0.4s;
+                background: rgba(99, 102, 241, 0.1);
+            }
+
+            .word-gap.active-target {
+                animation: ghostFlicker 2s infinite alternate;
+            }
+
+            @keyframes ghostFlicker {
+                0% { border-color: #6366f1; opacity: 1; }
+                50% { border-color: #312e81; opacity: 0.7; }
+                100% { border-color: #818cf8; opacity: 1; }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #ffffff;
+                font-weight: 700;
+                background: #4338ca;
+                padding: 0 15px;
+                border-radius: 4px;
+                animation: revealGhost 0.6s ease-out;
+            }
+
+            @keyframes revealGhost {
+                0% { filter: blur(10px); opacity: 0; transform: scale(1.2); }
+                100% { filter: blur(0); opacity: 1; transform: scale(1); }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(10, 10, 30, 0.98);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 20px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(20px);
+            }
+
+            .choice-btn {
+                background: transparent;
+                color: #c7d2fe;
+                padding: 20px 45px;
+                font-size: 2.4rem;
+                font-weight: 700;
+                border-radius: 5px;
+                cursor: pointer;
+                border: 2px solid #4338ca;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.3s;
+            }
+
+            .choice-btn:hover { background: #4338ca; color: white; box-shadow: 0 0 25px #6366f1; }
+            .choice-btn.wrong { border-color: #991b1b !important; color: #ef4444; animation: heartBeat 0.4s; }
+
+            @keyframes heartBeat {
+                0% { transform: scale(1); }
+                25% { transform: scale(1.2); }
+                50% { transform: scale(1); }
+                75% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+
+            .one-shot-label {
+                color: #6366f1;
+                font-size: 1.2rem;
+                letter-spacing: 10px;
+                font-weight: 900;
+                margin-bottom: 15px;
+                display: block;
+                text-transform: uppercase;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center>
+                <span class="one-shot-label">MYSTERY • STORY 18</span>
+                <h1 class="story-title">${storyTitle}</h1>
+            </center>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // اختيار 20 كلمة مستهدفة لقصة الكلب الذكي
+    const words = [
+        "genius", "neighbors", "languages", "math", "reporter", 
+        "newspaper", "interview", "proud", "garden", "kitchen", 
+        "bucket", "fence", "digging", "middle", "warming", 
+        "treats", "bark", "trick", "expensive", "thief"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Smartest Dog in the World";
+    
+    // محتوى القصة التاسعة عشرة
+    let storyContent = `
+        Mr. Jenkins believed his dog was a <span class="word-gap" data-word="genius">?</span>. 
+        He told all his <span class="word-gap" data-word="neighbors">?</span> that Barnaby could understand three <span class="word-gap" data-word="languages">?</span> and solve <span class="word-gap" data-word="math">?</span>. 
+        One day, a <span class="word-gap" data-word="reporter">?</span> from the local <span class="word-gap" data-word="newspaper">?</span> came for an <span class="word-gap" data-word="interview">?</span>. 
+        Mr. Jenkins was very <span class="word-gap" data-word="proud">?</span> and took her to the <span class="word-gap" data-word="garden">?</span>.
+        <br><br>
+        He asked Barnaby to go to the <span class="word-gap" data-word="kitchen">?</span> and bring a <span class="word-gap" data-word="bucket">?</span>. 
+        Instead, the dog ran to the <span class="word-gap" data-word="fence">?</span> and started <span class="word-gap" data-word="digging">?</span> a hole in the <span class="word-gap" data-word="middle">?</span> of the flowers. 
+        "He's just <span class="word-gap" data-word="warming">?</span> up," Mr. Jenkins explained.
+        <br><br>
+        Next, he used <span class="word-gap" data-word="treats">?</span> to test math, but the dog just let out a loud <span class="word-gap" data-word="bark">?</span> and ate them. 
+        For the last <span class="word-gap" data-word="trick">?</span>, Barnaby grabbed the reporter's <span class="word-gap" data-word="expensive">?</span> bag and ran away. 
+        "He is not a scientist," she laughed, "but he is a very good <span class="word-gap" data-word="thief">?</span>!"
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#f0fdf4; color:#166534; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Boogaloo&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #f0fdf4; }
+            #stage-content::-webkit-scrollbar-thumb { background: #22c55e; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: #ffffff;
+                padding: 60px;
+                border-radius: 40px;
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+                border: 3px solid #bbf7d0;
+                position: relative;
+            }
+
+            .story-title {
+                color: #15803d;
+                text-align: center;
+                font-size: 4.2rem;
+                font-weight: 400;
+                margin-bottom: 50px;
+                font-family: 'Boogaloo', cursive;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+            }
+
+            .story-body {
+                line-height: 2;
+                font-size: 2.7rem;
+                color: #166534;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 150px;
+                border-bottom: 4px dashed #22c55e;
+                text-align: center;
+                color: #16a34a;
+                cursor: pointer;
+                transition: 0.3s;
+                background: rgba(34, 197, 94, 0.05);
+            }
+
+            .word-gap.active-target {
+                animation: dogWag 0.8s infinite;
+                background: rgba(34, 197, 94, 0.15);
+            }
+
+            @keyframes dogWag {
+                0% { transform: rotate(-2deg); }
+                50% { transform: rotate(2deg); }
+                100% { transform: rotate(-2deg); }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #ffffff;
+                font-weight: 800;
+                background: #22c55e;
+                padding: 0 15px;
+                border-radius: 15px;
+                animation: pounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            @keyframes pounce {
+                0% { transform: translateY(20px) scale(0.8); opacity: 0; }
+                100% { transform: translateY(0) scale(1); opacity: 1; }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(21, 128, 61, 0.95);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 15px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(10px);
+            }
+
+            .choice-btn {
+                background: #ffffff;
+                color: #15803d;
+                padding: 18px 40px;
+                font-size: 2.3rem;
+                font-weight: 700;
+                border-radius: 20px;
+                cursor: pointer;
+                border: 3px solid #facc15;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.2s;
+            }
+
+            .choice-btn:hover { background: #facc15; transform: scale(1.1) rotate(3deg); }
+            .choice-btn.wrong { background: #ef4444 !important; color: white; border-color: #991b1b; animation: shake 0.4s; }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+
+            .one-shot-label {
+                background: #facc15;
+                color: #15803d;
+                padding: 5px 25px;
+                border-radius: 50px;
+                font-size: 1.2rem;
+                font-weight: 900;
+                display: inline-block;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 0 #ca8a04;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center>
+                <div class="one-shot-label">BARNABY THE GENIUS • STORY 19</div>
+                <h1 class="story-title">${storyTitle}</h1>
+            </center>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
+(function() {
+    const container = document.getElementById('stage-content');
+    if (!container) return;
+
+    // اختيار 20 كلمة مستهدفة لقصة الهاتف المفقود
+    const words = [
+        "beach", "smartphone", "camera", "social", "shore", 
+        "tightly", "crab", "closeup", "wave", "balance", 
+        "splash", "salty", "seaweed", "cloudy", "device", 
+        "snorkeling", "ocean", "waterproof", "video", "unique"
+    ];
+
+    let remainingWords = [...words];
+    let currentTargetId = null;
+
+    const storyTitle = "The Underwater Phone";
+    
+    // محتوى القصة العشرين
+    let storyContent = `
+        Last summer, Sophie went to the <span class="word-gap" data-word="beach">?</span>. 
+        She was excited because she had a new <span class="word-gap" data-word="smartphone">?</span> with an amazing <span class="word-gap" data-word="camera">?</span>. 
+        She wanted a photo for her <span class="word-gap" data-word="social">?</span> media. 
+        She walked along the <span class="word-gap" data-word="shore">?</span>, holding the phone <span class="word-gap" data-word="tightly">?</span>.
+        <br><br>
+        Suddenly, she saw an orange <span class="word-gap" data-word="crab">?</span> and knelt down for a <span class="word-gap" data-word="closeup">?</span> shot. 
+        Just then, a huge <span class="word-gap" data-word="wave">?</span> crashed, and Sophie lost her <span class="word-gap" data-word="balance">?</span>. 
+        With a loud <span class="word-gap" data-word="splash">?</span>, the phone fell into the <span class="word-gap" data-word="salty">?</span> water.
+        <br><br>
+        She searched through the <span class="word-gap" data-word="seaweed">?</span>, but the water was too <span class="word-gap" data-word="cloudy">?</span>. 
+        She thought her expensive <span class="word-gap" data-word="device">?</span> was gone forever. 
+        But then, a boy wearing <span class="word-gap" data-word="snorkeling">?</span> gear emerged from the <span class="word-gap" data-word="ocean">?</span> holding her phone.
+        <br><br>
+        Luckily, it was <span class="word-gap" data-word="waterproof">?</span>. 
+        It had even captured a cool <span class="word-gap" data-word="video">?</span> of fish! 
+        It was the most <span class="word-gap" data-word="unique">?</span> video she had ever captured.
+    `;
+
+    container.innerHTML = ''; 
+    container.style.cssText = `height:100%; width:100%; display:block; background:#0f172a; color:#f8fafc; overflow-y:auto; padding:0; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth;`;
+
+    container.innerHTML = `
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&family=Outfit:wght@400;700&display=swap');
+            
+            #stage-content::-webkit-scrollbar { width: 10px; }
+            #stage-content::-webkit-scrollbar-track { background: #0f172a; }
+            #stage-content::-webkit-scrollbar-thumb { background: #0ea5e9; border-radius: 5px; }
+
+            .story-wrapper {
+                max-width: 90%;
+                margin: 60px auto;
+                background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+                padding: 60px;
+                border-radius: 30px;
+                box-shadow: 0 0 50px rgba(14, 165, 233, 0.2);
+                border: 2px solid #334155;
+                position: relative;
+            }
+
+            .story-title {
+                color: #38bdf8;
+                text-align: center;
+                font-size: 4rem;
+                font-weight: 700;
+                margin-bottom: 50px;
+                font-family: 'Fredoka', sans-serif;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.4));
+            }
+
+            .story-body {
+                line-height: 2.1;
+                font-size: 2.7rem;
+                color: #cbd5e1;
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .word-gap {
+                display: inline-block;
+                min-width: 150px;
+                border-bottom: 4px solid #0ea5e9;
+                text-align: center;
+                color: #38bdf8;
+                cursor: pointer;
+                transition: 0.3s;
+                background: rgba(14, 165, 233, 0.1);
+            }
+
+            .word-gap.active-target {
+                animation: waveMotion 2s infinite ease-in-out;
+            }
+
+            @keyframes waveMotion {
+                0% { border-bottom-color: #0ea5e9; transform: translateY(0); }
+                50% { border-bottom-color: #fb923c; transform: translateY(-5px); }
+                100% { border-bottom-color: #0ea5e9; transform: translateY(0); }
+            }
+
+            .word-gap.filled {
+                border-bottom: none;
+                color: #ffffff;
+                font-weight: 700;
+                background: #0ea5e9;
+                padding: 0 15px;
+                border-radius: 8px;
+                animation: bubbleUp 0.5s ease-out;
+            }
+
+            @keyframes bubbleUp {
+                0% { transform: scale(0.5) translateY(20px); opacity: 0; }
+                100% { transform: scale(1) translateY(0); opacity: 1; }
+            }
+
+            #word-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(15, 23, 42, 0.95);
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-content: center;
+                gap: 20px;
+                padding: 40px;
+                z-index: 9999;
+                backdrop-filter: blur(15px);
+            }
+
+            .choice-btn {
+                background: transparent;
+                color: #38bdf8;
+                padding: 20px 45px;
+                font-size: 2.4rem;
+                font-weight: 700;
+                border-radius: 50px;
+                cursor: pointer;
+                border: 2px solid #38bdf8;
+                font-family: 'Outfit', sans-serif;
+                transition: 0.3s;
+            }
+
+            .choice-btn:hover { background: #38bdf8; color: #0f172a; box-shadow: 0 0 30px #0ea5e9; }
+            .choice-btn.wrong { border-color: #f87171 !important; color: #f87171; animation: sink 0.4s; }
+
+            @keyframes sink {
+                0% { transform: translateY(0); }
+                50% { transform: translateY(15px); }
+                100% { transform: translateY(0); }
+            }
+
+            .one-shot-label {
+                color: #fb923c;
+                font-size: 1.1rem;
+                letter-spacing: 5px;
+                font-weight: 900;
+                margin-bottom: 15px;
+                display: block;
+                text-transform: uppercase;
+            }
+        </style>
+
+        <div id="word-overlay"></div>
+
+        <div class="story-wrapper">
+            <center>
+                <span class="one-shot-label">DEEP BLUE • STORY 20</span>
+                <h1 class="story-title">${storyTitle}</h1>
+            </center>
+            <div class="story-body">
+                ${storyContent}
+            </div>
+        </div>
+        <div style="height: 100px;"></div>
+    `;
+
+    const overlay = document.getElementById('word-overlay');
+    const allGaps = document.querySelectorAll('.word-gap');
+
+    const updateActiveGap = () => {
+        allGaps.forEach(g => g.classList.remove('active-target'));
+        const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+        if (nextGap) nextGap.classList.add('active-target');
+    };
+
+    const openOverlay = (target) => {
+        currentTargetId = target;
+        overlay.innerHTML = '';
+        const shuffled = [...remainingWords].sort(() => Math.random() - 0.5);
+        shuffled.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = word;
+            btn.onclick = () => checkWord(word, btn);
+            overlay.appendChild(btn);
+        });
+        overlay.style.display = 'flex';
+    };
+
+    const checkWord = (selectedWord, btnElement) => {
+        const correctWord = currentTargetId.getAttribute('data-word');
+        if (selectedWord.toLowerCase() === correctWord.toLowerCase()) {
+            currentTargetId.innerText = correctWord;
+            currentTargetId.classList.add('filled');
+            overlay.style.display = 'none';
+            remainingWords = remainingWords.filter(w => w !== selectedWord);
+            updateActiveGap();
+        } else {
+            btnElement.classList.add('wrong');
+            setTimeout(() => btnElement.classList.remove('wrong'), 400);
+        }
+    };
+
+    allGaps.forEach(gap => {
+        gap.onclick = () => openOverlay(gap);
+    });
+
+    document.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const nextGap = Array.from(allGaps).find(g => !g.classList.contains('filled'));
+            if (nextGap && overlay.style.display !== 'flex') {
+                openOverlay(nextGap);
+            }
+        }
+        if (e.key === "Escape") overlay.style.display = 'none';
+    };
+
+    updateActiveGap();
+})();
