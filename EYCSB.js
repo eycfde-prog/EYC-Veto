@@ -9,76 +9,52 @@
 // ════════════════════════════════════════════
 const GAS_API = 'https://script.google.com/macros/s/AKfycbzoAAggaUvxuNngkih1PWM5yDl7NU8CrLuJ9r8G_goIXGwDKjDlxZzs5ubW1bkzilaCdA/exec';
 
-// ════════════════════════════════════════════
-// LISTENING DATA — Inline (no fetch on file://)
-// ════════════════════════════════════════════
-const LISTENING_DATA = {
-  "level_1": {
-    "class_1": {
-      "title": "First Impressions",
-      "tasks": [
-        { "id": "1.1", "dialogue": "[Ahmed - Friendly]: Hello! I am Ahmed. I <b>[feel]</b> a bit <b>[shy]</b> today. [Sandy - Encouraging]: Hi! I am Sandy. Don't be <b>[scared]</b>. [Ahmed - Honest]: My <b>[English]</b> is not <b>[good]</b>. I <b>[often]</b> stop <b>[talking]</b>. [Sandy - Supportive]: It is <b>[okay]</b>. We can <b>[practice]</b> together <b>[every]</b> day." },
-        { "id": "1.2", "dialogue": "[Emy - Searching]: Is this the <b>[right]</b> room? I am <b>[looking]</b> for the <b>[class]</b>. [John - Welcoming]: Yes, it <b>[is]</b>. Welcome! I am John. [Emy - Worried]: I am Emy. I <b>[always]</b> make <b>[mistakes]</b> with <b>[past]</b> tenses. [John - Positive]: No <b>[problem]</b>. We are all <b>[here]</b> to <b>[improve]</b>." },
-        { "id": "1.3", "dialogue": "[John - Curious]: What is your <b>[major]</b>, Ahmed? [Ahmed - Academic]: I study <b>[Commerce]</b>. I <b>[need]</b> English for my <b>[future]</b> job. [John - Technical]: Great! I am in <b>[IT]</b>. My <b>[accent]</b> is very <b>[strong]</b>. [Ahmed - Cooperative]: We <b>[must]</b> help <b>[each]</b> other to <b>[speak]</b> well." },
-        { "id": "1.4", "dialogue": "[Sandy - Distant]: Look at this <b>[book]</b>. The <b>[words]</b> are very <b>[new]</b> to me. [Emy - Helping]: Let me <b>[see]</b>. I <b>[know]</b> some of <b>[them]</b>. [Sandy - Struggling]: I <b>[try]</b> to <b>[explain]</b> things but I <b>[forget]</b> the <b>[vocabulary]</b>. [Emy - Practical]: We can use a <b>[dictionary]</b> for these <b>[difficult]</b> parts." }
-      ]
-    },
-    "class_2": {
-      "title": "Getting Started",
-      "tasks": [
-        { "id": "2.1", "dialogue": "[Ahmed - Observing]: The <b>[teacher]</b> is very <b>[friendly]</b>, right? [Emy - Confirming]: Yes, she <b>[speaks]</b> slowly. I <b>[understand]</b> her <b>[well]</b>. [Ahmed - Hopeful]: I <b>[hope]</b> I can <b>[answer]</b> her <b>[questions]</b> tomorrow. [Emy - Advising]: Just <b>[listen]</b> carefully and <b>[stay]</b> calm." },
-        { "id": "2.2", "dialogue": "[John - Searching]: Do you have a <b>[pen]</b>? I <b>[lost]</b> mine in the <b>[hall]</b>. [Sandy - Kind]: Here you <b>[go]</b>. I have an <b>[extra]</b> one. [John - Grateful]: Thanks! This <b>[lesson]</b> is about <b>[simple]</b> present <b>[verbs]</b>. [Sandy - Interested]: I <b>[like]</b> this topic. It <b>[seems]</b> very <b>[useful]</b>." },
-        { "id": "2.3", "dialogue": "[Ahmed - Directing]: Let's <b>[start]</b> our <b>[group]</b> work now. [Sandy - Agreeing]: Okay. We <b>[need]</b> to <b>[write]</b> five <b>[sentences]</b>. [John - Ready]: I can <b>[type]</b> them on my <b>[laptop]</b> quickly. [Ahmed - Careful]: Wait, let's <b>[check]</b> the <b>[spelling]</b> first. [John - Approving]: Good <b>[idea]</b>, Ahmed." },
-        { "id": "2.4", "dialogue": "[Emy - Curious]: What do you <b>[think]</b> of the <b>[campus]</b>? [Sandy - Surprised]: It is <b>[huge]</b>! I <b>[got]</b> lost this <b>[morning]</b>. [Emy - Sharing]: Me too! I <b>[asked]</b> a <b>[guard]</b> for <b>[directions]</b>. [Sandy - Happy]: I <b>[found]</b> the <b>[cafeteria]</b>. The <b>[coffee]</b> is <b>[cheap]</b>." }
-      ]
-    }
-  }
-};
 
 // ════════════════════════════════════════════
 // SESSION DATA
 // ════════════════════════════════════════════
 const sessionData = {
-  "1-1":["Grammar"],
-  "1-2":["Listening","Grammar"],
-  "1-3":["Listening","Vocab","Grammar"],
-  "1-4":["Listening","Vocab","Grammar"],
-  "2-1":["Listening","Grammar"],
-  "2-2":["Listening","Reading","One Shot"],
-  "2-3":["Listening","Vocab","Reading"],
-  "2-4":["Listening","Vocab","Grammar","Reading","tongue Twister","One Shot"],
-  "3-1":["Listening","Grammar","Reading","tongue Twister"],
-  "3-2":["Listening","Reading","tongue Twister","One Shot"],
-  "3-3":["Listening","Vocab","Reading","tongue Twister"],
-  "3-4":["Listening","Vocab","Grammar","Reading","tongue Twister","One Shot"],
-  "4-1":["Listening","Grammar","Reading","tongue Twister","Squeezer"],
-  "4-2":["Listening","Reading","tongue Twister","One Shot"],
-  "4-3":["Listening","Vocab","Reading","tongue Twister"],
-  "4-4":["Listening","Vocab","Grammar","Reading","tongue Twister","One Shot"],
-  "5-1":["Listening","Grammar","Reading","tongue Twister","Squeezer"],
-  "5-2":["Listening","Reading","tongue Twister","One Shot"],
-  "5-3":["Listening","Vocab","Reading","tongue Twister","DMT"],
-  "5-4":["Listening","Vocab","Grammar","Reading","tongue Twister","One Shot"],
-  "6-1":["Listening","Grammar","Reading","tongue Twister","Squeezer"],
-  "6-2":["Listening","Reading","tongue Twister","One Shot"],
-  "6-3":["Listening","Vocab","Reading","tongue Twister","Wish"],
-  "6-4":["Listening","Vocab","Grammar","Reading","tongue Twister","One Shot"],
-  "7-1":["Listening","Grammar","Reading","tongue Twister","Squeezer"],
-  "7-2":["Listening","Reading","tongue Twister","One Shot"],
-  "7-3":["Listening","Vocab","Reading","tongue Twister","DMT"],
-  "7-4":["Listening","Vocab","Grammar","Reading","tongue Twister","One Shot"],
-  "8-1":["Listening","Grammar","Reading","tongue Twister","Squeezer"],
-  "8-2":["Listening","Reading","tongue Twister","One Shot"],
-  "8-3":["Listening","Vocab","Reading","tongue Twister","Project"],
-  "8-4":["Listening","Vocab","Grammar","Reading","tongue Twister","One Shot"],
-  "9-1":["Listening","Reading","tongue Twister","Squeezer"],
-  "9-2":["Listening","Reading","tongue Twister","One Shot"],
-  "9-3":["Listening","Vocab","Reading","tongue Twister","Wish"],
-  "9-4":["Listening","Vocab","Grammar","Reading","tongue Twister","One Shot"],
-  "10-1":["Listening","Reading","tongue Twister","Squeezer"],
-  "10-2":["Listening","Reading","tongue Twister","One Shot"],
-  "10-3":["Listening","Vocab","Reading","tongue Twister","DMT"],
-  "10-4":["Listening","Vocab","Reading","tongue Twister","One Shot"],
+{
+  "1-1": ["Grammar"],
+  "1-2": ["Listening", "Grammar", "Vocab"],
+  "1-3": ["Listening", "Vocab", "Grammar"],
+  "1-4": ["Listening", "Grammar"],
+  "2-1": ["Listening", "Grammar"],
+  "2-2": ["Listening", "Reading", "One Shot", "Vocab"],
+  "2-3": ["Listening", "Vocab", "Reading"],
+  "2-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
+  "3-1": ["Listening", "Grammar", "Reading", "tongue Twister"],
+  "3-2": ["Listening", "Reading", "tongue Twister", "One Shot", "Vocab"],
+  "3-3": ["Listening", "Vocab", "Reading", "tongue Twister"],
+  "3-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
+  "4-1": ["Listening", "Grammar", "Reading", "tongue Twister", "Squeezer"],
+  "4-2": ["Listening", "Reading", "tongue Twister", "One Shot", "Vocab"],
+  "4-3": ["Listening", "Vocab", "Reading", "tongue Twister"],
+  "4-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
+  "5-1": ["Listening", "Grammar", "Reading", "tongue Twister", "Squeezer"],
+  "5-2": ["Listening", "Reading", "tongue Twister", "One Shot", "Vocab"],
+  "5-3": ["Listening", "Vocab", "Reading", "tongue Twister", "DMT"],
+  "5-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
+  "6-1": ["Listening", "Grammar", "Reading", "tongue Twister", "Squeezer"],
+  "6-2": ["Listening", "Reading", "tongue Twister", "One Shot", "Vocab"],
+  "6-3": ["Listening", "Vocab", "Reading", "tongue Twister", "Wish"],
+  "6-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
+  "7-1": ["Listening", "Grammar", "Reading", "tongue Twister", "Squeezer"],
+  "7-2": ["Listening", "Reading", "tongue Twister", "One Shot", "Vocab"],
+  "7-3": ["Listening", "Vocab", "Reading", "tongue Twister", "DMT"],
+  "7-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
+  "8-1": ["Listening", "Grammar", "Reading", "tongue Twister", "Squeezer"],
+  "8-2": ["Listening", "Reading", "tongue Twister", "One Shot", "Vocab"],
+  "8-3": ["Listening", "Vocab", "Reading", "tongue Twister", "Project"],
+  "8-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
+  "9-1": ["Listening", "Reading", "tongue Twister", "Squeezer"],
+  "9-2": ["Listening", "Reading", "tongue Twister", "One Shot", "Vocab"],
+  "9-3": ["Listening", "Vocab", "Reading", "tongue Twister", "Wish"],
+  "9-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
+  "10-1": ["Listening", "Reading", "tongue Twister", "Squeezer"],
+  "10-2": ["Listening", "Reading", "tongue Twister", "One Shot", "Vocab"],
+  "10-3": ["Listening", "Vocab", "Reading", "tongue Twister", "DMT"],
+  "10-4": ["Listening", "Reading", "tongue Twister", "One Shot"]
   "11-1":["Listening","Reading","tongue Twister","Graduation Project"],
   "11-2":["Listening","Reading","tongue Twister","One Shot","Graduation Project"],
   "11-3":["Listening","Reading","tongue Twister","DMT","Graduation Project"],
