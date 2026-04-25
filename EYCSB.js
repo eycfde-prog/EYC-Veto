@@ -7,54 +7,55 @@
 // ════════════════════════════════════════════
 // GAS API ENDPOINT
 // ════════════════════════════════════════════
-const GAS_API = 'https://script.google.com/macros/s/AKfycbzoAAggaUvxuNngkih1PWM5yDl7NU8CrLuJ9r8G_goIXGwDKjDlxZzs5ubW1bkzilaCdA/exec';
+const GAS_API = 'https://script.google.com/macros/s/AKfycbzRHoIIbrET1d2Oa9YFfl8SPUc7mJwI_SgNy-ATJHb4ulWSuHyUidbJ3qNYeGc8gy0p6w/exec';
+
+// ════════════════════════════════════════════
 
 
 // ════════════════════════════════════════════
 // SESSION DATA
 // ════════════════════════════════════════════
 const sessionData = {
-{
-  "1-1": ["Grammar"],
-  "1-2": ["Listening", "Grammar", "Vocab"],
-  "1-3": ["Listening", "Vocab", "Grammar"],
-  "1-4": ["Listening", "Grammar"],
-  "2-1": ["Listening", "Grammar"],
-  "2-2": 
-  "2-3": ["Listening", "Vocab", "Reading"],
-  "2-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
-  "3-1": ["Listening", "Grammar", "Reading", "tongue Twister"],
-  "3-2": ["Listening", "Reading", "tongue Twister", "One Shot", "Vocab"],
-  "3-3": ["Listening", "Vocab", "Reading", "tongue Twister"],
-  "3-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
-  "4-1": ["Listening", "Grammar", "Reading", "tongue Twister", "Squeezer"],
-  "4-2": ["Listening", "Reading", "tongue Twister", "One Shot", "Vocab"],
-  "4-3": ["Listening", "Vocab", "Reading", "tongue Twister"],
-  "4-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
-  "5-1": ["Listening", "Grammar", "Reading", "tongue Twister", "Squeezer"],
-  "5-2": ["Listening", "Reading", "tongue Twister", "One Shot", "Vocab"],
-  "5-3": ["Listening", "Vocab", "Reading", "tongue Twister", "DMT"],
-  "5-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
-  "6-1": ["Listening", "Grammar", "Reading", "tongue Twister", "Squeezer"],
-  "6-2": ["Listening", "Reading", "tongue Twister", "One Shot", "Vocab"],
-  "6-3": ["Listening", "Vocab", "Reading", "tongue Twister", "Wish"],
-  "6-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
-  "7-1": ["Listening", "Grammar", "Reading", "tongue Twister", "Squeezer"],
-  "7-2": ["Listening", "Reading", "tongue Twister", "One Shot", "Vocab"],
-  "7-3": ["Listening", "Vocab", "Reading", "tongue Twister", "DMT"],
-  "7-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
-  "8-1": ["Listening", "Grammar", "Reading", "tongue Twister", "Squeezer"],
-  "8-2": ["Listening", "Reading", "tongue Twister", "One Shot", "Vocab"],
-  "8-3": ["Listening", "Vocab", "Reading", "tongue Twister", "Project"],
-  "8-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
-  "9-1": ["Listening", "Reading", "tongue Twister", "Squeezer"],
-  "9-2": ["Listening", "Reading", "tongue Twister", "One Shot", "Vocab"],
-  "9-3": ["Listening", "Vocab", "Reading", "tongue Twister", "Wish"],
-  "9-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
-  "10-1": ["Listening", "Reading", "tongue Twister", "Squeezer"],
-  "10-2": ["Listening", "Reading", "tongue Twister", "One Shot", "Vocab"],
-  "10-3": ["Listening", "Vocab", "Reading", "tongue Twister", "DMT"],
-  "10-4": ["Listening", "Reading", "tongue Twister", "One Shot"]
+  "1-1":["Grammar"],
+  "1-2":["Listening","Grammar"],
+  "1-3":["Listening","Vocab","Grammar"],
+  "1-4":["Listening","Vocab","Grammar"],
+  "2-1":["Listening","Grammar"],
+  "2-2":["Listening","Reading","One Shot"],
+  "2-3":["Listening","Vocab","Reading"],
+  "2-4":["Listening","Vocab","Grammar","Reading","tongue Twister","One Shot"],
+  "3-1":["Listening","Grammar","Reading","tongue Twister"],
+  "3-2":["Listening","Reading","tongue Twister","One Shot"],
+  "3-3":["Listening","Vocab","Reading","tongue Twister"],
+  "3-4":["Listening","Vocab","Grammar","Reading","tongue Twister","One Shot"],
+  "4-1":["Listening","Grammar","Reading","tongue Twister","Squeezer"],
+  "4-2":["Listening","Reading","tongue Twister","One Shot"],
+  "4-3":["Listening","Vocab","Reading","tongue Twister"],
+  "4-4":["Listening","Vocab","Grammar","Reading","tongue Twister","One Shot"],
+  "5-1":["Listening","Grammar","Reading","tongue Twister","Squeezer"],
+  "5-2":["Listening","Reading","tongue Twister","One Shot"],
+  "5-3":["Listening","Vocab","Reading","tongue Twister","DMT"],
+  "5-4":["Listening","Vocab","Grammar","Reading","tongue Twister","One Shot"],
+  "6-1":["Listening","Grammar","Reading","tongue Twister","Squeezer"],
+  "6-2":["Listening","Reading","tongue Twister","One Shot"],
+  "6-3":["Listening","Vocab","Reading","tongue Twister","Wish"],
+  "6-4":["Listening","Vocab","Grammar","Reading","tongue Twister","One Shot"],
+  "7-1":["Listening","Grammar","Reading","tongue Twister","Squeezer"],
+  "7-2":["Listening","Reading","tongue Twister","One Shot"],
+  "7-3":["Listening","Vocab","Reading","tongue Twister","DMT"],
+  "7-4":["Listening","Vocab","Grammar","Reading","tongue Twister","One Shot"],
+  "8-1":["Listening","Grammar","Reading","tongue Twister","Squeezer"],
+  "8-2":["Listening","Reading","tongue Twister","One Shot"],
+  "8-3":["Listening","Vocab","Reading","tongue Twister","Project"],
+  "8-4":["Listening","Vocab","Grammar","Reading","tongue Twister","One Shot"],
+  "9-1":["Listening","Reading","tongue Twister","Squeezer"],
+  "9-2":["Listening","Reading","tongue Twister","One Shot"],
+  "9-3":["Listening","Vocab","Reading","tongue Twister","Wish"],
+  "9-4":["Listening","Vocab","Grammar","Reading","tongue Twister","One Shot"],
+  "10-1":["Listening","Reading","tongue Twister","Squeezer"],
+  "10-2":["Listening","Reading","tongue Twister","One Shot"],
+  "10-3":["Listening","Vocab","Reading","tongue Twister","DMT"],
+  "10-4":["Listening","Vocab","Reading","tongue Twister","One Shot"],
   "11-1":["Listening","Reading","tongue Twister","Graduation Project"],
   "11-2":["Listening","Reading","tongue Twister","One Shot","Graduation Project"],
   "11-3":["Listening","Reading","tongue Twister","DMT","Graduation Project"],
@@ -158,6 +159,46 @@ function setupTilt(scene) {
 }
 
 // ════════════════════════════════════════════
+// ACTIVITY REGISTRY
+// لإضافة نشاط جديد: أضف سطر واحد هنا بس
+// ════════════════════════════════════════════
+const ACTIVITY_REGISTRY = {
+    listening: {
+        engine: () => ListeningEngine,
+        getData: (lvl, sess) => {
+            const sessNum   = parseInt(sess);
+            const levelData = LISTENING_DATA[`level_${lvl}`];
+            if (!levelData) throw new Error(`No listening data for Level ${lvl}`);
+            const targetClass = sessNum === 1 ? 1 : sessNum - 1;
+            const classData   = levelData[`class_${targetClass}`];
+            if (!classData) throw new Error(`No listening data for session ${lvl}-${sess}`);
+            const audioBase = `data/Listening/wav/Level-${lvl}/Session ${targetClass}/`;
+            return [{ ...classData, audioBaseUrl: audioBase }];
+        }
+    },
+    grammar: {
+        engine: () => GrammarEngine,
+        getData: (lvl, sess) => {
+            const key  = `${lvl}-${sess}`;
+            const data = GRAMMAR_DATA.lessons[key];
+            if (!data) throw new Error(`No grammar data for session ${key}`);
+            return data;
+        }
+    },
+    vocab: {
+        engine: () => VocabEngine,
+        getData: (lvl, sess) => {
+            const key  = lvl + "-" + sess;
+            const data = VOCABULARY_DATA.lessons[key];
+            if (!data) throw new Error("No vocabulary data for session " + key);
+            return data;
+        }
+    },
+    // مستقبلاً — أضف نشاط جديد هنا:
+    // reading: { engine: () => ReadingEngine, getData: (lvl, sess) => { ... } },
+};
+
+// ════════════════════════════════════════════
 // ACTIVITY DISPATCHER
 // ════════════════════════════════════════════
 function openActivity(name) {
@@ -169,21 +210,11 @@ function openActivity(name) {
     stage.style.display = 'block'; loader.style.display = 'flex'; content.innerHTML = '';
 
     try {
-        const activityType = name.toLowerCase();
-        if (activityType === 'listening') {
-            const levelKey  = `level_${lvl}`;
-            const sessNum   = parseInt(sess);
-            const levelData = LISTENING_DATA[levelKey];
-            if (!levelData) throw new Error(`No listening data for Level ${lvl}`);
+        const key      = name.toLowerCase().trim();
+        const activity = ACTIVITY_REGISTRY[key];
 
-            const targetClass = sessNum === 1 ? 1 : sessNum - 1;
-            const classData   = levelData[`class_${targetClass}`];
-            if (!classData) throw new Error(`No class data for session ${SESSION}`);
-
-            const audioBase = `data/Listening/wav/Level-${lvl}/Session ${targetClass}/`;
-            loader.style.display = 'none';
-            ListeningEngine.init([{ ...classData, audioBaseUrl: audioBase }]);
-        } else {
+        if (!activity) {
+            // نشاط مش عنده engine بعد
             loader.style.display = 'none';
             content.innerHTML = `
                 <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;color:#c5a059;font-family:'Orbitron',sans-serif;">
@@ -191,7 +222,14 @@ function openActivity(name) {
                     <span style="font-size:1rem;letter-spacing:4px;">${name.toUpperCase()}</span>
                     <span style="font-size:.7rem;color:rgba(255,255,255,0.4);letter-spacing:2px;">ENGINE COMING SOON</span>
                 </div>`;
+            return;
         }
+
+        const data   = activity.getData(lvl, sess);
+        const engine = activity.engine();
+        loader.style.display = 'none';
+        engine.init(data);
+
     } catch (err) {
         console.error('WOLF System Error:', err);
         loader.style.display = 'none';
@@ -208,122 +246,10 @@ function closeStage() {
     document.getElementById('stage').style.display = 'none';
     document.getElementById('stage-content').innerHTML = '';
     document.getElementById('stage-loader').style.display = 'none';
-    ListeningEngine.audioPlayer.pause();
+    // أوقف أي صوت شغال في أي engine
+    if (typeof ListeningEngine !== 'undefined') ListeningEngine.audioPlayer.pause();
 }
 
-// ════════════════════════════════════════════
-// LISTENING ENGINE V2.1
-// ════════════════════════════════════════════
-const ListeningEngine = {
-    audioPlayer: new Audio(),
-    allTasks: [], currentIdx: 0, classBoundaries: [],
-
-    init(classesData) {
-        this.allTasks = []; this.classBoundaries = []; this.currentIdx = 0;
-        classesData.forEach(cls => {
-            const start = this.allTasks.length;
-            cls.tasks.forEach(task => this.allTasks.push({ ...task, _audioBase: cls.audioBaseUrl, _classTitle: cls.title }));
-            this.classBoundaries.push({ label: cls.title, start, end: this.allTasks.length - 1 });
-        });
-        this.audioPlayer.pause();
-        this._renderLayout();
-        this.renderTask(0);
-    },
-
-    _renderLayout() {
-        const tabsHtml = this.classBoundaries.map((b, i) =>
-            `<button class="le-tab ${i===0?'active':''}" data-idx="${b.start}" onclick="ListeningEngine.renderTask(${b.start})">${b.label}</button>`
-        ).join('');
-        document.getElementById('stage-content').innerHTML = `
-            <style>
-                .le-wrap{height:100vh;width:100%;background:radial-gradient(circle at 50% 30%,#0d1a2e 0%,#060810 100%);color:#fff;display:flex;flex-direction:column;font-family:'Barlow','Segoe UI',sans-serif;overflow:hidden;position:relative}
-                .le-header{padding:14px 28px 0;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid rgba(197,160,89,0.2);flex-shrink:0}
-                .le-title{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:4px;color:#c5a059;text-transform:uppercase}
-                .le-tabs{display:flex;gap:8px;flex-wrap:wrap;padding-bottom:12px}
-                .le-tab{padding:6px 16px;border-radius:20px;font-size:.7rem;font-weight:700;border:1px solid rgba(197,160,89,0.35);background:transparent;color:rgba(197,160,89,0.6);cursor:pointer;transition:.2s;font-family:'Barlow',sans-serif}
-                .le-tab.active,.le-tab:hover{background:#c5a059;color:#000;border-color:#c5a059}
-                .le-counter{text-align:center;font-family:'Orbitron',sans-serif;font-size:.55rem;color:rgba(255,255,255,0.3);letter-spacing:3px;padding:8px 0;flex-shrink:0}
-                .le-play-wrap{display:flex;justify-content:center;padding:10px 0;flex-shrink:0}
-                .le-play{width:64px;height:64px;border-radius:50%;background:#c5a059;border:none;cursor:pointer;font-size:1.4rem;transition:.25s;box-shadow:0 0 24px rgba(197,160,89,0.35);display:flex;align-items:center;justify-content:center}
-                .le-play:hover{transform:scale(1.08);background:#d4af37}
-                .le-play.playing{background:#ff4757;box-shadow:0 0 24px rgba(255,71,87,0.4)}
-                .le-dialogue{flex:1;overflow-y:auto;padding:20px 40px 100px;scrollbar-width:thin;scrollbar-color:#c5a059 transparent}
-                .le-dialogue::-webkit-scrollbar{width:3px}.le-dialogue::-webkit-scrollbar-thumb{background:#c5a059;border-radius:2px}
-                .le-line{margin-bottom:22px;padding-left:18px;border-left:3px solid #c5a059;animation:le-fi .3s ease}
-                @keyframes le-fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-                .le-name{color:#c5a059;font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px}
-                .le-mood{font-weight:400;font-size:.65rem;opacity:.5;text-transform:none;letter-spacing:0}
-                .le-text{font-size:1.5rem;line-height:1.45;color:#e0e0e0}
-                .le-text b{color:#fff;text-decoration:underline;text-underline-offset:4px}
-                .le-nav{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:center;gap:16px;padding:14px 0 18px;background:linear-gradient(to top,#060810 70%,transparent)}
-                .le-nav-btn{padding:9px 28px;background:transparent;border:1px solid #c5a059;color:#c5a059;cursor:pointer;border-radius:6px;transition:.2s;font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:2px}
-                .le-nav-btn:hover{background:#c5a059;color:#000}
-                .le-nav-btn:disabled{opacity:.25;cursor:not-allowed}
-            </style>
-            <div class="le-wrap">
-                <div class="le-header">
-                    <div class="le-title" id="le-session-label">LISTENING</div>
-                    <div class="le-tabs">${tabsHtml}</div>
-                </div>
-                <div class="le-counter" id="le-counter"></div>
-                <div class="le-play-wrap"><button class="le-play" id="le-play-btn" onclick="ListeningEngine.toggleAudio()">▶</button></div>
-                <div class="le-dialogue" id="le-dialogue"></div>
-                <div class="le-nav">
-                    <button class="le-nav-btn" id="le-prev" onclick="ListeningEngine.prev()">◀ PREV</button>
-                    <button class="le-nav-btn" id="le-next" onclick="ListeningEngine.next()">NEXT ▶</button>
-                </div>
-            </div>`;
-    },
-
-    renderTask(idx) {
-        this.currentIdx = idx;
-        const task = this.allTasks[idx], total = this.allTasks.length;
-        document.getElementById('le-session-label').innerText = task._classTitle.toUpperCase() + ' — TASK ' + task.id;
-        document.getElementById('le-counter').innerText = `CONVERSATION  ${idx+1}  /  ${total}`;
-        this.audioPlayer.pause();
-        const btn = document.getElementById('le-play-btn');
-        btn.classList.remove('playing'); btn.innerText = '▶';
-        const el = document.getElementById('le-dialogue'); el.innerHTML = '';
-        task.dialogue.split(/(?=\[[\w\s]+ - [\w\s]+\]:)/).forEach(line => {
-            const m = line.match(/\[(.*?)\s-\s(.*?)\]:\s*([\s\S]*)/);
-            if (m) {
-                const div = document.createElement('div'); div.className = 'le-line';
-                div.innerHTML = `<span class="le-name">${m[1]} <span class="le-mood">(${m[2]})</span></span><p class="le-text">${m[3].trim()}</p>`;
-                el.appendChild(div);
-            }
-        });
-        el.scrollTop = 0;
-        document.querySelectorAll('.le-tab').forEach(tab => {
-            const b = this.classBoundaries.find(b => b.start === parseInt(tab.dataset.idx));
-            tab.classList.toggle('active', b && idx >= b.start && idx <= b.end);
-        });
-        document.getElementById('le-prev').disabled = (idx === 0);
-        document.getElementById('le-next').disabled = (idx === total - 1);
-    },
-
-    _classStartIdx() {
-        for (let i = this.classBoundaries.length - 1; i >= 0; i--)
-            if (this.currentIdx >= this.classBoundaries[i].start) return this.classBoundaries[i].start;
-        return 0;
-    },
-
-    toggleAudio() {
-        const task = this.allTasks[this.currentIdx];
-        const num  = this.currentIdx - this._classStartIdx() + 1;
-        const src  = task._audioBase + num + '.wav';
-        if (this.audioPlayer.src !== src) this.audioPlayer.src = src;
-        const btn = document.getElementById('le-play-btn');
-        if (this.audioPlayer.paused) { this.audioPlayer.play().catch(() => {}); btn.innerText = '⏸'; btn.classList.add('playing'); }
-        else { this.audioPlayer.pause(); btn.innerText = '▶'; btn.classList.remove('playing'); }
-    },
-
-    next() { if (this.currentIdx < this.allTasks.length - 1) this.renderTask(this.currentIdx + 1); },
-    prev() { if (this.currentIdx > 0) this.renderTask(this.currentIdx - 1); }
-};
-ListeningEngine.audioPlayer.onended = () => {
-    const b = document.getElementById('le-play-btn');
-    if (b) { b.innerText = '▶'; b.classList.remove('playing'); }
-};
 
 // ════════════════════════════════════════════
 // WHEEL OF NAMES ENGINE
@@ -404,8 +330,12 @@ const WheelEngine = {
             ctx.rotate(startAngle + sliceAngle / 2);
             const maxW   = r * 0.55;
             const fontSize = Math.max(10, Math.min(20, r * 0.07));
-            ctx.font = `bold ${fontSize}px Barlow, sans-serif`;
-            ctx.fillStyle = '#fff';
+            ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+            ctx.fillStyle = 'yellow';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)'; // Shadow color
+            ctx.shadowBlur = 2; // Blur radius
+            ctx.shadowOffsetX = 1; // Horizontal offset
+            ctx.shadowOffsetY = 1; // Vertical offset
             ctx.textAlign = 'right';
             ctx.textBaseline = 'middle';
             // Truncate if needed
