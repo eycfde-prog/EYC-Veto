@@ -2,7 +2,7 @@
 //  Prep1.js  —  Auth / Session / Score Manager (Razor Integrated)
 // ═══════════════════════════════════════════════════════════════════
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyh8FSP06-D1v5OOf2lOuysow3Qcih7UMbkgk0wrSn35m1Oio7ju-sWa9pMVA92_LlF/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyN4L9dpNMBtRXQyz_he9RbSoZYchWhTEdfdLSk2JbElsrIfxmEBeIuruZCyQkjygoT/exec";
 
 const P1 = {
   student:      null,
@@ -342,9 +342,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ── تعديل دالة الدخول لضمان تنظيف الواجهة ──
+// ابحث عن دالة P1_login وحدث جزء التعامل مع رسالة الخطأ
 async function P1_login() {
-  const code = document.getElementById("p1-code-input").value.trim();
-  if (!code) { showError("Please enter your student code."); return; }
+  const codeInp = document.getElementById("p1-code-input");
+  const code = codeInp.value.trim();
+  if (!code) { showError("من فضلك أدخل كود الطالب"); return; }
+  
   setLoginLoading(true);
   clearError();
 
@@ -353,11 +356,15 @@ async function P1_login() {
     
     if (!res.ok) {
       if (res.msg === "WAIT_24H") {
+        // مسح أي بيانات قديمة في المتصفح لضمان عدم التكرار
+        LS.clear(); 
         showWaitPanel(res.waitHrs, res.waitMins);
       } else {
         showError(res.msg);
       }
     } else {
+      // نجاح الدخول - الكود كما هو
+      // ...
       // ✅ نجاح الدخول: نظف أي رسائل قديمة فوراً
       document.getElementById("p1-expired-overlay").classList.remove("show");
       
