@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VETO A✨ — Online Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Cairo:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #03060f;
+    --surface: #0c1526;
+    --surface2: #132038;
+    --accent: #00c8ff;
+    --green: #00e87a;
+    --red: #ff4d4d;
+    --gold: #ffc940;
+    --text: #e8f4ff;
+    --muted: #5a7a9a;
+    --border: #1a3050;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* NOISE */
+  body::after {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  }
+
+  /* ═══════════════════════════════
+     SCREENS
+  ═══════════════════════════════ */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }
+
+  /* ─── LOGIN ─── */
+  #screen-login { background: radial-gradient(ellipse 80% 60% at 50% 0%, #0a2040 0%, var(--bg) 70%); }
+
+  .logo-wrap { text-align: center; margin-bottom: 48px; }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: clamp(4rem, 12vw, 7rem); letter-spacing: 8px; line-height: 1; color: var(--text); }
+  .logo em { color: var(--accent); font-style: normal; }
+  .logo-sub { color: var(--muted); font-size: 0.8rem; letter-spacing: 5px; text-transform: uppercase; margin-top: 8px; }
+
+  .login-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
+    padding: 40px; width: 100%; max-width: 440px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+  }
+  .login-card h2 { font-size: 1rem; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 28px; }
+
+  .field { margin-bottom: 20px; }
+  .field label { display: block; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .field input {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 14px 18px; border-radius: 12px; font-size: 1rem; font-family: 'DM Sans', sans-serif;
+    outline: none; transition: border-color 0.2s;
+  }
+  .field input:focus { border-color: var(--accent); }
+  .field input::placeholder { color: var(--muted); }
+
+  .btn-primary {
+    width: 100%; background: var(--accent); color: #000; padding: 16px;
+    border-radius: 12px; font-weight: 700; font-size: 1rem; letter-spacing: 2px;
+    text-transform: uppercase; cursor: pointer; border: none; transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,200,255,0.3); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .error-msg { color: var(--red); font-size: 0.85rem; margin-top: 14px; text-align: center; min-height: 20px; }
+
+  /* ─── WELCOME ─── */
+  #screen-welcome { background: radial-gradient(ellipse 60% 50% at 50% 0%, #0a2a1a 0%, var(--bg) 70%); }
+  .welcome-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
+    padding: 48px 40px; width: 100%; max-width: 500px; text-align: center;
+  }
+  .welcome-card .icon { font-size: 4rem; margin-bottom: 20px; }
+  .welcome-card h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; letter-spacing: 4px; color: var(--green); margin-bottom: 8px; }
+  .welcome-card .name { font-size: 1.3rem; color: var(--text); margin-bottom: 24px; }
+  .welcome-card .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 32px; }
+  .info-item { background: var(--surface2); border-radius: 12px; padding: 16px; }
+  .info-item .label { font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .info-item .val { font-size: 1.3rem; font-weight: 700; color: var(--accent); }
+  .welcome-note { font-size: 0.85rem; color: var(--muted); line-height: 1.6; margin-bottom: 28px; }
+
+  /* ─── EXAM ─── */
+  #screen-exam { justify-content: flex-start; padding: 0; background: var(--bg); }
+
+  /* Progress strip */
+  #exam-header {
+    width: 100%; background: rgba(12,21,38,0.97); border-bottom: 1px solid var(--border);
+    padding: 14px 24px; display: flex; align-items: center; gap: 20px;
+    position: sticky; top: 0; z-index: 100; flex-shrink: 0;
+  }
+  .hdr-student { font-size: 0.8rem; color: var(--muted); }
+  .hdr-student span { color: var(--accent); font-weight: 700; }
+  .hdr-progress { flex: 1; }
+  .prog-bar-bg { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .prog-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--green)); border-radius: 3px; transition: width 0.5s ease; }
+  .prog-label { font-size: 0.72rem; color: var(--muted); margin-top: 4px; text-align: right; }
+  .hdr-score { font-size: 0.8rem; color: var(--muted); }
+  .hdr-score span { color: var(--gold); font-weight: 700; font-size: 1rem; }
+
+  /* Question card */
+  #exam-body { flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; padding: 30px 20px; }
+
+  .q-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
+    padding: clamp(24px, 4vw, 48px); width: 100%; max-width: 780px;
+    animation: cardIn 0.35s ease;
+  }
+  @keyframes cardIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+
+  .q-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .q-badge {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 5px 14px; font-size: 0.7rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent);
+  }
+  .q-badge.green { color: var(--green); border-color: rgba(0,232,122,0.3); }
+  .q-badge.gold { color: var(--gold); border-color: rgba(255,201,64,0.3); }
+  .q-counter { font-size: 0.75rem; color: var(--muted); margin-left: auto; }
+
+  .q-text {
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem); line-height: 1.5;
+    margin-bottom: 28px; font-weight: 500;
+  }
+
+  /* Passage (inline) */
+  .q-passage {
+    background: rgba(0,200,255,0.04); border-left: 4px solid var(--accent);
+    border-radius: 0 12px 12px 0; padding: 18px 22px; margin-bottom: 22px;
+    font-size: 0.9rem; line-height: 1.9; color: #a8c8e8; max-height: 220px; overflow-y: auto;
+  }
+  .q-passage::-webkit-scrollbar { width: 4px; }
+  .q-passage::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+  /* Options */
+  .opts { display: flex; flex-direction: column; gap: 12px; }
+  .opt-btn {
+    background: var(--surface2); border: 2px solid var(--border); border-radius: 14px;
+    padding: 16px 20px; font-size: clamp(0.9rem, 1.8vw, 1.1rem); text-align: left;
+    cursor: pointer; transition: all 0.2s; color: var(--text); font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .opt-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(0,200,255,0.06); transform: translateX(4px); }
+  .opt-btn .opt-letter {
+    min-width: 32px; height: 32px; border-radius: 8px; background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85rem; color: var(--muted); flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .opt-btn.selected { border-color: var(--accent); background: rgba(0,200,255,0.08); }
+  .opt-btn.selected .opt-letter { background: var(--accent); color: #000; }
+  .opt-btn:disabled { cursor: default; }
+
+  /* ─── RESULT ─── */
+  #screen-result { background: radial-gradient(ellipse 70% 60% at 50% 10%, #0a2a1a 0%, var(--bg) 70%); }
+
+  .result-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 28px;
+    padding: clamp(32px, 5vw, 56px); width: 100%; max-width: 560px; text-align: center;
+    animation: resultPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes resultPop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
+  .result-icon { font-size: 5rem; margin-bottom: 16px; display: block; }
+  .result-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 6vw, 3.5rem); letter-spacing: 4px; margin-bottom: 6px; }
+  .result-name { color: var(--muted); font-size: 1rem; margin-bottom: 36px; }
+
+  .score-ring {
+    width: 160px; height: 160px; border-radius: 50%;
+    border: 8px solid var(--border); margin: 0 auto 32px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative; background: var(--surface2);
+  }
+  .score-ring::before {
+    content: ''; position: absolute; inset: -8px; border-radius: 50%;
+    border: 8px solid transparent;
+    border-top-color: var(--green); border-right-color: var(--green);
+    animation: ringFill 1.5s ease forwards;
+  }
+  @keyframes ringFill { from { transform: rotate(-90deg); } to { transform: rotate(var(--ring-end, 180deg)); } }
+  .score-num { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; color: var(--green); line-height: 1; }
+  .score-denom { font-size: 0.85rem; color: var(--muted); }
+
+  .result-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+  .stat-box { background: var(--surface2); border-radius: 14px; padding: 16px 10px; }
+  .stat-box .sv { font-size: 1.6rem; font-weight: 700; }
+  .stat-box .sl { font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+  .sv.correct { color: var(--green); }
+  .sv.wrong { color: var(--red); }
+  .sv.pct { color: var(--gold); }
+
+  .grade-badge {
+    display: inline-block; padding: 10px 28px; border-radius: 50px;
+    font-weight: 700; font-size: 1.1rem; letter-spacing: 2px; margin-bottom: 28px;
+  }
+  .grade-A { background: rgba(0,232,122,0.15); color: var(--green); border: 2px solid var(--green); }
+  .grade-B { background: rgba(0,200,255,0.15); color: var(--accent); border: 2px solid var(--accent); }
+  .grade-C { background: rgba(255,201,64,0.15); color: var(--gold); border: 2px solid var(--gold); }
+  .grade-D { background: rgba(255,77,77,0.15); color: var(--red); border: 2px solid var(--red); }
+
+  .submit-status { font-size: 0.8rem; color: var(--muted); margin-bottom: 20px; min-height: 20px; }
+  .submit-status.ok { color: var(--green); }
+  .submit-status.err { color: var(--red); }
+
+  /* LOADING overlay */
+  #loading {
+    display: none; position: fixed; inset: 0; background: rgba(3,6,15,0.85);
+    align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 16px;
+  }
+  #loading.show { display: flex; }
+  .spinner {
+    width: 48px; height: 48px; border: 4px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loading p { color: var(--muted); font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .info-grid { grid-template-columns: 1fr; }
+    .result-stats { grid-template-columns: 1fr 1fr; }
+    .result-stats .stat-box:last-child { grid-column: 1 / -1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p id="loading-text">Verifying...</p>
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN 1: LOGIN
+══════════════════════════════ -->
+<div class="screen active" id="screen-login">
+  <div class="logo-wrap">
+    <div class="logo"><em>VETO</em> A✨</div>
+    <div class="logo-sub">Online Test · Model 1 · 2026</div>
+  </div>
+  <div class="login-card">
+    <h2>Student Login</h2>
+    <div class="field">
+      <label>Full Name</label>
+      <input type="text" id="inp-name" placeholder="Enter your full name..." autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Session Code</label>
+      <input type="text" id="inp-code" placeholder="Enter code from teacher..." autocomplete="off" maxlength="10" style="text-transform:uppercase;letter-spacing:3px;">
+    </div>
+    <button class="btn-primary" id="btn-login" onclick="doLogin()">ENTER TEST</button>
+    <div class="error-msg" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN 2: WELCOME
+══════════════════════════════ -->
+<div class="screen" id="screen-welcome">
+  <div class="welcome-card">
+    <div class="icon">📋</div>
+    <h1>READY?</h1>
+    <div class="name" id="w-name">—</div>
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="label">Questions</div>
+        <div class="val">35</div>
+      </div>
+      <div class="info-item">
+        <div class="label">Total Score</div>
+        <div class="val">35</div>
+      </div>
+      <div class="info-item">
+        <div class="label">Type</div>
+        <div class="val" style="font-size:0.95rem;">MCQ</div>
+      </div>
+      <div class="info-item">
+        <div class="label">No Time Limit</div>
+        <div class="val">∞</div>
+      </div>
+    </div>
+    <p class="welcome-note">📌 Read each question carefully.<br>Once you pick an answer you move to the next question automatically.<br>You <strong>cannot</strong> go back.</p>
+    <button class="btn-primary" onclick="startExam()">START EXAM →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN 3: EXAM
+══════════════════════════════ -->
+<div class="screen" id="screen-exam">
+  <div id="exam-header">
+    <div class="hdr-student">Student: <span id="hdr-name">—</span></div>
+    <div class="hdr-progress">
+      <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="prog-label"><span id="prog-cur">0</span> / 35</div>
+    </div>
+    <div class="hdr-score">Score: <span id="hdr-score">—</span></div>
+  </div>
+  <div id="exam-body">
+    <div class="q-card" id="q-card">
+      <!-- injected by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN 4: RESULT
+══════════════════════════════ -->
+<div class="screen" id="screen-result">
+  <div class="result-card">
+    <span class="result-icon" id="r-icon">🎉</span>
+    <div class="result-title" id="r-title">EXAM DONE!</div>
+    <div class="result-name" id="r-name">—</div>
+    <div class="score-ring" id="score-ring">
+      <div class="score-num" id="r-score">0</div>
+      <div class="score-denom">out of 35</div>
+    </div>
+    <div class="result-stats">
+      <div class="stat-box"><div class="sv correct" id="r-correct">0</div><div class="sl">Correct</div></div>
+      <div class="stat-box"><div class="sv wrong" id="r-wrong">0</div><div class="sl">Wrong</div></div>
+      <div class="stat-box"><div class="sv pct" id="r-pct">0%</div><div class="sl">Score %</div></div>
+    </div>
+    <div class="grade-badge grade-A" id="r-grade">Excellent</div>
+    <div class="submit-status" id="r-status">Submitting results…</div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  CONFIG — استبدل بالـ URL بتاعك من Apps Script
+// ═══════════════════════════════════════════════════
+const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+
+// ═══════════════════════════════════════════════════
+//  QUESTIONS DATA
+// ═══════════════════════════════════════════════════
+const QUESTIONS = [
+  // Section I — Vocabulary & Structure (Q1-11)
+  { id:1, section:"Vocabulary", badge:"blue",
+    text:"The sudden .......... of the factory caused a lot of workers to lose their jobs unexpectedly.",
+    opts:{a:"expansion", b:"attachment", c:"closure", d:"investment"}, ans:"c" },
+  { id:2, section:"Vocabulary", badge:"blue",
+    text:"The police are investigating the .......... of the accident to find out who was responsible.",
+    opts:{a:"circumstances", b:"results", c:"contents", d:"ingredients"}, ans:"a" },
+  { id:3, section:"Vocabulary", badge:"blue",
+    text:"Digital .......... is a serious crime that affects the publishing industry and authors' rights.",
+    opts:{a:"privacy", b:"piracy", c:"policy", d:"decency"}, ans:"b" },
+  { id:4, section:"Vocabulary", badge:"blue",
+    text:"To .......... is to make a bad situation better or to provide something good as a balance.",
+    opts:{a:"complicate", b:"congratulate", c:"compensate", d:"calculate"}, ans:"c" },
+  { id:5, section:"Grammar", badge:"blue",
+    text:"I .......... a very interesting book lately, and I'm almost halfway through it.",
+    opts:{a:"have been read", b:"had read", c:"was read", d:"have been reading"}, ans:"d" },
+  { id:6, section:"Grammar", badge:"blue",
+    text:"While the dinner .........., I was doing my homework in the other room.",
+    opts:{a:"was being cooked", b:"cooked", c:"is cooking", d:"was cooking"}, ans:"a" },
+  { id:7, section:"Grammar", badge:"blue",
+    text:"I .......... my old friend for ages; I wonder how he is doing now.",
+    opts:{a:"don't see", b:"didn't see", c:"haven't seen", d:"am not seeing"}, ans:"c" },
+  { id:8, section:"Grammar", badge:"blue",
+    text:"By the end of next month, we .......... all our exams and started our vacation.",
+    opts:{a:"will finish", b:"will have finished", c:"are finishing", d:"finish"}, ans:"b" },
+  { id:9, section:"Grammar", badge:"blue",
+    text:"It's high time you .......... harder if you want to join the Faculty of Medicine.",
+    opts:{a:"study", b:"have studied", c:"studied", d:"had studied"}, ans:"c" },
+  { id:10, section:"Grammar", badge:"blue",
+    text:"My sister .......... to be a nurse since she was a little child.",
+    opts:{a:"has wanted", b:"is wanting", c:"wants", d:"had wanted"}, ans:"a" },
+  { id:11, section:"Grammar", badge:"blue",
+    text:"Neither the teacher nor the students .......... present at the ceremony yesterday.",
+    opts:{a:"is", b:"were", c:"was", d:"has been"}, ans:"b" },
+
+  // Section II — Reading Passage 1 (Q12-19)
+  { id:12, section:"Reading", badge:"green",
+    passage:"The concept of 'Life-long Learning' has become essential in the 21st century due to the rapid pace of technological change. In the past, a person might learn a trade or profession in their youth and practice it for the rest of their life. Today, however, knowledge and skills become obsolete within a few years. Automation and AI are transforming the job market, making it necessary for workers to 'up-skill' continuously. Life-long learning includes online courses, workshops, and self-taught skills. Research shows that keeping the brain active can delay the onset of cognitive decline in old age. The main challenge is the 'digital divide,' as those without internet access are often left behind. To thrive, one must develop a 'growth mindset'—the belief that abilities can be developed through dedication.",
+    text:"What is the primary reason for the importance of life-long learning today?",
+    opts:{a:"University degrees are free now.", b:"The rapid pace of technological change.", c:"People live shorter lives.", d:"Formal education is useless."}, ans:"b" },
+  { id:13, section:"Reading", badge:"green",
+    text:'The word "obsolete" in the passage means:',
+    opts:{a:"Modern and updated.", b:"Very expensive.", c:"No longer useful or used.", d:"Easy to understand."}, ans:"c" },
+  { id:14, section:"Reading", badge:"green",
+    text:"According to the passage, life-long learning:",
+    opts:{a:"is only for young students.", b:"requires a university degree.", c:"is only about learning AI.", d:"can be done through formal and informal ways."}, ans:"d" },
+  { id:15, section:"Reading", badge:"green",
+    text:"How does learning benefit elderly people?",
+    opts:{a:"It helps them find new jobs.", b:"It can delay cognitive decline.", c:"It makes them younger.", d:"It provides them with money."}, ans:"b" },
+  { id:16, section:"Reading", badge:"green",
+    text:'What does a "growth mindset" involve?',
+    opts:{a:"Expecting things to be easy.", b:"Believing that abilities can be developed.", c:"Focusing only on physical growth.", d:"Avoiding any new challenges."}, ans:"b" },
+  { id:17, section:"Reading", badge:"green",
+    text:"Which of the following is a challenge to life-long learning?",
+    opts:{a:"Lack of internet access.", b:"Having too much free time.", c:"The abundance of online courses.", d:"Getting a promotion."}, ans:"a" },
+  { id:18, section:"Reading", badge:"green",
+    text:"What is the best title for this passage?",
+    opts:{a:"The History of Universities.", b:"How to Use AI.", c:"Embracing Continuous Education.", d:"The Benefits of Retirement."}, ans:"c" },
+  { id:19, section:"Reading", badge:"green",
+    text:"We can infer that the job market in the future will:",
+    opts:{a:"require constant adaptation of skills.", b:"be limited to manual labor.", c:"not need any human workers.", d:"stay the same as it is now."}, ans:"a" },
+
+  // Section III — Reading Passage 2 (Q20-27)
+  { id:20, section:"Reading", badge:"green",
+    passage:"Sustainable tourism, or ecotourism, aims to minimize the negative impact of travel on the environment and local cultures. Traditional mass tourism often leads to the destruction of natural habitats, pollution, and the commercialization of local traditions. Sustainable tourism encourages travelers to be mindful of their carbon footprint, choose eco-friendly hotels, use public transport, and support local businesses. In Egypt, the Red Sea coral reefs are fragile ecosystems easily damaged by careless divers. Some resorts have started 'green initiatives' such as banning single-use plastics and using solar energy. Sustainable tourism provides income for local communities, encouraging them to protect their environment. However, there must be a balance between tourist numbers and the capacity of the environment to handle them.",
+    text:"What is the main goal of sustainable tourism?",
+    opts:{a:"To make travel as cheap as possible.", b:"To minimize the negative impact on nature and culture.", c:"To build more large hotels.", d:"To encourage people to stay at home."}, ans:"b" },
+  { id:21, section:"Reading", badge:"green",
+    text:"Mass tourism is criticized in the passage for:",
+    opts:{a:"Leading to pollution and habitat destruction.", b:"Helping local businesses too much.", c:"Being too slow and boring.", d:"Using too much solar energy."}, ans:"a" },
+  { id:22, section:"Reading", badge:"green",
+    text:"Why are the Red Sea coral reefs mentioned?",
+    opts:{a:"Because they are the strongest in the world.", b:"As an example of a fragile ecosystem that needs protection.", c:"To encourage more boat racing.", d:"Because they are made of plastic."}, ans:"b" },
+  { id:23, section:"Reading", badge:"green",
+    text:'"Green initiatives" in some resorts include:',
+    opts:{a:"Using more plastic bottles.", b:"Banning single-use plastics.", c:"Increasing the use of coal energy.", d:"Building bigger swimming pools."}, ans:"b" },
+  { id:24, section:"Reading", badge:"green",
+    text:"How does sustainable tourism help local communities?",
+    opts:{a:"It teaches them how to leave their land.", b:"It provides income and encourages environment protection.", c:"It replaces their traditions with modern ones.", d:"It gives them free holidays."}, ans:"b" },
+  { id:25, section:"Reading", badge:"green",
+    text:'The word "preserve" in the passage is synonymous with:',
+    opts:{a:"Destroy.", b:"Protect.", c:"Ignore.", d:"Change."}, ans:"b" },
+  { id:26, section:"Reading", badge:"green",
+    text:"What is the author's tone regarding the future of tourism?",
+    opts:{a:"Pessimistic.", b:"Hopeful but cautious.", c:"Sarcastic.", d:"Indifferent."}, ans:"b" },
+  { id:27, section:"Reading", badge:"green",
+    text:"What is needed for the sustainable tourism model to be successful?",
+    opts:{a:"Increasing the number of tourists indefinitely.", b:"A balance between tourist numbers and environmental capacity.", c:"Stopping all forms of diving.", d:"Building more international chains."}, ans:"b" },
+
+  // Section IV — Applied Language (Q28-35)
+  { id:28, section:"Applied Language", badge:"gold",
+    text:'"I\'ve been waiting for the bus for an hour." This means:',
+    opts:{a:"The bus arrived an hour ago.", b:"I am no longer waiting.", c:"I will start waiting in an hour.", d:"I started waiting an hour ago and I'm still waiting."}, ans:"d" },
+  { id:29, section:"Applied Language", badge:"gold",
+    text:"Which of the following is correctly punctuated?",
+    opts:{a:'"Where are you going" asked the teacher.', b:'"Where are you going?" asked the teacher.', c:'"Where are you going," asked the teacher.', d:'"Where are you going"? asked the teacher.'}, ans:"b" },
+  { id:30, section:"Applied Language", badge:"gold",
+    text:'Choose the sentence that expresses "Causative" correctly:',
+    opts:{a:"I fixed the tap.", b:"I am fixing the tap.", c:"I had the tap fixed.", d:"The tap was fixed by me."}, ans:"c" },
+  { id:31, section:"Applied Language", badge:"gold",
+    text:'Which sentence has a similar meaning to: "It\'s a pity I didn\'t see the match."',
+    opts:{a:"I wish I saw the match.", b:"I wish I had seen the match.", c:"I wish I would see the match.", d:"I wish I see the match."}, ans:"b" },
+  { id:32, section:"Applied Language", badge:"gold",
+    text:'Identify the sentence that shows a "Result" relationship:',
+    opts:{a:"He was tired, yet he continued working.", b:"He was tired so he worked hard.", c:"He worked hard so that he could succeed.", d:"He worked hard; consequently, he felt tired."}, ans:"d" },
+  { id:33, section:"Applied Language", badge:"gold",
+    text:"Which of the following sentences is grammatically correct?",
+    opts:{a:"Each of the students have a book.", b:"Each of the students has a book.", c:"Each of the student has a book.", d:"All of the students has a book."}, ans:"b" },
+  { id:34, section:"Applied Language", badge:"gold",
+    text:'"Despite his illness, he went to work." This can be rewritten as:',
+    opts:{a:"Although he was ill, he went to work.", b:"Because he was ill, he went to work.", c:"He was ill, so he went to work.", d:"In spite of he was ill, he went to work."}, ans:"a" },
+  { id:35, section:"Applied Language", badge:"gold",
+    text:"Which sentence uses the past perfect continuous correctly?",
+    opts:{a:"He has been playing for two hours before it rained.", b:"He had been playing for two hours before it rained.", c:"He was playing for two hours before it rained.", d:"He had played for two hours when it rains."}, ans:"b" }
+];
+
+// ═══════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════
+let studentName = "";
+let studentCode = "";
+let currentQ = 0;
+let answers = []; // {id, chosen, correct, isRight}
+let score = 0;
+let lastPassage = "";
+
+// ═══════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+function loading(show, text="Verifying...") {
+  document.getElementById('loading-text').textContent = text;
+  document.getElementById('loading').classList.toggle('show', show);
+}
+function showErr(msg) { document.getElementById('login-err').textContent = msg; }
+
+// ═══════════════════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════════════════
+async function doLogin() {
+  const name = document.getElementById('inp-name').value.trim();
+  const code = document.getElementById('inp-code').value.trim().toUpperCase();
+  if (!name) { showErr("Please enter your name."); return; }
+  if (!code) { showErr("Please enter the session code."); return; }
+  showErr("");
+
+  loading(true, "Verifying code...");
+  document.getElementById('btn-login').disabled = true;
+
+  try {
+    const res = await fetch(SCRIPT_URL + "?action=verify&code=" + encodeURIComponent(code) + "&name=" + encodeURIComponent(name));
+    const data = await res.json();
+    loading(false);
+    if (data.ok) {
+      studentName = name;
+      studentCode = code;
+      document.getElementById('w-name').textContent = "Welcome, " + name + "!";
+      showScreen('welcome');
+    } else {
+      showErr(data.msg || "Invalid code. Please check with your teacher.");
+      document.getElementById('btn-login').disabled = false;
+    }
+  } catch(e) {
+    loading(false);
+    showErr("Connection error. Please try again.");
+    document.getElementById('btn-login').disabled = false;
+  }
+}
+
+// Allow Enter key in inputs
+document.getElementById('inp-code').addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
+document.getElementById('inp-name').addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
+
+// ═══════════════════════════════════════════════════
+//  START EXAM
+// ═══════════════════════════════════════════════════
+function startExam() {
+  document.getElementById('hdr-name').textContent = studentName;
+  document.getElementById('hdr-score').textContent = "—";
+  showScreen('exam');
+  renderQuestion(0);
+}
+
+// ═══════════════════════════════════════════════════
+//  RENDER QUESTION
+// ═══════════════════════════════════════════════════
+function renderQuestion(idx) {
+  const q = QUESTIONS[idx];
+  const card = document.getElementById('q-card');
+
+  // Progress
+  document.getElementById('prog-fill').style.width = ((idx / 35) * 100) + "%";
+  document.getElementById('prog-cur').textContent = idx;
+
+  // Badge color
+  const badgeClass = q.badge === "green" ? "green" : q.badge === "gold" ? "gold" : "";
+
+  // Passage (show only first time per passage)
+  let passageHTML = "";
+  if (q.passage && q.passage !== lastPassage) {
+    lastPassage = q.passage;
+    passageHTML = `<div class="q-passage">${q.passage}</div>`;
+  } else if (q.passage) {
+    // still show passage but collapsed
+    passageHTML = `<details style="margin-bottom:16px;"><summary style="color:var(--accent);font-size:0.8rem;cursor:pointer;letter-spacing:1px;">📖 SHOW PASSAGE</summary><div class="q-passage" style="margin-top:10px;">${q.passage}</div></details>`;
+  }
+
+  card.innerHTML = `
+    <div class="q-meta">
+      <span class="q-badge ${badgeClass}">${q.section}</span>
+      <span class="q-counter">Q${q.id} of 35</span>
+    </div>
+    ${passageHTML}
+    <div class="q-text">${q.text}</div>
+    <div class="opts">
+      ${Object.entries(q.opts).map(([k,v]) => `
+        <button class="opt-btn" onclick="selectAnswer('${k}', this)" data-key="${k}">
+          <span class="opt-letter">${k.toUpperCase()}</span>
+          ${v}
+        </button>
+      `).join('')}
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════
+//  SELECT ANSWER
+// ═══════════════════════════════════════════════════
+function selectAnswer(chosen, btn) {
+  // Disable all buttons immediately
+  document.querySelectorAll('.opt-btn').forEach(b => {
+    b.disabled = true;
+    b.style.opacity = "0.5";
+  });
+  btn.style.opacity = "1";
+  btn.classList.add('selected');
+
+  const q = QUESTIONS[currentQ];
+  const isRight = chosen === q.ans;
+  if (isRight) score++;
+
+  answers.push({ id: q.id, chosen, correct: q.ans, isRight });
+  document.getElementById('hdr-score').textContent = score;
+
+  // Next after short delay
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ < QUESTIONS.length) {
+      renderQuestion(currentQ);
+    } else {
+      finishExam();
+    }
+  }, 400);
+}
+
+// ═══════════════════════════════════════════════════
+//  FINISH
+// ═══════════════════════════════════════════════════
+function finishExam() {
+  const wrong = 35 - score;
+  const pct = Math.round((score / 35) * 100);
+
+  // Grade
+  let grade, gradeClass, icon;
+  if (pct >= 90)      { grade = "Excellent ⭐"; gradeClass = "grade-A"; icon = "🏆"; }
+  else if (pct >= 75) { grade = "Very Good";   gradeClass = "grade-B"; icon = "🎉"; }
+  else if (pct >= 60) { grade = "Good";         gradeClass = "grade-C"; icon = "👍"; }
+  else                { grade = "Needs Work";   gradeClass = "grade-D"; icon = "📚"; }
+
+  document.getElementById('r-icon').textContent = icon;
+  document.getElementById('r-title').textContent = "EXAM COMPLETE!";
+  document.getElementById('r-name').textContent = studentName;
+  document.getElementById('r-score').textContent = score;
+  document.getElementById('r-correct').textContent = score;
+  document.getElementById('r-wrong').textContent = wrong;
+  document.getElementById('r-pct').textContent = pct + "%";
+
+  const gradeBadge = document.getElementById('r-grade');
+  gradeBadge.textContent = grade;
+  gradeBadge.className = "grade-badge " + gradeClass;
+
+  // Ring animation
+  const deg = -90 + (pct / 100) * 360;
+  document.getElementById('score-ring').style.setProperty('--ring-end', deg + 'deg');
+
+  showScreen('result');
+  submitResults(pct);
+}
+
+// ═══════════════════════════════════════════════════
+//  SUBMIT TO GOOGLE SHEETS
+// ═══════════════════════════════════════════════════
+async function submitResults(pct) {
+  const status = document.getElementById('r-status');
+  status.textContent = "⏳ Saving results to sheet...";
+  status.className = "submit-status";
+
+  const payload = {
+    action: "submit",
+    name: studentName,
+    code: studentCode,
+    score: score,
+    total: 35,
+    pct: pct,
+    timestamp: new Date().toISOString(),
+    answers: answers.map(a => `Q${a.id}:${a.chosen.toUpperCase()}(${a.isRight ? '✓' : '✗'})`).join(', ')
+  };
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(payload)
+    });
+    status.textContent = "✅ Results saved to sheet successfully!";
+    status.className = "submit-status ok";
+  } catch(e) {
+    status.textContent = "⚠️ Could not save to sheet. Please tell your teacher.";
+    status.className = "submit-status err";
+  }
+}
+</script>
+</body>
+</html>
