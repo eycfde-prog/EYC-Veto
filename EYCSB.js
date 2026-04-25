@@ -20,7 +20,7 @@ const sessionData = {
   "1-3": ["Listening", "Vocab", "Grammar"],
   "1-4": ["Listening", "Grammar"],
   "2-1": ["Listening", "Grammar"],
-  "2-2": ["Listening", "Reading", "One Shot", "Vocab"],
+  "2-2": 
   "2-3": ["Listening", "Vocab", "Reading"],
   "2-4": ["Listening", "Grammar", "Reading", "tongue Twister", "One Shot"],
   "3-1": ["Listening", "Grammar", "Reading", "tongue Twister"],
