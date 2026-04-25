@@ -16,7 +16,6 @@ const GAS_API = 'https://script.google.com/macros/s/AKfycbzRHoIIbrET1d2Oa9YFfl8S
 // SESSION DATA
 // ════════════════════════════════════════════
 const sessionData = {
-{
   "1-1": ["Grammar"],
   "1-2": ["Listening", "Grammar", "Vocab"],
   "1-3": ["Listening", "Vocab", "Grammar"],
