@@ -2,7 +2,7 @@
 //  Prep1.js  —  Auth / Session / Score Manager (Razor Integrated)
 // ═══════════════════════════════════════════════════════════════════
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyN4L9dpNMBtRXQyz_he9RbSoZYchWhTEdfdLSk2JbElsrIfxmEBeIuruZCyQkjygoT/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzXdZ5az-EDsno2ubZhbFbd72ZmQ3_9lqaFEiERWj99weOxMw0oxJ05d1Eli5fvsg22/exec";
 
 const P1 = {
   student:      null,
