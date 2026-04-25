@@ -684,7 +684,7 @@ function spawnWord() {
   el.style.top  = '-55px';
 
   /* insert before cannon so cannon stays on top */
-  arena.insertBefore(el, q('cwrap'));
+  arena.appendChild(el, q('cwrap'));
 
   G.words.push({
     el: el, word: word,
