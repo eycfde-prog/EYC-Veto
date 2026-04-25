@@ -49,13 +49,11 @@ document.addEventListener("DOMContentLoaded", () => {
     P1.student = null;
     document.body.classList.add("not-logged");
     // نضمن أن واجهة "انتهى الوقت" مخفية تماماً الآن
-    const expiredOverlay = document.getElementById("p1-expired-overlay");
-    if (expiredOverlay) expiredOverlay.classList.remove("show");
+    document.getElementById("p1-expired-overlay").classList.remove("show");
     openLoginModal();
     
     // منع الإغلاق
-    const modalOverlay = document.getElementById("p1-modal-overlay");
-    if (modalOverlay) modalOverlay.onclick = null;
+    document.getElementById("p1-modal-overlay").onclick = null;
     const closeBtn = document.querySelector(".p1-m-close");
     if(closeBtn) closeBtn.style.display = "none";
   } else {
@@ -317,6 +315,33 @@ function interceptActivityButtons() {
 }
 
 // ── تعديل دالة الدخول لضمان تنظيف الواجهة ──
+// ── تعديل الـ Bootstrap لضمان عدم ظهور رسائل قديمة ──
+document.addEventListener("DOMContentLoaded", () => {
+  injectAuthUI();
+  
+  const savedSession = LS.load();
+  const now = Date.now();
+
+  // إذا كانت الجلسة منتهية أو غير موجودة، امسح كل شيء وافرض تسجيل الدخول
+  if (!savedSession || now >= savedSession.sessionExpiry) {
+    LS.clear();
+    P1.student = null;
+    document.body.classList.add("not-logged");
+    // نضمن أن واجهة "انتهى الوقت" مخفية تماماً الآن
+    document.getElementById("p1-expired-overlay").classList.remove("show");
+    openLoginModal();
+    
+    // منع الإغلاق
+    document.getElementById("p1-modal-overlay").onclick = null;
+    const closeBtn = document.querySelector(".p1-m-close");
+    if(closeBtn) closeBtn.style.display = "none";
+  } else {
+    // الجلسة لا تزال صالحة
+    tryRestoreSession();
+  }
+});
+
+// ── تعديل دالة الدخول لضمان تنظيف الواجهة ──
 async function P1_login() {
   const code = document.getElementById("p1-code-input").value.trim();
   if (!code) { showError("Please enter your student code."); return; }
@@ -334,8 +359,7 @@ async function P1_login() {
       }
     } else {
       // ✅ نجاح الدخول: نظف أي رسائل قديمة فوراً
-      const expiredOverlay = document.getElementById("p1-expired-overlay");
-      if (expiredOverlay) expiredOverlay.classList.remove("show");
+      document.getElementById("p1-expired-overlay").classList.remove("show");
       
       P1.student = {
         code: code,
@@ -356,7 +380,6 @@ async function P1_login() {
   }
   setLoginLoading(false);
 }
-
 function tryRestoreSession() {
   const saved = LS.load();
   if (!saved) return;
