@@ -36,16 +36,30 @@ blockStyle.textContent = `
 `;
 document.head.appendChild(blockStyle);
 
+// ── تعديل الـ Bootstrap لضمان عدم ظهور رسائل قديمة ──
 document.addEventListener("DOMContentLoaded", () => {
   injectAuthUI();
-  const session = LS.load();
-  if (!session || isSessionExpired()) {
+  
+  const savedSession = LS.load();
+  const now = Date.now();
+
+  // إذا كانت الجلسة منتهية أو غير موجودة، امسح كل شيء وافرض تسجيل الدخول
+  if (!savedSession || now >= savedSession.sessionExpiry) {
+    LS.clear();
+    P1.student = null;
     document.body.classList.add("not-logged");
+    // نضمن أن واجهة "انتهى الوقت" مخفية تماماً الآن
+    const expiredOverlay = document.getElementById("p1-expired-overlay");
+    if (expiredOverlay) expiredOverlay.classList.remove("show");
     openLoginModal();
-    document.getElementById("p1-modal-overlay").onclick = null;
+    
+    // منع الإغلاق
+    const modalOverlay = document.getElementById("p1-modal-overlay");
+    if (modalOverlay) modalOverlay.onclick = null;
     const closeBtn = document.querySelector(".p1-m-close");
     if(closeBtn) closeBtn.style.display = "none";
   } else {
+    // الجلسة لا تزال صالحة
     tryRestoreSession();
   }
 });
@@ -302,6 +316,47 @@ function interceptActivityButtons() {
   });
 }
 
+// ── تعديل دالة الدخول لضمان تنظيف الواجهة ──
+async function P1_login() {
+  const code = document.getElementById("p1-code-input").value.trim();
+  if (!code) { showError("Please enter your student code."); return; }
+  setLoginLoading(true);
+  clearError();
+
+  try {
+    const res = await gasPost({ action: "login", code });
+    
+    if (!res.ok) {
+      if (res.msg === "WAIT_24H") {
+        showWaitPanel(res.waitHrs, res.waitMins);
+      } else {
+        showError(res.msg);
+      }
+    } else {
+      // ✅ نجاح الدخول: نظف أي رسائل قديمة فوراً
+      const expiredOverlay = document.getElementById("p1-expired-overlay");
+      if (expiredOverlay) expiredOverlay.classList.remove("show");
+      
+      P1.student = {
+        code: code,
+        name: res.name,
+        score: res.score,
+        sessionExpiry: res.sessionExpiry
+      };
+      
+      LS.save(P1.student);
+      document.body.classList.remove("not-logged");
+      updateSessionBar();
+      startSessionCountdown();
+      updateFABs();
+      showSuccessPanel(res.name, res.score);
+    }
+  } catch (err) {
+    showError("Connection error. Please try again.");
+  }
+  setLoginLoading(false);
+}
+
 function tryRestoreSession() {
   const saved = LS.load();
   if (!saved) return;
@@ -336,11 +391,14 @@ function closeLoginModal() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("p1-modal-overlay").addEventListener("click", (e) => {
-    if (e.target.id === "p1-modal-overlay") {
-      if(!document.body.classList.contains("not-logged")) closeLoginModal();
-    }
-  });
+  const overlay = document.getElementById("p1-modal-overlay");
+  if (overlay) {
+    overlay.addEventListener("click", (e) => {
+      if (e.target.id === "p1-modal-overlay") {
+        if(!document.body.classList.contains("not-logged")) closeLoginModal();
+      }
+    });
+  }
 });
 
 function showLoginPanel() {
@@ -363,41 +421,6 @@ function showSuccessPanel(name, score) {
   document.getElementById("p1-success-panel").style.display = "block";
   document.getElementById("p1-s-name-text").textContent     = `Welcome back, ${name}! 👋`;
   document.getElementById("p1-s-score-text").textContent    = `Total score: ${score} pts`;
-}
-
-// ── LOGIN MODIFIED ──
-async function P1_login() {
-  const code = document.getElementById("p1-code-input").value.trim();
-  if (!code) { showError("Please enter your student code."); return; }
-  setLoginLoading(true);
-
-  try {
-    const res = await gasPost({ action: "login", code });
-    if (!res.ok) {
-      if (res.msg === "WAIT_24H") {
-        showWaitPanel(res.waitHrs, res.waitMins);
-      } else {
-        showError(res.msg);
-      }
-    } else {
-      document.getElementById("p1-expired-overlay").classList.remove("show");
-      P1.student = {
-        code,
-        name: res.name,
-        score: res.score,
-        sessionExpiry: res.sessionExpiry
-      };
-      LS.save(P1.student);
-      document.body.classList.remove("not-logged");
-      updateSessionBar();
-      startSessionCountdown();
-      updateFABs();
-      showSuccessPanel(res.name, res.score);
-    }
-  } catch (err) {
-    showError("Connection error.");
-  }
-  setLoginLoading(false);
 }
 
 function P1_logout() {
@@ -469,8 +492,11 @@ function startSessionCountdown() {
 }
 
 function showExpiredOverlay() {
-  document.getElementById("p1-expired-overlay").classList.add("show");
-  startExpiredCountdown();
+  const overlay = document.getElementById("p1-expired-overlay");
+  if (overlay) {
+    overlay.classList.add("show");
+    startExpiredCountdown();
+  }
 }
 
 function startExpiredCountdown() {
