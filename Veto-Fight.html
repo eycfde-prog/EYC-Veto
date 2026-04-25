@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veto Conquest | Territory War</title>
+    <title>Veto Conquest | Character Panic</title>
     <style>
         :root {
             --p1-color: #00d2ff;
             --p2-color: #ff0058;
             --bg-dark: #050505;
-            --q-panel-h: 30vh;
         }
 
         body, html {
@@ -21,13 +20,11 @@
             overflow: hidden;
         }
 
-        /* Battle Ground (Flexbox is the key here) */
         .battle-ground {
             display: flex;
-            height: 70vh; /* 70% of screen */
+            height: 70vh;
             width: 100%;
-            transition: all 0.8s cubic-bezier(0.65, 0, 0.35, 1);
-            border-bottom: 5px solid white;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .territory {
@@ -36,160 +33,165 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: flex 0.8s ease-in-out;
+            transition: flex 0.6s ease-in-out;
             overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.1);
         }
 
-        /* Player 1 Side */
-        #p1-zone {
-            background: linear-gradient(45deg, #00334e, var(--p1-color));
-            flex: 1; /* Initial 50% */
+        #p1-zone { background: linear-gradient(to bottom, #001a2c, #004e7a); flex: 50; }
+        #p2-zone { background: linear-gradient(to bottom, #2c000b, #7a001e); flex: 50; }
+
+        /* Character Container */
+        .char-wrapper {
+            width: 250px;
+            height: 250px;
+            transition: transform 0.4s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* Player 2 Side */
-        #p2-zone {
-            background: linear-gradient(45deg, var(--p2-color), #4e0019);
-            flex: 1; /* Initial 50% */
+        /* Panic Animation */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-3px, 0px) rotate(-1deg); }
+            40% { transform: translate(3px, 2px) rotate(1deg); }
+            60% { transform: translate(-3px, 1px) rotate(-1deg); }
+            80% { transform: translate(3px, 1px) rotate(1deg); }
+            100% { transform: translate(1px, -2px) rotate(0deg); }
         }
 
-        /* Base Icons (SVG) */
-        .base-icon {
-            width: 150px;
-            height: 150px;
-            filter: drop-shadow(0 0 15px rgba(255,255,255,0.5));
-        }
+        .panic { animation: shake 0.2s infinite; }
 
-        .player-label {
-            font-size: 3rem;
-            text-shadow: 2px 2px 10px black;
-            margin-bottom: 20px;
-        }
-
-        /* Question Area */
-        .question-area {
-            height: var(--q-panel-h);
+        /* UI Panel */
+        .ui-panel {
+            height: 30vh;
             background: #111;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 0 50px;
-        }
-
-        .question-text {
-            font-size: 2.5rem;
-            text-align: center;
-            margin-bottom: 20px;
-            color: #eee;
+            justify-content: space-evenly;
+            border-top: 5px solid #444;
         }
 
         .controls {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            display: flex;
             gap: 20px;
-            width: 90%;
         }
 
-        .btn-conquest {
-            padding: 20px;
-            font-size: 1.5rem;
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
             cursor: pointer;
-            border: 3px solid white;
-            background: transparent;
-            color: white;
-            border-radius: 10px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
             transition: 0.3s;
         }
 
-        .p1-btn:hover { background: var(--p1-color); color: black; }
-        .p2-btn:hover { background: var(--p2-color); color: black; }
+        .p1-btn { background: var(--p1-color); color: #000; }
+        .p2-btn { background: var(--p2-color); color: #fff; }
+        .btn:active { transform: scale(0.9); }
 
-        /* Territorial Warnings */
-        .danger-zone {
-            animation: pulse-red 0.5s infinite alternate;
-        }
-
-        @keyframes pulse-red {
-            from { box-shadow: inset 0 0 20px transparent; }
-            to { box-shadow: inset 0 0 100px rgba(255,0,0,0.8); }
-        }
+        .status-text { font-size: 2rem; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-    <div class="battle-ground" id="war-map">
+    <div class="battle-ground">
         <div id="p1-zone" class="territory">
-            <h2 class="player-label">COMMANDER 1</h2>
-            <div class="base-icon">
-                <svg viewBox="0 0 100 100">
-                    <polygon points="50,5 95,95 5,95" fill="none" stroke="white" stroke-width="3"/>
-                    <circle cx="50" cy="65" r="15" fill="white">
-                        <animate attributeName="r" values="12;18;12" dur="2s" repeatCount="indefinite" />
-                    </circle>
+            <div class="status-text">Commander 1</div>
+            <div class="char-wrapper" id="p1-char-wrap">
+                <svg viewBox="0 0 100 100" id="p1-svg" width="100%" height="100%">
+                    <path id="p1-body" d="M20,80 Q50,10 80,80 T20,80" fill="var(--p1-color)" />
+                    <g id="p1-eyes">
+                        <circle cx="40" cy="55" r="5" fill="white" />
+                        <circle cx="60" cy="55" r="5" fill="white" />
+                    </g>
                 </svg>
             </div>
-            <div class="percentage" style="font-size: 2rem;" id="p1-percent">50%</div>
+            <div id="p1-label" style="font-size: 1.5rem;">SECURE</div>
         </div>
 
         <div id="p2-zone" class="territory">
-            <h2 class="player-label">COMMANDER 2</h2>
-            <div class="base-icon">
-                <svg viewBox="0 0 100 100">
-                    <rect x="20" y="20" width="60" height="60" fill="none" stroke="white" stroke-width="3"/>
-                    <rect x="35" y="35" width="30" height="30" fill="white">
-                        <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" />
-                    </rect>
+            <div class="status-text">Commander 2</div>
+            <div class="char-wrapper" id="p2-char-wrap">
+                <svg viewBox="0 0 100 100" id="p2-svg" width="100%" height="100%">
+                    <path id="p2-body" d="M20,80 Q50,10 80,80 T20,80" fill="var(--p2-color)" />
+                    <g id="p2-eyes">
+                        <circle cx="40" cy="55" r="5" fill="white" />
+                        <circle cx="60" cy="55" r="5" fill="white" />
+                    </g>
                 </svg>
             </div>
-            <div class="percentage" style="font-size: 2rem;" id="p2-percent">50%</div>
+            <div id="p2-label" style="font-size: 1.5rem;">SECURE</div>
         </div>
     </div>
 
-    <div class="question-area">
-        <div class="question-text" id="q-box">TERRITORY WAR: ANSWER TO CONQUER!</div>
+    <div class="ui-panel">
+        <div id="game-msg" style="font-size: 1.5rem;">CONQUEST IN PROGRESS...</div>
         <div class="controls">
-            <button class="btn-conquest p1-btn" onclick="conquer(1, true)">P1 Correct (+10%)</button>
-            <button class="btn-conquest p1-btn" onclick="conquer(1, false)">P1 Wrong (-10%)</button>
-            <button class="btn-conquest p2-btn" onclick="conquer(2, true)">P2 Correct (+10%)</button>
-            <button class="btn-conquest p2-btn" onclick="conquer(2, false)">P2 Wrong (-10%)</button>
+            <button class="btn p1-btn" onclick="updateWar(10)">P1 CONQUEST</button>
+            <button class="btn p2-btn" onclick="updateWar(-10)">P2 CONQUEST</button>
         </div>
     </div>
 
 <script>
-    let p1Share = 50; // Initial percentage
+    let p1Flex = 50;
 
-    function conquer(player, isCorrect) {
-        let change = 10;
+    function updateWar(amount) {
+        p1Flex += amount;
         
-        if (player === 1) {
-            p1Share += isCorrect ? change : -change;
-        } else {
-            p1Share += isCorrect ? -change : change;
-        }
+        // Limits
+        if (p1Flex > 85) p1Flex = 85;
+        if (p1Flex < 15) p1Flex = 15;
 
-        // Keep within bounds (10% to 90%)
-        if (p1Share > 90) p1Share = 90;
-        if (p1Share < 10) p1Share = 10;
-
-        applyChanges();
+        render();
     }
 
-    function applyChanges() {
+    function render() {
         const p1Zone = document.getElementById('p1-zone');
         const p2Zone = document.getElementById('p2-zone');
-        
-        p1Zone.style.flex = p1Share;
-        p2Zone.style.flex = (100 - p1Share);
+        const p1Wrap = document.getElementById('p1-char-wrap');
+        const p2Wrap = document.getElementById('p2-char-wrap');
 
-        document.getElementById('p1-percent').innerText = p1Share + "%";
-        document.getElementById('p2-percent').innerText = (100 - p1Share) + "%";
+        p1Zone.style.flex = p1Flex;
+        p2Zone.style.flex = (100 - p1Flex);
 
-        // Danger effects
-        if (p1Share <= 20) p1Zone.classList.add('danger-zone');
-        else p1Zone.classList.remove('danger-zone');
+        // Logic for Player 1 Stress
+        if (p1Flex <= 30) {
+            applyStress(p1Wrap, 'p1-eyes', 'p1-label', "PANIC!");
+        } else {
+            removeStress(p1Wrap, 'p1-eyes', 'p1-label', "SECURE");
+            p1Wrap.style.transform = `scale(${p1Flex/50})`; // Grow if winning
+        }
 
-        if (p1Share >= 80) p2Zone.classList.add('danger-zone');
-        else p2Zone.classList.remove('danger-zone');
+        // Logic for Player 2 Stress
+        if (p1Flex >= 70) {
+            applyStress(p2Wrap, 'p2-eyes', 'p2-label', "PANIC!");
+        } else {
+            removeStress(p2Wrap, 'p2-eyes', 'p2-label', "SECURE");
+            p2Wrap.style.transform = `scale(${(100-p1Flex)/50})`; // Grow if winning
+        }
+    }
+
+    function applyStress(wrapper, eyeId, labelId, text) {
+        wrapper.classList.add('panic');
+        wrapper.style.transform = "scaleX(0.6) scaleY(1.3)"; // Squash effect
+        document.getElementById(eyeId).innerHTML = `
+            <path d="M35,50 L45,60 M45,50 L35,60" stroke="white" stroke-width="3"/>
+            <path d="M55,50 L65,60 M65,50 L55,60" stroke="white" stroke-width="3"/>`;
+        document.getElementById(labelId).innerText = text;
+        document.getElementById(labelId).style.color = "yellow";
+    }
+
+    function removeStress(wrapper, eyeId, labelId, text) {
+        wrapper.classList.remove('panic');
+        document.getElementById(eyeId).innerHTML = `
+            <circle cx="40" cy="55" r="5" fill="white" />
+            <circle cx="60" cy="55" r="5" fill="white" />`;
+        document.getElementById(labelId).innerText = text;
+        document.getElementById(labelId).style.color = "white";
     }
 </script>
 </body>
