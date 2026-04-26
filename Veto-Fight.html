@@ -24,7 +24,7 @@
             overflow: hidden;
         }
 
-        /* ========== INTRO SCREEN ========== */
+        /* ========== INTRO ========== */
         #intro-screen {
             position: fixed; inset: 0;
             background: radial-gradient(ellipse at center, #0a0a1a 0%, #000 100%);
@@ -35,100 +35,100 @@
 
         .intro-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 4rem; font-weight: 900;
+            font-size: 3.5rem; font-weight: 900;
             background: linear-gradient(90deg, var(--p1-color), var(--gold), var(--p2-color));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-shadow: none;
-            margin-bottom: 10px;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
             animation: titlePulse 2s ease-in-out infinite;
         }
 
         @keyframes titlePulse {
             0%,100% { filter: brightness(1); }
-            50% { filter: brightness(1.4); }
+            50% { filter: brightness(1.5); }
         }
 
         .intro-subtitle {
-            font-size: 1.3rem; color: #888;
-            letter-spacing: 6px; margin-bottom: 50px;
+            font-size: 1.1rem; color: #666;
+            letter-spacing: 6px; margin-bottom: 40px;
             text-transform: uppercase;
         }
 
         .players-setup {
-            display: flex; gap: 60px; margin-bottom: 40px;
+            display: flex; gap: 50px; margin-bottom: 35px;
         }
 
         .player-card {
             background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px; padding: 30px;
+            border-radius: 20px; padding: 25px;
             display: flex; flex-direction: column;
-            align-items: center; gap: 20px;
-            width: 280px;
+            align-items: center; gap: 15px;
+            width: 260px;
         }
 
-        .player-card.p1-card { border-color: rgba(0,210,255,0.3); }
-        .player-card.p2-card { border-color: rgba(255,0,88,0.3); }
+        .p1-card { border: 1px solid rgba(0,210,255,0.4); }
+        .p2-card { border: 1px solid rgba(255,0,88,0.4); }
 
         .card-label {
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem; letter-spacing: 3px;
+            font-size: 0.85rem; letter-spacing: 3px;
         }
-
         .p1-card .card-label { color: var(--p1-color); }
         .p2-card .card-label { color: var(--p2-color); }
 
         .char-preview {
-            width: 120px; height: 120px;
-            position: relative;
+            width: 130px; height: 160px;
         }
 
         .char-select-btns {
-            display: flex; gap: 10px;
+            display: flex; gap: 10px; align-items: center;
         }
 
         .char-btn {
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.08);
             border: 1px solid rgba(255,255,255,0.2);
-            color: white; width: 40px; height: 40px;
+            color: white; width: 36px; height: 36px;
             border-radius: 8px; cursor: pointer;
-            font-size: 1.1rem; transition: 0.2s;
+            font-size: 1rem; transition: 0.2s;
         }
+        .char-btn:hover { background: rgba(255,255,255,0.18); }
 
-        .char-btn:hover { background: rgba(255,255,255,0.15); }
+        .char-name-label {
+            font-size: 0.9rem; min-width: 85px;
+            text-align: center; color: #ccc;
+        }
 
         .name-input {
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.06);
             border: 1px solid rgba(255,255,255,0.2);
-            color: white; padding: 12px 20px;
-            border-radius: 10px; font-size: 1.1rem;
+            color: white; padding: 10px 16px;
+            border-radius: 10px; font-size: 1rem;
             font-family: 'Rajdhani', sans-serif;
-            width: 100%; text-align: center;
-            outline: none; transition: 0.3s;
+            width: 100%; text-align: center; outline: none;
+            transition: 0.3s;
         }
-
-        .p1-card .name-input:focus { border-color: var(--p1-color); box-shadow: 0 0 15px rgba(0,210,255,0.3); }
-        .p2-card .name-input:focus { border-color: var(--p2-color); box-shadow: 0 0 15px rgba(255,0,88,0.3); }
+        .p1-card .name-input:focus { border-color: var(--p1-color); }
+        .p2-card .name-input:focus { border-color: var(--p2-color); }
 
         .start-btn {
-            background: linear-gradient(135deg, var(--p1-color), #0080ff, var(--p2-color));
+            background: linear-gradient(135deg, #0080ff, #00d2ff 40%, #ff0058);
             border: none; color: white;
-            padding: 18px 60px; font-size: 1.4rem;
+            padding: 16px 55px; font-size: 1.3rem;
             font-family: 'Orbitron', sans-serif;
             border-radius: 50px; cursor: pointer;
             letter-spacing: 3px; transition: 0.3s;
-            position: relative; overflow: hidden;
         }
-
         .start-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 40px rgba(0,210,255,0.5);
+            transform: scale(1.06);
+            box-shadow: 0 0 35px rgba(0,210,255,0.5);
         }
 
         /* ========== GAME SCREEN ========== */
-        #game-screen { display: none; height: 100vh; flex-direction: column; }
+        #game-screen {
+            display: none; height: 100vh;
+            flex-direction: column;
+        }
 
-        /* Battle Ground */
         .battle-ground {
             display: flex; height: 62vh;
             border-bottom: 3px solid #1a1a1a;
@@ -139,174 +139,130 @@
             position: relative; display: flex;
             flex-direction: column; align-items: center;
             justify-content: flex-end;
-            transition: flex 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden; padding-bottom: 20px;
+            transition: flex 0.8s cubic-bezier(0.4,0,0.2,1);
+            overflow: hidden; padding-bottom: 15px;
         }
 
         #p1-zone {
-            background: linear-gradient(160deg, #000d1a 0%, #001f3f 50%, #003366 100%);
+            background: linear-gradient(160deg,#000d1a,#001f3f,#003366);
             flex: 50;
         }
-
         #p2-zone {
-            background: linear-gradient(200deg, #1a0005 0%, #3f0010 50%, #660020 100%);
+            background: linear-gradient(200deg,#1a0005,#3f0010,#660020);
             flex: 50;
-        }
-
-        /* Ground effect */
-        .territory::before {
-            content: '';
-            position: absolute; bottom: 0; left: 0; right: 0;
-            height: 80px;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-        }
-
-        /* Particle effects */
-        .particles {
-            position: absolute; inset: 0;
-            pointer-events: none; overflow: hidden;
-        }
-
-        .particle {
-            position: absolute;
-            width: 3px; height: 3px;
-            border-radius: 50%;
-            animation: float linear infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(100%) translateX(0); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-100%) translateX(30px); opacity: 0; }
         }
 
         /* HP Bar */
         .hp-container {
-            position: absolute; top: 15px;
-            left: 20px; right: 20px;
+            position: absolute; top: 12px;
+            left: 15px; right: 15px; z-index: 5;
         }
-
         .hp-label {
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.7rem; letter-spacing: 2px;
-            margin-bottom: 5px;
+            font-size: 0.65rem; letter-spacing: 2px; margin-bottom: 4px;
         }
-
         .hp-bar-bg {
-            width: 100%; height: 12px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 6px; overflow: hidden;
+            width: 100%; height: 10px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 5px; overflow: hidden;
             border: 1px solid rgba(255,255,255,0.1);
         }
-
-        .hp-bar-fill {
-            height: 100%; border-radius: 6px;
-            transition: width 0.8s ease;
-        }
-
-        #p1-zone .hp-bar-fill { background: linear-gradient(90deg, #00ff88, #00d2ff); }
-        #p2-zone .hp-bar-fill { background: linear-gradient(90deg, #ff0058, #ff8800); }
-
+        .hp-bar-fill { height: 100%; border-radius: 5px; transition: width 0.7s ease; }
+        #p1-zone .hp-bar-fill { background: linear-gradient(90deg,#00ff88,#00d2ff); }
+        #p2-zone .hp-bar-fill { background: linear-gradient(90deg,#ff0058,#ff8800); }
         .hp-text {
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem; margin-top: 4px;
+            font-size: 0.75rem; margin-top: 3px;
         }
 
-        /* Score Badge */
+        /* Score */
         .score-badge {
-            position: absolute; top: 15px; right: 15px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 10px; padding: 5px 12px;
+            position: absolute; top: 12px; right: 12px;
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
+            font-size: 1.1rem; z-index: 5;
         }
 
-        /* 3D Character */
+        /* Character */
         .char-scene {
-            width: 200px; height: 260px;
-            position: relative;
-            margin-bottom: 10px;
-            z-index: 2;
+            width: 160px; height: 210px;
+            position: relative; z-index: 2;
+            margin-bottom: 8px;
         }
 
-        /* Character name */
         .char-name {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1rem; letter-spacing: 3px;
-            margin-bottom: 8px; z-index: 2;
+            font-size: 0.9rem; letter-spacing: 3px;
+            margin-bottom: 6px; z-index: 2;
         }
-
         #p1-zone .char-name { color: var(--p1-color); }
         #p2-zone .char-name { color: var(--p2-color); }
 
-        /* Status pill */
         .status-pill {
-            padding: 5px 18px;
-            border-radius: 20px; font-size: 0.85rem;
-            font-family: 'Orbitron', sans-serif;
+            padding: 4px 14px; border-radius: 20px;
+            font-size: 0.8rem; font-family: 'Orbitron', sans-serif;
             letter-spacing: 2px; z-index: 2;
-        }
-
-        /* ======= 3D CHARACTER SVGs ======= */
-
-        /* WARRIOR Character */
-        .warrior-char {
-            width: 100%; height: 100%;
-        }
-
-        /* MAGE Character */
-        .mage-char {
-            width: 100%; height: 100%;
         }
 
         /* Animations */
         @keyframes idle-bob {
-            0%,100% { transform: translateY(0); }
+            0%,100% { transform: translateY(0px); }
             50% { transform: translateY(-8px); }
         }
-
-        @keyframes shake {
-            0%,100% { transform: translate(0,0) rotate(0); }
-            25% { transform: translate(-4px,2px) rotate(-2deg); }
-            75% { transform: translate(4px,-2px) rotate(2deg); }
+        @keyframes shake-anim {
+            0%,100% { transform: translate(0,0); }
+            25% { transform: translate(-5px,3px); }
+            75% { transform: translate(5px,-3px); }
+        }
+        @keyframes attack-anim {
+            0% { transform: translateX(0) scale(1); }
+            30% { transform: translateX(25px) scale(1.1); }
+            60% { transform: translateX(-8px) scale(0.95); }
+            100% { transform: translateX(0) scale(1); }
         }
 
-        @keyframes attack-slash {
-            0% { transform: translateX(0) rotate(0); }
-            30% { transform: translateX(30px) rotate(15deg) scale(1.1); }
-            60% { transform: translateX(-10px) rotate(-5deg); }
-            100% { transform: translateX(0) rotate(0); }
-        }
+        .idle { animation: idle-bob 2.2s ease-in-out infinite; }
+        .panic { animation: shake-anim 0.12s infinite; }
+        .attacking { animation: attack-anim 0.5s ease; }
 
-        @keyframes death-fall {
-            0% { transform: rotate(0) translateY(0); opacity: 1; }
-            100% { transform: rotate(90deg) translateY(50px); opacity: 0.3; }
-        }
-
-        .idle { animation: idle-bob 2s ease-in-out infinite; }
-        .panic { animation: shake 0.1s infinite; }
-        .attacking { animation: attack-slash 0.5s ease; }
-        .defeated { animation: death-fall 1s ease forwards; }
-
-        /* VS Divider */
+        /* VS */
         .vs-divider {
             position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%,-50%);
             z-index: 10;
-            display: flex; flex-direction: column;
-            align-items: center;
         }
-
         .vs-circle {
-            width: 60px; height: 60px;
-            background: radial-gradient(circle, #1a1a1a, #000);
-            border: 2px solid #333;
-            border-radius: 50%;
+            width: 55px; height: 55px;
+            background: radial-gradient(circle,#1a1a2a,#000);
+            border: 2px solid #333; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.1rem; font-weight: 900;
+            font-size: 1rem; font-weight: 900;
             color: var(--gold);
+        }
+
+        /* Damage flash */
+        .damage-flash {
+            position: absolute; inset: 0;
+            pointer-events: none; opacity: 0;
+            transition: opacity 0.08s;
+            background: radial-gradient(circle,rgba(255,50,50,0.35),transparent);
+            z-index: 3;
+        }
+        .damage-flash.active { opacity: 1; }
+
+        /* Combo text */
+        .combo-text {
+            position: absolute; font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem; font-weight: 900;
+            pointer-events: none; z-index: 20;
+            left: 50%; transform: translateX(-50%);
+            top: 38%;
+            animation: comboAnim 1s ease forwards;
+        }
+        @keyframes comboAnim {
+            0%   { transform: translateX(-50%) scale(0.5) translateY(0); opacity: 1; }
+            50%  { transform: translateX(-50%) scale(1.3) translateY(-25px); opacity: 1; }
+            100% { transform: translateX(-50%) scale(1) translateY(-55px); opacity: 0; }
         }
 
         /* ========== UI PANEL ========== */
@@ -314,95 +270,78 @@
             height: 38vh; background: #0a0a0a;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            padding: 15px 40px; position: relative;
+            padding: 12px 40px; position: relative;
         }
 
-        /* Progress bar */
         .round-progress {
-            position: absolute; top: 0; left: 0; right: 0;
-            height: 3px; background: #1a1a1a;
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: #1a1a1a;
         }
-
         .round-fill {
             height: 100%;
             background: linear-gradient(90deg, var(--p1-color), var(--p2-color));
             transition: width 0.6s ease;
         }
 
-        /* Turn indicator */
         .turn-banner {
             display: flex; align-items: center; gap: 10px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
-
         .turn-dot {
-            width: 10px; height: 10px;
-            border-radius: 50%;
+            width: 9px; height: 9px; border-radius: 50%;
             animation: blink 1s ease-in-out infinite;
         }
-
         @keyframes blink {
-            0%,100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.7); }
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
-
         .turn-text {
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem; letter-spacing: 3px;
+            font-size: 0.85rem; letter-spacing: 3px;
+        }
+        .q-counter {
+            margin-left: 15px; color: #444;
+            font-size: 0.75rem; font-family: 'Orbitron', sans-serif;
         }
 
-        /* Question */
         .question-box {
-            font-size: 1.8rem; margin-bottom: 18px;
+            font-size: 1.7rem; margin-bottom: 15px;
             text-align: center; color: #fff;
             font-family: 'Rajdhani', sans-serif;
             font-weight: 600; line-height: 1.3;
             max-width: 800px;
         }
 
-        .question-box span.blank {
-            color: var(--gold);
-            border-bottom: 2px solid var(--gold);
-            padding: 0 5px;
-        }
-
-        /* Options */
         .options-grid {
             display: grid; grid-template-columns: 1fr 1fr;
-            gap: 10px; width: 80%;
+            gap: 9px; width: 78%;
         }
 
         .opt-btn {
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.12);
-            color: #bbb; padding: 14px 20px;
-            font-size: 1.2rem; font-family: 'Rajdhani', sans-serif;
+            color: #bbb; padding: 12px 18px;
+            font-size: 1.15rem; font-family: 'Rajdhani', sans-serif;
             font-weight: 600; border-radius: 10px;
             cursor: pointer; transition: 0.2s;
-            text-align: left; position: relative;
-            overflow: hidden;
+            text-align: left; position: relative; overflow: hidden;
         }
-
-        .opt-btn:hover {
-            border-color: rgba(255,255,255,0.4);
-            color: white;
-            background: rgba(255,255,255,0.07);
+        .opt-btn:hover:not(:disabled) {
+            border-color: rgba(255,255,255,0.35);
+            color: white; background: rgba(255,255,255,0.07);
             transform: translateX(3px);
         }
-
         .opt-btn .key-hint {
-            position: absolute; right: 15px; top: 50%;
+            position: absolute; right: 12px; top: 50%;
             transform: translateY(-50%);
-            font-size: 0.8rem; color: #444;
+            font-size: 0.75rem; color: #333;
             font-family: 'Orbitron', sans-serif;
         }
-
         .opt-btn.correct {
             background: rgba(0,255,136,0.15) !important;
             border-color: #00ff88 !important;
             color: #00ff88 !important;
         }
-
         .opt-btn.wrong {
             background: rgba(255,0,0,0.15) !important;
             border-color: #ff4444 !important;
@@ -412,119 +351,97 @@
         /* ========== RESULT SCREEN ========== */
         #result-screen {
             display: none; position: fixed; inset: 0;
-            background: radial-gradient(ellipse at center, #050510 0%, #000 100%);
+            background: radial-gradient(ellipse at center,#050510,#000);
             flex-direction: column; align-items: center;
             justify-content: center; z-index: 200;
         }
-
         .result-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem; letter-spacing: 8px;
-            color: #555; margin-bottom: 10px;
-            text-transform: uppercase;
+            font-size: 1rem; letter-spacing: 8px;
+            color: #555; margin-bottom: 8px;
         }
-
         .winner-name {
             font-family: 'Orbitron', sans-serif;
-            font-size: 4rem; font-weight: 900;
-            animation: winnerGlow 1.5s ease-in-out infinite;
-            margin-bottom: 20px;
+            font-size: 3.5rem; font-weight: 900;
+            margin-bottom: 15px;
+            animation: winGlow 1.5s ease-in-out infinite;
         }
-
-        @keyframes winnerGlow {
-            0%,100% { filter: drop-shadow(0 0 20px currentColor); }
-            50% { filter: drop-shadow(0 0 60px currentColor); }
+        @keyframes winGlow {
+            0%,100% { filter: drop-shadow(0 0 15px currentColor); }
+            50% { filter: drop-shadow(0 0 50px currentColor); }
         }
-
         .winner-char-display {
-            width: 200px; height: 250px; margin: 20px;
+            width: 180px; height: 220px; margin: 10px;
         }
-
         .final-scores {
-            display: flex; gap: 40px; margin: 20px;
+            display: flex; gap: 35px; margin: 15px;
+            align-items: center;
         }
-
         .final-score-card {
-            text-align: center; padding: 20px 30px;
+            text-align: center; padding: 18px 28px;
             background: rgba(255,255,255,0.03);
-            border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.08);
         }
-
-        .final-score-card .fscore {
+        .fscore {
             font-family: 'Orbitron', sans-serif;
-            font-size: 2.5rem; font-weight: 900;
+            font-size: 2.3rem; font-weight: 900;
         }
-
-        .final-score-card .fname {
-            font-size: 1rem; color: #666; margin-top: 5px;
-        }
+        .fname { font-size: 0.9rem; color: #555; margin-top: 4px; }
 
         .play-again-btn {
             background: transparent;
             border: 2px solid var(--gold);
-            color: var(--gold); padding: 15px 50px;
-            font-size: 1.2rem; font-family: 'Orbitron', sans-serif;
+            color: var(--gold); padding: 13px 45px;
+            font-size: 1.1rem; font-family: 'Orbitron', sans-serif;
             border-radius: 50px; cursor: pointer;
             letter-spacing: 3px; transition: 0.3s;
-            margin-top: 20px;
+            margin-top: 15px;
         }
+        .play-again-btn:hover { background: var(--gold); color: #000; }
 
-        .play-again-btn:hover {
-            background: var(--gold); color: #000;
-        }
-
-        /* ========== DAMAGE FLASH ========== */
-        .damage-flash {
+        /* Particles */
+        .particles {
             position: absolute; inset: 0;
-            pointer-events: none; opacity: 0;
-            transition: opacity 0.1s;
+            pointer-events: none; overflow: hidden;
         }
-
-        .damage-flash.active { opacity: 1; }
-
-        /* ========== COMBO TEXT ========== */
-        .combo-text {
-            position: absolute; font-family: 'Orbitron', sans-serif;
-            font-size: 2rem; font-weight: 900;
-            pointer-events: none; z-index: 20;
-            animation: comboAnim 1s ease forwards;
+        .particle {
+            position: absolute; border-radius: 50%;
+            animation: floatUp linear infinite;
         }
-
-        @keyframes comboAnim {
-            0% { transform: scale(0.5) translateY(0); opacity: 1; }
-            50% { transform: scale(1.3) translateY(-30px); opacity: 1; }
-            100% { transform: scale(1) translateY(-60px); opacity: 0; }
+        @keyframes floatUp {
+            0%   { transform: translateY(0) translateX(0); opacity: 0; }
+            10%  { opacity: 0.6; }
+            90%  { opacity: 0.4; }
+            100% { transform: translateY(-300px) translateX(20px); opacity: 0; }
         }
-
     </style>
 </head>
 <body>
 
-<!-- ===== INTRO SCREEN ===== -->
+<!-- ===== INTRO ===== -->
 <div id="intro-screen">
     <div class="intro-title">⚔️ VETO CONQUEST</div>
     <div class="intro-subtitle">Grammar Battle Arena</div>
 
     <div class="players-setup">
-        <!-- Player 1 -->
         <div class="player-card p1-card">
             <div class="card-label">⚡ PLAYER 1</div>
             <div class="char-preview" id="p1-preview"></div>
             <div class="char-select-btns">
                 <button class="char-btn" onclick="changeChar(1,-1)">◀</button>
-                <span id="p1-char-name" style="font-size:0.9rem;align-self:center;min-width:80px;text-align:center"></span>
+                <span class="char-name-label" id="p1-char-label">Warrior</span>
                 <button class="char-btn" onclick="changeChar(1,1)">▶</button>
             </div>
             <input class="name-input" id="p1-input" placeholder="Enter name..." maxlength="12">
         </div>
 
-        <!-- Player 2 -->
         <div class="player-card p2-card">
             <div class="card-label">🔥 PLAYER 2</div>
             <div class="char-preview" id="p2-preview"></div>
             <div class="char-select-btns">
                 <button class="char-btn" onclick="changeChar(2,-1)">◀</button>
-                <span id="p2-char-name" style="font-size:0.9rem;align-self:center;min-width:80px;text-align:center"></span>
+                <span class="char-name-label" id="p2-char-label">Mage</span>
                 <button class="char-btn" onclick="changeChar(2,1)">▶</button>
             </div>
             <input class="name-input" id="p2-input" placeholder="Enter name..." maxlength="12">
@@ -536,51 +453,50 @@
 
 <!-- ===== GAME SCREEN ===== -->
 <div id="game-screen">
-    <div class="battle-ground" id="war-map">
+    <div class="battle-ground">
 
-        <!-- P1 Zone -->
+        <!-- P1 -->
         <div id="p1-zone" class="territory">
             <div class="particles" id="p1-particles"></div>
-            <div class="damage-flash" id="p1-flash" style="background:radial-gradient(circle,rgba(255,0,0,0.3),transparent)"></div>
-
+            <div class="damage-flash" id="p1-flash"></div>
             <div class="hp-container">
-                <div class="hp-label" style="color:var(--p1-color)">HP</div>
+                <div class="hp-label" style="color:var(--p1-color)">❤️ HP</div>
                 <div class="hp-bar-bg">
                     <div class="hp-bar-fill" id="p1-hp-fill" style="width:100%"></div>
                 </div>
                 <div class="hp-text" id="p1-hp-text" style="color:var(--p1-color)">100 / 100</div>
             </div>
-
-            <div class="score-badge" id="p1-score-badge" style="color:var(--p1-color)">0</div>
-
-            <div class="char-scene idle" id="p1-char-scene"></div>
-            <div class="char-name" id="p1-name-display">Commander 1</div>
-            <div class="status-pill" id="p1-status" style="background:rgba(0,210,255,0.1);border:1px solid var(--p1-color);color:var(--p1-color)">READY</div>
+            <div class="score-badge" id="p1-score-badge" style="color:var(--p1-color)">⭐ 0</div>
+            <div class="char-scene" id="p1-char-scene"></div>
+            <div class="char-name" id="p1-name-display">Player 1</div>
+            <div class="status-pill" id="p1-status"
+                 style="background:rgba(0,210,255,0.1);border:1px solid var(--p1-color);color:var(--p1-color)">
+                READY
+            </div>
         </div>
 
-        <!-- VS -->
         <div class="vs-divider">
             <div class="vs-circle">VS</div>
         </div>
 
-        <!-- P2 Zone -->
+        <!-- P2 -->
         <div id="p2-zone" class="territory">
             <div class="particles" id="p2-particles"></div>
-            <div class="damage-flash" id="p2-flash" style="background:radial-gradient(circle,rgba(255,0,0,0.3),transparent)"></div>
-
+            <div class="damage-flash" id="p2-flash"></div>
             <div class="hp-container">
-                <div class="hp-label" style="color:var(--p2-color)">HP</div>
+                <div class="hp-label" style="color:var(--p2-color)">❤️ HP</div>
                 <div class="hp-bar-bg">
                     <div class="hp-bar-fill" id="p2-hp-fill" style="width:100%"></div>
                 </div>
                 <div class="hp-text" id="p2-hp-text" style="color:var(--p2-color)">100 / 100</div>
             </div>
-
-            <div class="score-badge" id="p2-score-badge" style="color:var(--p2-color)">0</div>
-
-            <div class="char-scene idle" id="p2-char-scene"></div>
-            <div class="char-name" id="p2-name-display">Commander 2</div>
-            <div class="status-pill" id="p2-status" style="background:rgba(255,0,88,0.1);border:1px solid var(--p2-color);color:var(--p2-color)">READY</div>
+            <div class="score-badge" id="p2-score-badge" style="color:var(--p2-color)">⭐ 0</div>
+            <div class="char-scene" id="p2-char-scene"></div>
+            <div class="char-name" id="p2-name-display">Player 2</div>
+            <div class="status-pill" id="p2-status"
+                 style="background:rgba(255,0,88,0.1);border:1px solid var(--p2-color);color:var(--p2-color)">
+                READY
+            </div>
         </div>
     </div>
 
@@ -589,20 +505,17 @@
         <div class="round-progress">
             <div class="round-fill" id="round-fill" style="width:0%"></div>
         </div>
-
         <div class="turn-banner">
-            <div class="turn-dot" id="turn-dot"></div>
+            <div class="turn-dot" id="turn-dot" style="background:var(--p1-color)"></div>
             <div class="turn-text" id="turn-txt">PLAYER 1 TURN</div>
-            <div style="margin-left:20px;color:#444;font-size:0.8rem;font-family:'Orbitron',sans-serif" id="q-counter">Q 1/10</div>
+            <div class="q-counter" id="q-counter">Q 1 / 10</div>
         </div>
-
         <div class="question-box" id="q-text">Loading...</div>
-
         <div class="options-grid">
-            <button class="opt-btn" onclick="checkAnswer(0)" id="opt0"><span class="key-hint">A</span></button>
-            <button class="opt-btn" onclick="checkAnswer(1)" id="opt1"><span class="key-hint">B</span></button>
-            <button class="opt-btn" onclick="checkAnswer(2)" id="opt2"><span class="key-hint">C</span></button>
-            <button class="opt-btn" onclick="checkAnswer(3)" id="opt3"><span class="key-hint">D</span></button>
+            <button class="opt-btn" id="opt0" onclick="checkAnswer(0)"><span class="key-hint">A</span></button>
+            <button class="opt-btn" id="opt1" onclick="checkAnswer(1)"><span class="key-hint">B</span></button>
+            <button class="opt-btn" id="opt2" onclick="checkAnswer(2)"><span class="key-hint">C</span></button>
+            <button class="opt-btn" id="opt3" onclick="checkAnswer(3)"><span class="key-hint">D</span></button>
         </div>
     </div>
 </div>
@@ -610,14 +523,14 @@
 <!-- ===== RESULT SCREEN ===== -->
 <div id="result-screen">
     <div class="result-title">🏆 CONQUEST COMPLETE</div>
-    <div class="winner-name" id="winner-name-display">PLAYER 1 WINS!</div>
+    <div class="winner-name" id="winner-name-display"></div>
     <div class="winner-char-display" id="winner-char-display"></div>
     <div class="final-scores">
         <div class="final-score-card">
             <div class="fscore" id="fs1" style="color:var(--p1-color)">0</div>
             <div class="fname" id="fn1">Player 1</div>
         </div>
-        <div style="display:flex;align-items:center;color:#444;font-size:2rem">—</div>
+        <div style="color:#333;font-size:1.5rem">—</div>
         <div class="final-score-card">
             <div class="fscore" id="fs2" style="color:var(--p2-color)">0</div>
             <div class="fname" id="fn2">Player 2</div>
@@ -628,656 +541,580 @@
 
 <script>
 // ============================================================
-//  CHARACTER DEFINITIONS  (3D-style SVG)
+// COLOR HELPERS
+// ============================================================
+function hexToRgb(hex) {
+    const r = parseInt(hex.slice(1,3),16);
+    const g = parseInt(hex.slice(3,5),16);
+    const b = parseInt(hex.slice(5,7),16);
+    return {r,g,b};
+}
+function lighten(hex, amt) {
+    const c = hexToRgb(hex);
+    return `rgb(${Math.min(255,c.r+amt)},${Math.min(255,c.g+amt)},${Math.min(255,c.b+amt)})`;
+}
+function darken(hex, amt) {
+    const c = hexToRgb(hex);
+    return `rgb(${Math.max(0,c.r-amt)},${Math.max(0,c.g-amt)},${Math.max(0,c.b-amt)})`;
+}
+
+// ============================================================
+// CHARACTERS
 // ============================================================
 const CHARACTERS = [
     {
-        name: "Warrior",
-        emoji: "⚔️",
-        getSVG: (color, flipped) => `
-        <svg viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;${flipped?'transform:scaleX(-1)':''}">
-          <defs>
-            <radialGradient id="wbody${flipped?'2':''}" cx="40%" cy="30%" r="60%">
-              <stop offset="0%" stop-color="${lighten(color,60)}"/>
-              <stop offset="100%" stop-color="${color}"/>
-            </radialGradient>
-            <radialGradient id="wface${flipped?'2':''}" cx="40%" cy="35%" r="55%">
-              <stop offset="0%" stop-color="#ffe0c0"/>
-              <stop offset="100%" stop-color="#c8845a"/>
-            </radialGradient>
-            <filter id="wshadow${flipped?'2'.''}">
-              <feDropShadow dx="2" dy="4" stdDeviation="3" flood-color="${color}" flood-opacity="0.5"/>
-            </filter>
-          </defs>
+        name: "⚔️ Warrior",
+        build: (color, flip) => {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+            svg.setAttribute("viewBox","0 0 120 200");
+            svg.style.cssText = `width:100%;height:100%;${flip ? 'transform:scaleX(-1)' : ''}`;
 
-          <!-- Shadow on ground -->
-          <ellipse cx="60" cy="195" rx="30" ry="6" fill="rgba(0,0,0,0.4)"/>
+            // Shadow
+            addEl(svg,"ellipse",{cx:60,cy:196,rx:28,ry:5,fill:"rgba(0,0,0,0.4)"});
 
-          <!-- Legs -->
-          <rect x="42" y="130" width="16" height="45" rx="6" fill="url(#wbody${flipped?'2':''})" filter="url(#wshadow${flipped?'2':''})"/>
-          <rect x="62" y="130" width="16" height="45" rx="6" fill="url(#wbody${flipped?'2':''})" filter="url(#wshadow${flipped?'2':''})"/>
-          <!-- Boots -->
-          <rect x="40" y="163" width="20" height="14" rx="5" fill="#1a0a00"/>
-          <rect x="60" y="163" width="20" height="14" rx="5" fill="#1a0a00"/>
+            // Boots
+            addEl(svg,"rect",{x:40,y:165,width:18,height:14,rx:5,fill:"#111"});
+            addEl(svg,"rect",{x:62,y:165,width:18,height:14,rx:5,fill:"#111"});
 
-          <!-- Body / Armor -->
-          <rect x="32" y="75" width="56" height="60" rx="12" fill="url(#wbody${flipped?'2':''})" filter="url(#wshadow${flipped?'2':''})"/>
-          <!-- Chest plate -->
-          <rect x="38" y="80" width="44" height="45" rx="8" fill="${darken(color,30)}" opacity="0.6"/>
-          <!-- Armor lines -->
-          <line x1="60" y1="80" x2="60" y2="125" stroke="${lighten(color,40)}" stroke-width="1.5" opacity="0.5"/>
-          <line x1="38" y1="100" x2="82" y2="100" stroke="${lighten(color,40)}" stroke-width="1" opacity="0.4"/>
+            // Legs
+            addEl(svg,"rect",{x:42,y:128,width:15,height:40,rx:6,fill:darken(color,20)});
+            addEl(svg,"rect",{x:63,y:128,width:15,height:40,rx:6,fill:darken(color,20)});
 
-          <!-- Left arm -->
-          <rect x="14" y="78" width="18" height="48" rx="8" fill="url(#wbody${flipped?'2':''})" filter="url(#wshadow${flipped?'2':''})"/>
-          <!-- Shield -->
-          <ellipse cx="14" cy="105" rx="12" ry="16" fill="${darken(color,20)}" stroke="${lighten(color,50)}" stroke-width="2"/>
-          <ellipse cx="14" cy="105" rx="7" ry="10" fill="${color}" opacity="0.5"/>
+            // Body
+            const body = addEl(svg,"rect",{x:32,y:74,width:56,height:58,rx:12,fill:color});
+            // Chest plate
+            addEl(svg,"rect",{x:38,y:79,width:44,height:44,rx:8,fill:darken(color,30),"fill-opacity":"0.6"});
+            // Center line
+            addEl(svg,"line",{x1:60,y1:79,x2:60,y2:123,stroke:lighten(color,60),"stroke-width":"1.5","stroke-opacity":"0.5"});
 
-          <!-- Right arm -->
-          <rect x="88" y="78" width="18" height="48" rx="8" fill="url(#wbody${flipped?'2':''})" filter="url(#wshadow${flipped?'2':''})"/>
-          <!-- Sword -->
-          <rect x="104" y="60" width="5" height="60" rx="2" fill="#c0c0c0" filter="url(#wshadow${flipped?'2':''})"/>
-          <rect x="96" y="115" width="22" height="6" rx="2" fill="#8B4513"/>
-          <polygon points="106,30 103,60 109,60" fill="#e8e8e8"/>
+            // Shield (left)
+            addEl(svg,"rect",{x:10,y:78,width:18,height:48,rx:7,fill:darken(color,15)});
+            addEl(svg,"ellipse",{cx:12,cy:104,rx:11,ry:15,fill:darken(color,10),stroke:lighten(color,50),"stroke-width":"2"});
+            addEl(svg,"ellipse",{cx:12,cy:104,rx:6,ry:9,fill:color,"fill-opacity":"0.5"});
 
-          <!-- Neck -->
-          <rect x="52" y="60" width="16" height="18" rx="6" fill="#c8845a"/>
+            // Sword arm (right)
+            addEl(svg,"rect",{x:90,y:78,width:18,height:48,rx:7,fill:darken(color,15)});
+            // Sword
+            addEl(svg,"rect",{x:106,y:52,width:5,height:62,rx:2,fill:"#d0d0d0"});
+            addEl(svg,"rect",{x:98,y:108,width:22,height:6,rx:2,fill:"#8B4513"});
+            const tip = addEl(svg,"polygon",{points:"108,28 104,52 112,52",fill:"#eee"});
 
-          <!-- Head -->
-          <ellipse cx="60" cy="48" rx="24" ry="26" fill="url(#wface${flipped?'2':''})" filter="url(#wshadow${flipped?'2':''})"/>
-          <!-- Helmet -->
-          <path d="M36,46 Q36,18 60,16 Q84,18 84,46 L80,46 Q80,26 60,24 Q40,26 40,46 Z" fill="${darken(color,10)}" opacity="0.85"/>
-          <!-- Helmet crest -->
-          <rect x="56" y="10" width="8" height="20" rx="3" fill="${color}"/>
-          <!-- Face -->
-          <ellipse cx="52" cy="52" rx="5" ry="4" fill="white"/>
-          <ellipse cx="68" cy="52" rx="5" ry="4" fill="white"/>
-          <circle cx="53" cy="53" r="2.5" fill="#1a1a3a"/>
-          <circle cx="69" cy="53" r="2.5" fill="#1a1a3a"/>
-          <!-- Pupils shine -->
-          <circle cx="54" cy="52" r="1" fill="white"/>
-          <circle cx="70" cy="52" r="1" fill="white"/>
-          <!-- Mouth -->
-          <path d="M54,62 Q60,66 66,62" stroke="#8B4513" stroke-width="1.5" fill="none"/>
-          <!-- Cheeks -->
-          <ellipse cx="45" cy="58" rx="5" ry="3" fill="#ff9999" opacity="0.3"/>
-          <ellipse cx="75" cy="58" rx="5" ry="3" fill="#ff9999" opacity="0.3"/>
-        </svg>`
+            // Neck
+            addEl(svg,"rect",{x:52,y:60,width:16,height:16,rx:6,fill:"#c8845a"});
+
+            // Head
+            addEl(svg,"ellipse",{cx:60,cy:46,rx:24,ry:26,fill:"#d4935e"});
+
+            // Helmet
+            addEl(svg,"path",{d:"M36,44 Q36,16 60,14 Q84,16 84,44 L80,44 Q80,24 60,22 Q40,24 40,44 Z",fill:darken(color,10),"fill-opacity":"0.9"});
+            // Helmet crest
+            addEl(svg,"rect",{x:56,y:8,width:8,height:18,rx:3,fill:lighten(color,20)});
+
+            // Face
+            addEl(svg,"ellipse",{cx:51,cy:52,rx:5,ry:4,fill:"white"});
+            addEl(svg,"ellipse",{cx:69,cy:52,rx:5,ry:4,fill:"white"});
+            addEl(svg,"circle",{cx:52,cy:53,r:"2.5",fill:"#1a1a3a"});
+            addEl(svg,"circle",{cx:70,cy:53,r:"2.5",fill:"#1a1a3a"});
+            addEl(svg,"circle",{cx:53,cy:52,r:"1",fill:"white"});
+            addEl(svg,"circle",{cx:71,cy:52,r:"1",fill:"white"});
+            addEl(svg,"path",{d:"M54,62 Q60,67 66,62",stroke:"#8B4513","stroke-width":"1.5",fill:"none"});
+
+            return svg;
+        }
     },
     {
-        name: "Mage",
-        emoji: "🔮",
-        getSVG: (color, flipped) => `
-        <svg viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;${flipped?'transform:scaleX(-1)':''}">
-          <defs>
-            <radialGradient id="mbody${flipped?'2':''}" cx="40%" cy="30%" r="60%">
-              <stop offset="0%" stop-color="${lighten(color,60)}"/>
-              <stop offset="100%" stop-color="${color}"/>
-            </radialGradient>
-            <radialGradient id="mface${flipped?'2':''}" cx="40%" cy="35%" r="55%">
-              <stop offset="0%" stop-color="#e8d5ff"/>
-              <stop offset="100%" stop-color="#b088cc"/>
-            </radialGradient>
-            <filter id="mglow${flipped?'2':''}">
-              <feGaussianBlur stdDeviation="3" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
+        name: "🔮 Mage",
+        build: (color, flip) => {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+            svg.setAttribute("viewBox","0 0 120 200");
+            svg.style.cssText = `width:100%;height:100%;${flip ? 'transform:scaleX(-1)' : ''}`;
 
-          <!-- Shadow -->
-          <ellipse cx="60" cy="195" rx="28" ry="5" fill="rgba(0,0,0,0.35)"/>
+            addEl(svg,"ellipse",{cx:60,cy:196,rx:26,ry:5,fill:"rgba(0,0,0,0.35)"});
 
-          <!-- Robe bottom -->
-          <path d="M35,120 Q25,175 45,180 Q60,185 75,180 Q95,175 85,120 Z" fill="${darken(color,20)}"/>
-          <path d="M45,140 Q42,170 50,175 Q60,178 70,175 Q78,170 75,140 Z" fill="${darken(color,35)}" opacity="0.6"/>
+            // Robe bottom
+            addEl(svg,"path",{d:"M34,118 Q22,175 44,180 Q60,186 76,180 Q98,175 86,118 Z",fill:darken(color,25)});
+            addEl(svg,"path",{d:"M44,138 Q40,168 50,174 Q60,178 70,174 Q80,168 76,138 Z",fill:darken(color,40),"fill-opacity":"0.6"});
 
-          <!-- Robe body -->
-          <path d="M30,70 L35,135 Q60,148 85,135 L90,70 Q60,58 30,70 Z" fill="url(#mbody${flipped?'2':''})"/>
-          <!-- Robe trim -->
-          <path d="M30,70 Q60,62 90,70" stroke="${lighten(color,50)}" stroke-width="2" fill="none" opacity="0.6"/>
+            // Robe body
+            addEl(svg,"path",{d:"M30,68 L34,132 Q60,146 86,132 L90,68 Q60,56 30,68 Z",fill:color});
 
-          <!-- Left sleeve -->
-          <path d="M30,72 Q10,90 8,115 L20,118 Q22,100 35,88 Z" fill="url(#mbody${flipped?'2':''})"/>
-          <!-- Left hand -->
-          <circle cx="12" cy="120" r="8" fill="#b088cc"/>
-          <!-- Magic orb -->
-          <circle cx="8" cy="125" r="10" fill="${color}" opacity="0.3" filter="url(#mglow${flipped?'2':''})"/>
-          <circle cx="8" cy="125" r="6" fill="${lighten(color,60)}" opacity="0.8"/>
+            // Left sleeve
+            addEl(svg,"path",{d:"M30,70 Q8,90 6,116 L20,119 Q22,100 35,86 Z",fill:darken(color,10)});
+            // Magic orb in left hand
+            addEl(svg,"circle",{cx:8,cy:122,r:"10",fill:lighten(color,40),"fill-opacity":"0.4"});
+            addEl(svg,"circle",{cx:8,cy:122,r:"6",fill:lighten(color,70),"fill-opacity":"0.9"});
+            addEl(svg,"circle",{cx:6,cy:120,r:"2",fill:"white","fill-opacity":"0.8"});
 
-          <!-- Right sleeve + staff -->
-          <path d="M90,72 Q110,90 112,115 L100,118 Q98,100 85,88 Z" fill="url(#mbody${flipped?'2':''})"/>
-          <!-- Staff -->
-          <rect x="108" y="40" width="5" height="85" rx="2" fill="#4a2800"/>
-          <!-- Staff crystal -->
-          <polygon points="110,20 104,40 116,40" fill="${lighten(color,40)}" filter="url(#mglow${flipped?'2':''})"/>
-          <circle cx="110" cy="30" r="8" fill="${color}" opacity="0.6" filter="url(#mglow${flipped?'2':''})"/>
-          <!-- Stars around staff -->
-          <text x="95" y="25" font-size="10" fill="${lighten(color,50)}" opacity="0.8">✦</text>
-          <text x="115" y="45" font-size="8" fill="${lighten(color,50)}" opacity="0.6">✦</text>
+            // Right sleeve + staff
+            addEl(svg,"path",{d:"M90,70 Q112,90 114,116 L100,119 Q98,100 85,86 Z",fill:darken(color,10)});
+            addEl(svg,"rect",{x:109,y:38,width:5,height:86,rx:2,fill:"#4a2800"});
+            // Staff crystal
+            addEl(svg,"polygon",{points:"111,18 105,38 117,38",fill:lighten(color,50)});
+            addEl(svg,"circle",{cx:111,cy:28,r:"9",fill:color,"fill-opacity":"0.7"});
+            addEl(svg,"circle",{cx:108,cy:25,r:"3",fill:"white","fill-opacity":"0.8"});
 
-          <!-- Neck -->
-          <rect x="52" y="56" width="16" height="16" rx="6" fill="#b088cc"/>
+            // Neck
+            addEl(svg,"rect",{x:52,y:56,width:16,height:14,rx:6,fill:"#b088cc"});
 
-          <!-- Head -->
-          <ellipse cx="60" cy="43" rx="23" ry="25" fill="url(#mface${flipped?'2':''})"/>
+            // Head
+            addEl(svg,"ellipse",{cx:60,cy:42,rx:23,ry:25,fill:"#d8b8f0"});
 
-          <!-- Wizard hat -->
-          <path d="M37,38 Q40,20 60,5 Q80,20 83,38 Z" fill="${darken(color,15)}"/>
-          <ellipse cx="60" cy="38" rx="25" ry="7" fill="${darken(color,5)}"/>
-          <!-- Hat stars -->
-          <text x="52" y="30" font-size="8" fill="${lighten(color,60)}" opacity="0.9">★</text>
-          <text x="63" y="20" font-size="6" fill="${lighten(color,60)}" opacity="0.7">★</text>
+            // Wizard hat
+            addEl(svg,"path",{d:"M36,38 Q40,18 60,4 Q80,18 84,38 Z",fill:darken(color,15)});
+            addEl(svg,"ellipse",{cx:60,cy:38,rx:26,ry:7,fill:darken(color,5)});
 
-          <!-- Face -->
-          <ellipse cx="51" cy="47" rx="5" ry="4.5" fill="white"/>
-          <ellipse cx="69" cy="47" rx="5" ry="4.5" fill="white"/>
-          <circle cx="52" cy="48" r="3" fill="#2a1a4a"/>
-          <circle cx="70" cy="48" r="3" fill="#2a1a4a"/>
-          <circle cx="53" cy="47" r="1.2" fill="white"/>
-          <circle cx="71" cy="47" r="1.2" fill="white"/>
-          <!-- Sparkle in eyes -->
-          <circle cx="54" cy="46" r="0.8" fill="${lighten(color,70)}" opacity="0.9"/>
-          <circle cx="72" cy="46" r="0.8" fill="${lighten(color,70)}" opacity="0.9"/>
-          <!-- Eyebrows -->
-          <path d="M46,42 Q51,40 56,42" stroke="#7a5a8a" stroke-width="1.5" fill="none"/>
-          <path d="M64,42 Q69,40 74,42" stroke="#7a5a8a" stroke-width="1.5" fill="none"/>
-          <!-- Mouth -->
-          <path d="M54,57 Q60,62 66,57" stroke="#9a6aaa" stroke-width="1.5" fill="none"/>
-        </svg>`
+            // Eyes
+            addEl(svg,"ellipse",{cx:50,cy:47,rx:5,ry:4.5,fill:"white"});
+            addEl(svg,"ellipse",{cx:70,cy:47,rx:5,ry:4.5,fill:"white"});
+            addEl(svg,"circle",{cx:51,cy:48,r:"3",fill:"#2a1a4a"});
+            addEl(svg,"circle",{cx:71,cy:48,r:"3",fill:"#2a1a4a"});
+            addEl(svg,"circle",{cx:52,cy:47,r:"1.2",fill:"white"});
+            addEl(svg,"circle",{cx:72,cy:47,r:"1.2",fill:"white"});
+            // Sparkle
+            addEl(svg,"circle",{cx:53,cy:46,r:"0.8",fill:lighten(color,70),"fill-opacity":"0.9"});
+            addEl(svg,"circle",{cx:73,cy:46,r:"0.8",fill:lighten(color,70),"fill-opacity":"0.9"});
+            // Mouth
+            addEl(svg,"path",{d:"M54,57 Q60,62 66,57",stroke:"#9a6aaa","stroke-width":"1.5",fill:"none"});
+
+            return svg;
+        }
     },
     {
-        name: "Archer",
-        emoji: "🏹",
-        getSVG: (color, flipped) => `
-        <svg viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;${flipped?'transform:scaleX(-1)':''}">
-          <defs>
-            <radialGradient id="abody${flipped?'2':''}" cx="40%" cy="30%" r="60%">
-              <stop offset="0%" stop-color="${lighten(color,55)}"/>
-              <stop offset="100%" stop-color="${color}"/>
-            </radialGradient>
-            <radialGradient id="aface${flipped?'2':''}" cx="40%" cy="35%" r="55%">
-              <stop offset="0%" stop-color="#ffdda0"/>
-              <stop offset="100%" stop-color="#d4934a"/>
-            </radialGradient>
-          </defs>
+        name: "🏹 Archer",
+        build: (color, flip) => {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+            svg.setAttribute("viewBox","0 0 120 200");
+            svg.style.cssText = `width:100%;height:100%;${flip ? 'transform:scaleX(-1)' : ''}`;
 
-          <!-- Shadow -->
-          <ellipse cx="60" cy="195" rx="28" ry="5" fill="rgba(0,0,0,0.35)"/>
+            addEl(svg,"ellipse",{cx:60,cy:196,rx:26,ry:5,fill:"rgba(0,0,0,0.35)"});
 
-          <!-- Legs -->
-          <rect x="43" y="130" width="14" height="48" rx="5" fill="url(#abody${flipped?'2':''})"/>
-          <rect x="63" y="130" width="14" height="48" rx="5" fill="url(#abody${flipped?'2':''})"/>
-          <!-- Boots -->
-          <path d="M41,170 Q41,182 56,182 Q58,175 57,170 Z" fill="#2a1500"/>
-          <path d="M61,170 Q61,182 76,182 Q78,175 77,170 Z" fill="#2a1500"/>
+            // Boots
+            addEl(svg,"path",{d:"M41,170 Q40,183 57,183 Q59,176 58,170 Z",fill:"#2a1500"});
+            addEl(svg,"path",{d:"M62,170 Q62,183 78,183 Q80,176 79,170 Z",fill:"#2a1500"});
 
-          <!-- Quiver on back -->
-          <rect x="78" y="70" width="12" height="50" rx="5" fill="${darken(color,25)}"/>
-          <line x1="82" y1="68" x2="82" y2="65" stroke="#c8a050" stroke-width="2"/>
-          <line x1="85" y1="66" x2="85" y2="62" stroke="#c8a050" stroke-width="2"/>
-          <line x1="88" y1="68" x2="88" y2="64" stroke="#c8a050" stroke-width="2"/>
+            // Legs
+            addEl(svg,"rect",{x:43,y:128,width:14,height:45,rx:5,fill:darken(color,20)});
+            addEl(svg,"rect",{x:63,y:128,width:14,height:45,rx:5,fill:darken(color,20)});
 
-          <!-- Body -->
-          <rect x="33" y="76" width="54" height="58" rx="10" fill="url(#abody${flipped?'2':''})"/>
-          <!-- Leather details -->
-          <path d="M33,90 L87,90" stroke="${darken(color,30)}" stroke-width="2" opacity="0.5"/>
-          <path d="M45,76 L45,134" stroke="${darken(color,30)}" stroke-width="1.5" opacity="0.4"/>
-          <path d="M75,76 L75,134" stroke="${darken(color,30)}" stroke-width="1.5" opacity="0.4"/>
+            // Quiver
+            addEl(svg,"rect",{x:78,y:68,width:11,height:48,rx:5,fill:darken(color,30)});
+            addEl(svg,"line",{x1:82,y1:66,x2:82,y2:62,stroke:"#c8a050","stroke-width":"2"});
+            addEl(svg,"line",{x1:85,y1:64,x2:85,y2:60,stroke:"#c8a050","stroke-width":"2"});
+            addEl(svg,"line",{x1:88,y1:66,x2:88,y2:62,stroke:"#c8a050","stroke-width":"2"});
 
-          <!-- Left arm holding bow -->
-          <rect x="15" y="78" width="18" height="46" rx="7" fill="url(#abody${flipped?'2':''})"/>
-          <!-- Bow -->
-          <path d="M10,65 Q0,105 10,145" stroke="${darken(color,10)}" stroke-width="5" fill="none" stroke-linecap="round"/>
-          <line x1="10" y1="65" x2="10" y2="145" stroke="#c8a050" stroke-width="1.5"/>
+            // Body
+            addEl(svg,"rect",{x:33,y:74,width:54,height:57,rx:10,fill:color});
+            addEl(svg,"line",{x1:33,y1:90,x2:87,y2:90,stroke:darken(color,30),"stroke-width":"2","stroke-opacity":"0.5"});
 
-          <!-- Right arm -->
-          <rect x="87" y="78" width="18" height="46" rx="7" fill="url(#abody${flipped?'2':''})"/>
-          <!-- Arrow -->
-          <line x1="15" y1="105" x2="95" y2="105" stroke="#c8a050" stroke-width="2"/>
-          <polygon points="95,102 105,105 95,108" fill="#c8a050"/>
-          <path d="M15,102 L10,105 L15,108 Z" fill="${color}"/>
+            // Left arm + bow
+            addEl(svg,"rect",{x:15,y:76,width:18,height:46,rx:7,fill:darken(color,10)});
+            addEl(svg,"path",{d:"M10,63 Q-1,103 10,143",stroke:darken(color,10),"stroke-width":"5",fill:"none","stroke-linecap":"round"});
+            addEl(svg,"line",{x1:10,y1:63,x2:10,y2:143,stroke:"#c8a050","stroke-width":"1.5"});
 
-          <!-- Neck -->
-          <rect x="52" y="62" width="16" height="16" rx="6" fill="#d4934a"/>
+            // Right arm
+            addEl(svg,"rect",{x:87,y:76,width:18,height:46,rx:7,fill:darken(color,10)});
 
-          <!-- Head -->
-          <ellipse cx="60" cy="48" rx="22" ry="24" fill="url(#aface${flipped?'2':''})"/>
+            // Arrow
+            addEl(svg,"line",{x1:14,y1:103,x2:94,y2:103,stroke:"#c8a050","stroke-width":"2"});
+            addEl(svg,"polygon",{points:"94,100 106,103 94,106",fill:"#c8a050"});
+            addEl(svg,"polygon",{points:"14,100 8,103 14,106",fill:color});
 
-          <!-- Hood -->
-          <path d="M38,50 Q38,24 60,20 Q82,24 82,50 L78,50 Q78,30 60,26 Q42,30 42,50 Z" fill="${darken(color,15)}" opacity="0.9"/>
-          <!-- Hood shadow -->
-          <path d="M42,44 Q60,42 78,44 L78,50 L42,50 Z" fill="${darken(color,35)}" opacity="0.5"/>
+            // Neck
+            addEl(svg,"rect",{x:52,y:60,width:16,height:16,rx:6,fill:"#d4934a"});
 
-          <!-- Hair strands -->
-          <path d="M44,46 Q46,56 44,62" stroke="#5a3010" stroke-width="3" fill="none" stroke-linecap="round"/>
-          <path d="M76,46 Q74,56 76,62" stroke="#5a3010" stroke-width="3" fill="none" stroke-linecap="round"/>
+            // Head
+            addEl(svg,"ellipse",{cx:60,cy:47,rx:22,ry:24,fill:"#e0a060"});
 
-          <!-- Eyes -->
-          <ellipse cx="51" cy="50" rx="5" ry="4" fill="white"/>
-          <ellipse cx="69" cy="50" rx="5" ry="4" fill="white"/>
-          <circle cx="52" cy="51" r="2.8" fill="#1a2a1a"/>
-          <circle cx="70" cy="51" r="2.8" fill="#1a2a1a"/>
-          <circle cx="53" cy="50" r="1" fill="white"/>
-          <circle cx="71" cy="50" r="1" fill="white"/>
-          <!-- Eye shine -->
-          <circle cx="53.5" cy="49.5" r="0.7" fill="${lighten(color,70)}" opacity="0.8"/>
-          <circle cx="71.5" cy="49.5" r="0.7" fill="${lighten(color,70)}" opacity="0.8"/>
-          <!-- Mouth -->
-          <path d="M54,60 Q60,64 66,60" stroke="#a06030" stroke-width="1.5" fill="none"/>
-          <!-- Scar -->
-          <path d="M68,44 L72,50" stroke="#c07040" stroke-width="1" opacity="0.6"/>
-        </svg>`
+            // Hood
+            addEl(svg,"path",{d:"M38,49 Q38,22 60,18 Q82,22 82,49 L78,49 Q78,28 60,24 Q42,28 42,49 Z",fill:darken(color,15),"fill-opacity":"0.92"});
+
+            // Hair
+            addEl(svg,"path",{d:"M44,45 Q46,55 44,62",stroke:"#5a3010","stroke-width":"3",fill:"none","stroke-linecap":"round"});
+            addEl(svg,"path",{d:"M76,45 Q74,55 76,62",stroke:"#5a3010","stroke-width":"3",fill:"none","stroke-linecap":"round"});
+
+            // Eyes
+            addEl(svg,"ellipse",{cx:51,cy:50,rx:5,ry:4,fill:"white"});
+            addEl(svg,"ellipse",{cx:69,cy:50,rx:5,ry:4,fill:"white"});
+            addEl(svg,"circle",{cx:52,cy:51,r:"2.8",fill:"#1a2a1a"});
+            addEl(svg,"circle",{cx:70,cy:51,r:"2.8",fill:"#1a2a1a"});
+            addEl(svg,"circle",{cx:53,cy:50,r:"1",fill:"white"});
+            addEl(svg,"circle",{cx:71,cy:50,r:"1",fill:"white"});
+            addEl(svg,"circle",{cx:53.5,cy:49.5,r:"0.7",fill:lighten(color,70),"fill-opacity":"0.8"});
+            addEl(svg,"circle",{cx:71.5,cy:49.5,r:"0.7",fill:lighten(color,70),"fill-opacity":"0.8"});
+            addEl(svg,"path",{d:"M54,60 Q60,65 66,60",stroke:"#a06030","stroke-width":"1.5",fill:"none"});
+
+            return svg;
+        }
     },
     {
-        name: "Knight",
-        emoji: "🛡️",
-        getSVG: (color, flipped) => `
-        <svg viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;${flipped?'transform:scaleX(-1)':''}">
-          <defs>
-            <radialGradient id="kbody${flipped?'2':''}" cx="40%" cy="30%" r="60%">
-              <stop offset="0%" stop-color="${lighten(color,70)}"/>
-              <stop offset="100%" stop-color="${color}"/>
-            </radialGradient>
-            <linearGradient id="kmetal${flipped?'2':''}" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#e0e0f0"/>
-              <stop offset="50%" stop-color="#a0a0c0"/>
-              <stop offset="100%" stop-color="#606080"/>
-            </linearGradient>
-          </defs>
+        name: "🛡️ Knight",
+        build: (color, flip) => {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+            svg.setAttribute("viewBox","0 0 120 200");
+            svg.style.cssText = `width:100%;height:100%;${flip ? 'transform:scaleX(-1)' : ''}`;
 
-          <!-- Shadow -->
-          <ellipse cx="60" cy="195" rx="35" ry="7" fill="rgba(0,0,0,0.5)"/>
+            addEl(svg,"ellipse",{cx:60,cy:196,rx:32,ry:7,fill:"rgba(0,0,0,0.5)"});
 
-          <!-- Greaves -->
-          <rect x="40" y="130" width="18" height="50" rx="4" fill="url(#kmetal${flipped?'2':''})"/>
-          <rect x="62" y="130" width="18" height="50" rx="4" fill="url(#kmetal${flipped?'2':''})"/>
-          <!-- Knee guards -->
-          <ellipse cx="49" cy="130" rx="11" ry="8" fill="${lighten(color,50)}" opacity="0.8"/>
-          <ellipse cx="71" cy="130" rx="11" ry="8" fill="${lighten(color,50)}" opacity="0.8"/>
-          <!-- Boots -->
-          <path d="M38,170 Q36,185 55,185 Q57,177 58,170 Z" fill="#404060"/>
-          <path d="M62,170 Q62,185 82,185 Q82,177 82,170 Z" fill="#404060"/>
+            // Greaves
+            addEl(svg,"rect",{x:40,y:128,width:18,height:50,rx:4,fill:"#b0b0c8"});
+            addEl(svg,"rect",{x:62,y:128,width:18,height:50,rx:4,fill:"#b0b0c8"});
+            // Knee guards
+            addEl(svg,"ellipse",{cx:49,cy:128,rx:11,ry:8,fill:lighten(color,50),"fill-opacity":"0.8"});
+            addEl(svg,"ellipse",{cx:71,cy:128,rx:11,ry:8,fill:lighten(color,50),"fill-opacity":"0.8"});
+            // Boots
+            addEl(svg,"path",{d:"M38,168 Q36,183 56,183 Q58,176 58,168 Z",fill:"#404060"});
+            addEl(svg,"path",{d:"M62,168 Q62,183 82,183 Q82,176 82,168 Z",fill:"#404060"});
 
-          <!-- Armor skirt -->
-          <path d="M28,120 Q28,138 60,140 Q92,138 92,120 Z" fill="url(#kmetal${flipped?'2':''})"/>
-          <path d="M28,120 L60,122 L92,120 L92,128 L60,130 L28,128 Z" fill="${darken(color,20)}" opacity="0.4"/>
+            // Armor skirt
+            addEl(svg,"path",{d:"M27,118 Q27,136 60,138 Q93,136 93,118 Z",fill:"#a0a0b8"});
 
-          <!-- Chest armor -->
-          <path d="M25,65 Q25,125 60,128 Q95,125 95,65 Q95,50 60,48 Q25,50 25,65 Z" fill="url(#kmetal${flipped?'2':''})"/>
-          <!-- Chest emblem -->
-          <path d="M50,80 L60,68 L70,80 L66,95 L54,95 Z" fill="url(#kbody${flipped?'2':''})" opacity="0.8"/>
-          <!-- Armor ridges -->
-          <path d="M25,75 Q60,70 95,75" stroke="white" stroke-width="1" opacity="0.3" fill="none"/>
-          <path d="M25,90 Q60,85 95,90" stroke="white" stroke-width="1" opacity="0.3" fill="none"/>
+            // Chest
+            addEl(svg,"path",{d:"M25,63 Q25,123 60,126 Q95,123 95,63 Q95,48 60,46 Q25,48 25,63 Z",fill:"#c0c0d8"});
+            // Chest emblem
+            addEl(svg,"path",{d:"M50,78 L60,65 L70,78 L66,94 L54,94 Z",fill:color,"fill-opacity":"0.85"});
+            // Ridges
+            addEl(svg,"path",{d:"M25,74 Q60,68 95,74",stroke:"white","stroke-width":"1","stroke-opacity":"0.3",fill:"none"});
+            addEl(svg,"path",{d:"M25,90 Q60,84 95,90",stroke:"white","stroke-width":"1","stroke-opacity":"0.3",fill:"none"});
 
-          <!-- Left pauldron + arm -->
-          <ellipse cx="22" cy="65" rx="18" ry="12" fill="url(#kmetal${flipped?'2':''})"/>
-          <rect x="10" y="72" width="22" height="48" rx="8" fill="url(#kmetal${flipped?'2':''})"/>
-          <!-- Big shield -->
-          <path d="M-5,75 Q-15,105 -5,140 Q10,155 15,140 Q25,120 20,75 Z" fill="url(#kbody${flipped?'2':''})" stroke="${lighten(color,50)}" stroke-width="2"/>
-          <path d="M2,85 Q-5,110 2,135 Q10,148 12,135 Q18,115 15,85 Z" fill="${darken(color,20)}" opacity="0.5"/>
-          <!-- Shield emblem -->
-          <circle cx="7" cy="110" r="8" fill="${lighten(color,40)}" opacity="0.7"/>
+            // Left pauldron
+            addEl(svg,"ellipse",{cx:22,cy:63,rx:18,ry:12,fill:"#b0b0c8"});
+            addEl(svg,"rect",{x:10,y:70,width:22,height:48,rx:8,fill:"#b0b0c8"});
+            // Big shield
+            addEl(svg,"path",{d:"M-4,73 Q-14,103 -4,138 Q10,153 14,138 Q24,118 19,73 Z",fill:color,stroke:lighten(color,50),"stroke-width":"2"});
+            addEl(svg,"path",{d:"M2,83 Q-4,108 2,133 Q10,146 12,133 Q17,113 14,83 Z",fill:darken(color,25),"fill-opacity":"0.5"});
+            addEl(svg,"circle",{cx:7,cy:108,r:"8",fill:lighten(color,40),"fill-opacity":"0.7"});
 
-          <!-- Right pauldron + arm -->
-          <ellipse cx="98" cy="65" rx="18" ry="12" fill="url(#kmetal${flipped?'2':''})"/>
-          <rect x="88" y="72" width="22" height="48" rx="8" fill="url(#kmetal${flipped?'2':''})"/>
-          <!-- Mace/Flail -->
-          <rect x="107" y="55" width="6" height="55" rx="3" fill="#5a3a10"/>
-          <circle cx="110" cy="48" r="12" fill="url(#kmetal${flipped?'2':''})"/>
-          <!-- Mace spikes -->
-          <polygon points="110,32 107,45 113,45" fill="${color}"/>
-          <polygon points="122,40 111,45 116,50" fill="${color}"/>
-          <polygon points="98,40 109,45 104,50" fill="${color}"/>
-          <polygon points="110,62 107,49 113,49" fill="${color}"/>
+            // Right pauldron
+            addEl(svg,"ellipse",{cx:98,cy:63,rx:18,ry:12,fill:"#b0b0c8"});
+            addEl(svg,"rect",{x:88,y:70,width:22,height:48,rx:8,fill:"#b0b0c8"});
+            // Mace
+            addEl(svg,"rect",{x:107,y:52,width:6,height:55,rx:3,fill:"#5a3a10"});
+            addEl(svg,"circle",{cx:110,cy:46,r:"12",fill:"#c0c0d8"});
+            addEl(svg,"polygon",{points:"110,30 107,44 113,44",fill:color});
+            addEl(svg,"polygon",{points:"124,38 111,44 116,50",fill:color});
+            addEl(svg,"polygon",{points:"96,38 109,44 104,50",fill:color});
+            addEl(svg,"polygon",{points:"110,62 107,48 113,48",fill:color});
 
-          <!-- Neck guard -->
-          <rect x="48" y="55" width="24" height="15" rx="5" fill="url(#kmetal${flipped?'2':''})"/>
+            // Neck guard
+            addEl(svg,"rect",{x:48,y:54,width:24,height:14,rx:5,fill:"#b0b0c8"});
 
-          <!-- Great Helmet -->
-          <ellipse cx="60" cy="52" rx="28" ry="22" fill="url(#kmetal${flipped?'2':''})"/>
-          <!-- Visor -->
-          <rect x="36" y="50" width="48" height="14" rx="4" fill="${darken(color,30)}"/>
-          <!-- Eye slit -->
-          <rect x="40" y="54" width="40" height="5" rx="2" fill="${lighten(color,60)}" opacity="0.3"/>
-          <!-- Eyes visible through visor -->
-          <ellipse cx="50" cy="56" rx="5" ry="3" fill="${lighten(color,70)}" opacity="0.6"/>
-          <ellipse cx="70" cy="56" rx="5" ry="3" fill="${lighten(color,70)}" opacity="0.6"/>
-          <!-- Helmet crest -->
-          <path d="M50,30 Q60,22 70,30 L68,40 L52,40 Z" fill="${color}" opacity="0.9"/>
-          <path d="M55,25 Q60,18 65,25" stroke="${lighten(color,50)}" stroke-width="2" fill="none"/>
-          <!-- Helmet details -->
-          <path d="M32,52 Q60,48 88,52" stroke="white" stroke-width="1" opacity="0.3" fill="none"/>
-        </svg>`
+            // Helmet
+            addEl(svg,"ellipse",{cx:60,cy:50,rx:28,ry:22,fill:"#c8c8e0"});
+            // Visor
+            addEl(svg,"rect",{x:36,y:48,width:48,height:14,rx:4,fill:darken(color,35)});
+            // Eye slit
+            addEl(svg,"rect",{x:40,y:52,width:40,height:5,rx:2,fill:lighten(color,60),"fill-opacity":"0.35"});
+            // Eyes through visor
+            addEl(svg,"ellipse",{cx:50,cy:54,rx:5,ry:3,fill:lighten(color,70),"fill-opacity":"0.65"});
+            addEl(svg,"ellipse",{cx:70,cy:54,rx:5,ry:3,fill:lighten(color,70),"fill-opacity":"0.65"});
+            // Crest
+            addEl(svg,"path",{d:"M50,28 Q60,20 70,28 L68,40 L52,40 Z",fill:color,"fill-opacity":"0.9"});
+
+            return svg;
+        }
     }
 ];
 
-// ============================================================
-//  COLOR HELPERS
-// ============================================================
-function lighten(hex, amount) {
-    const num = parseInt(hex.replace('#',''), 16);
-    const r = Math.min(255, (num >> 16) + amount);
-    const g = Math.min(255, ((num >> 8) & 0xff) + amount);
-    const b = Math.min(255, (num & 0xff) + amount);
-    return `#${((1<<24)|(r<<16)|(g<<8)|b).toString(16).slice(1)}`;
-}
-
-function darken(hex, amount) {
-    const num = parseInt(hex.replace('#',''), 16);
-    const r = Math.max(0, (num >> 16) - amount);
-    const g = Math.max(0, ((num >> 8) & 0xff) - amount);
-    const b = Math.max(0, (num & 0xff) - amount);
-    return `#${((1<<24)|(r<<16)|(g<<8)|b).toString(16).slice(1)}`;
+// SVG helper
+function addEl(parent, tag, attrs) {
+    const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (const [k,v] of Object.entries(attrs)) el.setAttribute(k, v);
+    parent.appendChild(el);
+    return el;
 }
 
 // ============================================================
-//  QUIZ DATA
+// QUIZ DATA
 // ============================================================
 const quizData = [
-    { q: "She ____ to school every day.", options: ["go", "goes", "going", "gone"], correct: 1 },
-    { q: "They ____ football right now.", options: ["play", "plays", "are playing", "played"], correct: 2 },
-    { q: "____ you see the match yesterday?", options: ["Do", "Does", "Did", "Have"], correct: 2 },
-    { q: "Look! The birds ____ in the sky.", options: ["fly", "is flying", "are flying", "flies"], correct: 2 },
-    { q: "I have ____ my homework already.", options: ["finish", "finishing", "finished", "finishes"], correct: 2 },
-    { q: "If it rains, I ____ stay at home.", options: ["will", "would", "am", "was"], correct: 0 },
-    { q: "This is the ____ film I've ever seen.", options: ["good", "better", "best", "well"], correct: 2 },
-    { q: "He is ____ than his brother.", options: ["tall", "taller", "tallest", "as tall"], correct: 1 },
-    { q: "We ____ in Cairo since 2010.", options: ["live", "are living", "have lived", "lived"], correct: 2 },
-    { q: "While I ____, the phone rang.", options: ["sleep", "was sleeping", "slept", "sleeping"], correct: 1 }
+    { q: "She ____ to school every day.", options: ["go","goes","going","gone"], correct: 1 },
+    { q: "They ____ football right now.", options: ["play","plays","are playing","played"], correct: 2 },
+    { q: "____ you see the match yesterday?", options: ["Do","Does","Did","Have"], correct: 2 },
+    { q: "Look! The birds ____ in the sky.", options: ["fly","is flying","are flying","flies"], correct: 2 },
+    { q: "I have ____ my homework already.", options: ["finish","finishing","finished","finishes"], correct: 2 },
+    { q: "If it rains, I ____ stay at home.", options: ["will","would","am","was"], correct: 0 },
+    { q: "This is the ____ film I've ever seen.", options: ["good","better","best","well"], correct: 2 },
+    { q: "He is ____ than his brother.", options: ["tall","taller","tallest","as tall"], correct: 1 },
+    { q: "We ____ in Cairo since 2010.", options: ["live","are living","have lived","lived"], correct: 2 },
+    { q: "While I ____, the phone rang.", options: ["sleep","was sleeping","slept","sleeping"], correct: 1 }
 ];
 
 // ============================================================
-//  GAME STATE
+// GAME STATE
 // ============================================================
 let p1CharIdx = 0, p2CharIdx = 1;
-let p1Name = 'Commander 1', p2Name = 'Commander 2';
+let p1Name = "Commander 1", p2Name = "Commander 2";
 let currentQ = 0, currentPlayer = 1;
 let p1HP = 100, p2HP = 100;
 let p1Score = 0, p2Score = 0;
 let locked = false;
 
 // ============================================================
-//  INTRO FUNCTIONS
+// INTRO
 // ============================================================
-function changeChar(player, dir) {
-    if (player === 1) {
-        p1CharIdx = (p1CharIdx + dir + CHARACTERS.length) % CHARACTERS.length;
-        renderPreview(1);
-    } else {
-        p2CharIdx = (p2CharIdx + dir + CHARACTERS.length) % CHARACTERS.length;
-        renderPreview(2);
-    }
+function renderPreview(player) {
+    const idx   = player === 1 ? p1CharIdx : p2CharIdx;
+    const color = player === 1 ? "#00d2ff" : "#ff0058";
+    const el    = document.getElementById(`p${player}-preview`);
+    const lbl   = document.getElementById(`p${player}-char-label`);
+    el.innerHTML = "";
+    el.appendChild(CHARACTERS[idx].build(color, false));
+    lbl.textContent = CHARACTERS[idx].name;
 }
 
-function renderPreview(player) {
-    const idx = player === 1 ? p1CharIdx : p2CharIdx;
-    const color = player === 1 ? '#00d2ff' : '#ff0058';
-    const el = document.getElementById(`p${player}-preview`);
-    const nameEl = document.getElementById(`p${player}-char-name`);
-    el.innerHTML = CHARACTERS[idx].getSVG(color, player === 2);
-    nameEl.textContent = CHARACTERS[idx].emoji + ' ' + CHARACTERS[idx].name;
+function changeChar(player, dir) {
+    if (player === 1) p1CharIdx = (p1CharIdx + dir + CHARACTERS.length) % CHARACTERS.length;
+    else              p2CharIdx = (p2CharIdx + dir + CHARACTERS.length) % CHARACTERS.length;
+    renderPreview(player);
 }
 
 function startGame() {
-    p1Name = document.getElementById('p1-input').value.trim() || 'Commander 1';
-    p2Name = document.getElementById('p2-input').value.trim() || 'Commander 2';
+    p1Name = document.getElementById("p1-input").value.trim() || "Commander 1";
+    p2Name = document.getElementById("p2-input").value.trim() || "Commander 2";
 
-    document.getElementById('intro-screen').style.display = 'none';
-    document.getElementById('game-screen').style.display = 'flex';
+    document.getElementById("intro-screen").style.display = "none";
+    const gs = document.getElementById("game-screen");
+    gs.style.display = "flex";
 
-    document.getElementById('p1-name-display').textContent = p1Name;
-    document.getElementById('p2-name-display').textContent = p2Name;
+    document.getElementById("p1-name-display").textContent = p1Name;
+    document.getElementById("p2-name-display").textContent = p2Name;
 
-    // Render characters
-    document.getElementById('p1-char-scene').innerHTML =
-        CHARACTERS[p1CharIdx].getSVG('#00d2ff', false);
-    document.getElementById('p2-char-scene').innerHTML =
-        CHARACTERS[p2CharIdx].getSVG('#ff0058', true);
+    // Place characters
+    const p1Scene = document.getElementById("p1-char-scene");
+    const p2Scene = document.getElementById("p2-char-scene");
+    p1Scene.innerHTML = "";
+    p2Scene.innerHTML = "";
+    p1Scene.appendChild(CHARACTERS[p1CharIdx].build("#00d2ff", false));
+    p2Scene.appendChild(CHARACTERS[p2CharIdx].build("#ff0058", true));
 
-    // Particles
-    createParticles('p1-particles', '#00d2ff');
-    createParticles('p2-particles', '#ff0058');
+    p1Scene.classList.add("idle");
+    p2Scene.classList.add("idle");
+
+    createParticles("p1-particles","#00d2ff");
+    createParticles("p2-particles","#ff0058");
 
     loadQuestion();
 }
 
 // ============================================================
-//  PARTICLES
+// PARTICLES
 // ============================================================
-function createParticles(containerId, color) {
-    const container = document.getElementById(containerId);
-    for (let i = 0; i < 15; i++) {
-        const p = document.createElement('div');
-        p.className = 'particle';
+function createParticles(id, color) {
+    const c = document.getElementById(id);
+    c.innerHTML = "";
+    for (let i = 0; i < 12; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
         p.style.cssText = `
-            left: ${Math.random()*100}%;
-            bottom: ${Math.random()*20}%;
-            background: ${color};
-            opacity: ${Math.random()*0.5+0.1};
-            animation-duration: ${Math.random()*4+3}s;
-            animation-delay: ${Math.random()*3}s;
-            width: ${Math.random()*4+1}px;
-            height: ${Math.random()*4+1}px;
+            left:${Math.random()*100}%;
+            bottom:${Math.random()*15}%;
+            width:${Math.random()*3+1}px;
+            height:${Math.random()*3+1}px;
+            background:${color};
+            opacity:${Math.random()*0.4+0.1};
+            animation-duration:${Math.random()*4+3}s;
+            animation-delay:${Math.random()*3}s;
         `;
-        container.appendChild(p);
+        c.appendChild(p);
     }
 }
 
 // ============================================================
-//  QUESTION LOADER
+// QUESTION
 // ============================================================
 function loadQuestion() {
     if (currentQ >= quizData.length) { endGame(); return; }
-
     locked = false;
+
     const data = quizData[currentQ];
-    const displayQ = data.q.replace('____', '<span class="blank">____</span>');
-    document.getElementById('q-text').innerHTML = displayQ;
-    document.getElementById('q-counter').textContent = `Q ${currentQ+1}/${quizData.length}`;
+    document.getElementById("q-text").innerHTML =
+        data.q.replace("____", `<span style="color:var(--gold);border-bottom:2px solid var(--gold);padding:0 4px">____</span>`);
+    document.getElementById("q-counter").textContent = `Q ${currentQ+1} / ${quizData.length}`;
 
-    const color = currentPlayer === 1 ? 'var(--p1-color)' : 'var(--p2-color)';
-    const name = currentPlayer === 1 ? p1Name : p2Name;
-    document.getElementById('turn-txt').textContent = `${name.toUpperCase()}'S TURN`;
-    document.getElementById('turn-txt').style.color = color;
-    document.getElementById('turn-dot').style.background = color;
+    const color = currentPlayer === 1 ? "var(--p1-color)" : "var(--p2-color)";
+    const name  = currentPlayer === 1 ? p1Name : p2Name;
+    document.getElementById("turn-txt").textContent = `${name.toUpperCase()}'S TURN`;
+    document.getElementById("turn-txt").style.color = color;
+    document.getElementById("turn-dot").style.background = color;
 
-    const keys = ['A', 'B', 'C', 'D'];
+    const keys = ["A","B","C","D"];
     for (let i = 0; i < 4; i++) {
         const btn = document.getElementById(`opt${i}`);
-        btn.className = 'opt-btn';
-        btn.innerHTML = data.options[i] + `<span class="key-hint">${keys[i]}</span>`;
+        btn.className = "opt-btn";
         btn.disabled = false;
+        btn.innerHTML = `${data.options[i]}<span class="key-hint">${keys[i]}</span>`;
     }
 
-    document.getElementById('round-fill').style.width = `${(currentQ/quizData.length)*100}%`;
+    document.getElementById("round-fill").style.width = `${(currentQ/quizData.length)*100}%`;
 }
 
 // ============================================================
-//  ANSWER CHECK
+// ANSWER
 // ============================================================
 function checkAnswer(idx) {
     if (locked) return;
     locked = true;
 
-    const isCorrect = (idx === quizData[currentQ].correct);
-    const attacker = currentPlayer;
-    const defender = currentPlayer === 1 ? 2 : 1;
+    const isCorrect = idx === quizData[currentQ].correct;
+    const defender  = currentPlayer === 1 ? 2 : 1;
 
-    // Visual feedback on buttons
-    document.getElementById(`opt${idx}`).classList.add(isCorrect ? 'correct' : 'wrong');
-    if (!isCorrect) {
-        document.getElementById(`opt${quizData[currentQ].correct}`).classList.add('correct');
-    }
-
-    // Disable all buttons
-    for (let i = 0; i < 4; i++) document.getElementById(`opt${i}`).disabled = true;
+    // Button feedback
+    document.getElementById(`opt${idx}`).classList.add(isCorrect ? "correct" : "wrong");
+    if (!isCorrect) document.getElementById(`opt${quizData[currentQ].correct}`).classList.add("correct");
+    for (let i=0;i<4;i++) document.getElementById(`opt${i}`).disabled = true;
 
     if (isCorrect) {
-        // Deal damage
         const dmg = 15 + Math.floor(Math.random()*10);
         if (defender === 1) p1HP = Math.max(0, p1HP - dmg);
-        else p2HP = Math.max(0, p2HP - dmg);
+        else                p2HP = Math.max(0, p2HP - dmg);
 
-        if (attacker === 1) p1Score++;
-        else p2Score++;
+        if (currentPlayer === 1) p1Score++; else p2Score++;
 
         // Attack animation
-        const atkScene = document.getElementById(`p${attacker}-char-scene`);
-        atkScene.classList.remove('idle');
-        atkScene.classList.add('attacking');
-        setTimeout(() => { atkScene.classList.remove('attacking'); atkScene.classList.add('idle'); }, 500);
+        const atk = document.getElementById(`p${currentPlayer}-char-scene`);
+        atk.classList.remove("idle");
+        atk.classList.add("attacking");
+        setTimeout(() => { atk.classList.remove("attacking"); atk.classList.add("idle"); }, 500);
 
-        // Damage flash on defender
         flashDamage(defender);
-        showCombo(attacker, '+HIT');
+        showCombo(currentPlayer, "+HIT!", currentPlayer === 1 ? "#00ff88" : "#ff4466");
     } else {
-        // Self damage
         const dmg = 8;
-        if (attacker === 1) p1HP = Math.max(0, p1HP - dmg);
-        else p2HP = Math.max(0, p2HP - dmg);
-        flashDamage(attacker);
-        showCombo(attacker, 'MISS!');
+        if (currentPlayer === 1) p1HP = Math.max(0, p1HP - dmg);
+        else                     p2HP = Math.max(0, p2HP - dmg);
+        flashDamage(currentPlayer);
+        showCombo(currentPlayer, "MISS!", "#ff4444");
     }
 
     updateHP();
     updateScores();
 
-    // Check for KO
-    if (p1HP <= 0 || p2HP <= 0) {
-        setTimeout(endGame, 1200);
-        return;
-    }
+    if (p1HP <= 0 || p2HP <= 0) { setTimeout(endGame, 1100); return; }
 
     currentPlayer = defender;
     currentQ++;
-    setTimeout(loadQuestion, 900);
+    setTimeout(loadQuestion, 950);
 }
 
 // ============================================================
-//  VISUALS
+// VISUALS
 // ============================================================
 function flashDamage(player) {
     const flash = document.getElementById(`p${player}-flash`);
-    flash.classList.add('active');
-    // Panic
     const scene = document.getElementById(`p${player}-char-scene`);
-    scene.classList.remove('idle');
-    scene.classList.add('panic');
+    flash.classList.add("active");
+    scene.classList.remove("idle","attacking");
+    scene.classList.add("panic");
     setTimeout(() => {
-        flash.classList.remove('active');
-        scene.classList.remove('panic');
-        scene.classList.add('idle');
-    }, 400);
+        flash.classList.remove("active");
+        scene.classList.remove("panic");
+        scene.classList.add("idle");
+    }, 420);
 }
 
-function showCombo(player, text) {
+function showCombo(player, text, color) {
     const zone = document.getElementById(`p${player}-zone`);
-    const div = document.createElement('div');
-    div.className = 'combo-text';
-    div.style.color = player === 1 ? 'var(--p1-color)' : 'var(--p2-color)';
-    div.style.left = '50%';
-    div.style.top = '40%';
-    div.style.transform = 'translateX(-50%)';
+    const div  = document.createElement("div");
+    div.className = "combo-text";
+    div.style.color = color || "white";
     div.textContent = text;
     zone.appendChild(div);
     setTimeout(() => div.remove(), 1000);
 }
 
 function updateHP() {
-    document.getElementById('p1-hp-fill').style.width = p1HP + '%';
-    document.getElementById('p2-hp-fill').style.width = p2HP + '%';
-    document.getElementById('p1-hp-text').textContent = `${p1HP} / 100`;
-    document.getElementById('p2-hp-text').textContent = `${p2HP} / 100`;
+    document.getElementById("p1-hp-fill").style.width = p1HP + "%";
+    document.getElementById("p2-hp-fill").style.width = p2HP + "%";
+    document.getElementById("p1-hp-text").textContent = `${p1HP} / 100`;
+    document.getElementById("p2-hp-text").textContent = `${p2HP} / 100`;
 
-    const s1 = document.getElementById('p1-status');
-    const s2 = document.getElementById('p2-status');
+    // Status pills
+    const s1 = document.getElementById("p1-status");
+    const s2 = document.getElementById("p2-status");
 
     if (p1HP <= 30) {
-        s1.textContent = '⚠️ CRITICAL'; s1.style.color = '#ff4444';
-        document.getElementById('p1-char-scene').classList.remove('idle');
-        document.getElementById('p1-char-scene').classList.add('panic');
-    } else { s1.textContent = '✅ STABLE'; s1.style.color = 'var(--p1-color)'; }
+        s1.textContent = "⚠️ CRITICAL"; s1.style.color = "#ff4444";
+        s1.style.borderColor = "#ff4444"; s1.style.background = "rgba(255,68,68,0.1)";
+    } else {
+        s1.textContent = "✅ STABLE"; s1.style.color = "var(--p1-color)";
+        s1.style.borderColor = "var(--p1-color)"; s1.style.background = "rgba(0,210,255,0.1)";
+    }
 
     if (p2HP <= 30) {
-        s2.textContent = '⚠️ CRITICAL'; s2.style.color = '#ff4444';
-        document.getElementById('p2-char-scene').classList.remove('idle');
-        document.getElementById('p2-char-scene').classList.add('panic');
-    } else { s2.textContent = '✅ STABLE'; s2.style.color = 'var(--p2-color)'; }
+        s2.textContent = "⚠️ CRITICAL"; s2.style.color = "#ff4444";
+        s2.style.borderColor = "#ff4444"; s2.style.background = "rgba(255,68,68,0.1)";
+    } else {
+        s2.textContent = "✅ STABLE"; s2.style.color = "var(--p2-color)";
+        s2.style.borderColor = "var(--p2-color)"; s2.style.background = "rgba(255,0,88,0.1)";
+    }
 
-    // Flex territory
-    const p1Flex = p1HP;
-    const p2Flex = p2HP;
-    document.getElementById('p1-zone').style.flex = p1Flex;
-    document.getElementById('p2-zone').style.flex = p2Flex;
+    // Territory flex
+    document.getElementById("p1-zone").style.flex = p1HP;
+    document.getElementById("p2-zone").style.flex = p2HP;
 }
 
 function updateScores() {
-    document.getElementById('p1-score-badge').textContent = `⭐ ${p1Score}`;
-    document.getElementById('p2-score-badge').textContent = `⭐ ${p2Score}`;
+    document.getElementById("p1-score-badge").textContent = `⭐ ${p1Score}`;
+    document.getElementById("p2-score-badge").textContent = `⭐ ${p2Score}`;
 }
 
 // ============================================================
-//  END GAME
+// END GAME
 // ============================================================
 function endGame() {
-    const winner = p1HP > p2HP ? 1 : (p2HP > p1HP ? 2 : 0);
-    const rs = document.getElementById('result-screen');
-    rs.style.display = 'flex';
+    const winner = p1HP > p2HP ? 1 : p2HP > p1HP ? 2 : 0;
+    const rs = document.getElementById("result-screen");
+    rs.style.display = "flex";
 
-    const wName = winner === 1 ? p1Name : winner === 2 ? p2Name : 'DRAW!';
-    const wColor = winner === 1 ? 'var(--p1-color)' : winner === 2 ? 'var(--p2-color)' : 'var(--gold)';
+    const wName  = winner === 1 ? p1Name : winner === 2 ? p2Name : "DRAW";
+    const wColor = winner === 1 ? "var(--p1-color)" : winner === 2 ? "var(--p2-color)" : "var(--gold)";
 
-    document.getElementById('winner-name-display').textContent =
-        winner === 0 ? '🤝 IT\'S A DRAW!' : `🏆 ${wName.toUpperCase()} WINS!`;
-    document.getElementById('winner-name-display').style.color = wColor;
+    document.getElementById("winner-name-display").textContent =
+        winner === 0 ? "🤝 IT'S A DRAW!" : `🏆 ${wName.toUpperCase()} WINS!`;
+    document.getElementById("winner-name-display").style.color = wColor;
 
-    // Winner char
     if (winner > 0) {
-        const idx = winner === 1 ? p1CharIdx : p2CharIdx;
-        const color = winner === 1 ? '#00d2ff' : '#ff0058';
-        document.getElementById('winner-char-display').innerHTML =
-            CHARACTERS[idx].getSVG(color, false);
+        const idx   = winner === 1 ? p1CharIdx : p2CharIdx;
+        const color = winner === 1 ? "#00d2ff" : "#ff0058";
+        const wc    = document.getElementById("winner-char-display");
+        wc.innerHTML = "";
+        wc.appendChild(CHARACTERS[idx].build(color, false));
     }
 
-    document.getElementById('fs1').textContent = p1Score;
-    document.getElementById('fs2').textContent = p2Score;
-    document.getElementById('fn1').textContent = p1Name;
-    document.getElementById('fn2').textContent = p2Name;
+    document.getElementById("fs1").textContent = p1Score;
+    document.getElementById("fs2").textContent = p2Score;
+    document.getElementById("fn1").textContent = p1Name;
+    document.getElementById("fn2").textContent = p2Name;
 }
 
+// ============================================================
+// RESET
+// ============================================================
 function resetGame() {
     p1HP = 100; p2HP = 100;
     p1Score = 0; p2Score = 0;
-    currentQ = 0; currentPlayer = 1;
-    locked = false;
+    currentQ = 0; currentPlayer = 1; locked = false;
 
-    document.getElementById('result-screen').style.display = 'none';
-    document.getElementById('game-screen').style.display = 'none';
-    document.getElementById('intro-screen').style.display = 'flex';
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("game-screen").style.display = "none";
+    document.getElementById("intro-screen").style.display = "flex";
 
     renderPreview(1);
     renderPreview(2);
 }
 
 // ============================================================
-//  KEYBOARD SHORTCUTS
+// KEYBOARD
 // ============================================================
-document.addEventListener('keydown', (e) => {
-    const map = { 'a': 0, 'b': 1, 'c': 2, 'd': 3 };
-    if (map[e.key.toLowerCase()] !== undefined) {
-        checkAnswer(map[e.key.toLowerCase()]);
-    }
+document.addEventListener("keydown", e => {
+    const map = {a:0, b:1, c:2, d:3};
+    if (map[e.key.toLowerCase()] !== undefined) checkAnswer(map[e.key.toLowerCase()]);
 });
 
 // ============================================================
-//  INIT
+// INIT
 // ============================================================
-window.onload = () => {
-    renderPreview(1);
-    renderPreview(2);
-};
+window.onload = () => { renderPreview(1); renderPreview(2); };
 </script>
 </body>
 </html>
