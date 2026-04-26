@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veto Program - Neon Memory</title>
+    <style>
+        body { 
+            background: #050505; 
+            color: #fff; 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+            overflow: hidden;
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 15px; 
+            z-index: 5;
+        }
+        #levelText { 
+            color: #00f2ff; 
+            text-shadow: 0 0 10px #00f2ff;
+            margin: 5px 0;
+            font-size: 1.8rem;
+        }
+        #game-container { position: relative; }
+        canvas { 
+            border: 3px solid #00f2ff; 
+            box-shadow: 0 0 25px rgba(0, 242, 255, 0.5); 
+            border-radius: 15px; 
+            background: #000;
+            cursor: pointer;
+        }
+        #overlay { 
+            position: absolute; 
+            top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.95); 
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 10; 
+            border-radius: 15px; 
+        }
+        button { 
+            background: #00f2ff; 
+            color: #000; 
+            border: none; 
+            padding: 12px 35px; 
+            font-size: 1.3rem; 
+            font-weight: bold; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+        button:hover { background: #fff; transform: scale(1.05); }
+        .fail-text { color: #ff0055; text-shadow: 0 0 10px #ff0055; }
+        .stats-bar { font-size: 1.1rem; color: #ccc; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2 id="levelText">Group 1 - Level 1</h2>
+        <div class="stats-bar">Limit: 50 Moves | Current: <span id="moveDisplay" style="color: #fff; font-weight: bold;">0</span></div>
+    </div>
+
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        <div id="overlay">
+            <h1 id="statusTitle">Stage Clear!</h1>
+            <p id="scoreDetail" style="font-size: 1.5rem;"></p>
+            <button id="actionBtn" onclick="handleAction()">Next Level</button>
+        </div>
+    </div>
+
+    <script>
+        // --- بيانات الكلمات (دمجتها هنا لحل مشكلة ERR_FILE_NOT_FOUND) ---
+        const VetoVocab = {
+            setA: [
+                ["Eat", "Drink", "Sleep", "Go", "Come", "Run", "Walk", "Play", "Read", "Write"],
+                ["Speak", "Listen", "Look", "See", "Watch", "Open", "Close", "Sit", "Stand", "Jump"],
+                ["Swim", "Drive", "Ride", "Give", "Take", "Buy", "Sell", "Help", "Work", "Study"],
+                ["Learn", "Teach", "Cook", "Clean", "Wash", "Cut", "Draw", "Paint", "Sing", "Dance"],
+                ["Smile", "Laugh", "Cry", "Think", "Know", "Make", "Use", "Push", "Pull", "Stop"]
+            ],
+            setB: [
+                ["Hear", "Touch", "Smell", "Taste", "Feel", "Remember", "Forget", "Believe", "Hope", "Want"],
+                ["Need", "Love", "Like", "Hate", "Wait", "Meet", "Ask", "Answer", "Tell", "Say"],
+                ["Call", "Send", "Receive", "Bring", "Carry", "Hold", "Catch", "Throw", "Win", "Lose"],
+                ["Start", "Finish", "Try", "Change", "Fix", "Break", "Build", "Spend", "Save", "Borrow"],
+                ["Lend", "Pay", "Cost", "Choose", "Decide", "Explain", "Travel", "Fly", "Stay", "Leave"]
+            ]
+        };
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let currentSet = 'setA';
+        let currentLevel = 0;
+        let moves = 0;
+        let matches = 0;
+        let cards = [];
+        let flipped = [];
+        let isLock = false;
+
+        // إعدادات الكروت
+        const cardW = 140;
+        const cardH = 95;
+        const gapX = 15;
+        const gapY = 15;
+        const startX = (canvas.width - (5 * cardW + 4 * gapX)) / 2;
+        const startY = (canvas.height - (4 * cardH + 3 * gapY)) / 2;
+
+        function init() {
+            moves = 0;
+            matches = 0;
+            flipped = [];
+            isLock = false;
+            document.getElementById('moveDisplay').innerText = moves;
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('levelText').innerText = `${currentSet === 'setA' ? 'Group 1' : 'Group 2'} - Level ${currentLevel + 1}`;
+
+            let words = VetoVocab[currentSet][currentLevel];
+            let deck = [...words, ...words].sort(() => Math.random() - 0.5);
+
+            cards = [];
+            for(let i=0; i<20; i++) {
+                cards.push({
+                    word: deck[i],
+                    x: startX + (i % 5) * (cardW + gapX),
+                    y: startY + Math.floor(i / 5) * (cardH + gapY),
+                    isFlipped: false,
+                    isMatched: false
+                });
+            }
+            draw();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            cards.forEach(card => {
+                ctx.save();
+                
+                // رسم جسم الكارت
+                ctx.beginPath();
+                ctx.roundRect(card.x, card.y, cardW, cardH, 12);
+                
+                if (card.isFlipped || card.isMatched) {
+                    // الكارت المفتوح
+                    ctx.fillStyle = "#111";
+                    ctx.strokeStyle = card.isMatched ? "#00ff00" : "#00f2ff";
+                    ctx.lineWidth = 3;
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = ctx.strokeStyle;
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // النص
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = "#fff";
+                    ctx.font = "bold 20px 'Segoe UI'";
+                    ctx.textAlign = "center";
+                    ctx.fillText(card.word, card.x + cardW/2, card.y + cardH/2 + 8);
+                } else {
+                    // الكارت المغلق
+                    ctx.fillStyle = "#1a1a1a";
+                    ctx.strokeStyle = "#00f2ff";
+                    ctx.lineWidth = 2;
+                    ctx.shadowBlur = 5;
+                    ctx.shadowColor = "#00f2ff";
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    // علامة الاستفهام
+                    ctx.fillStyle = "#333";
+                    ctx.font = "40px Arial";
+                    ctx.textAlign = "center";
+                    ctx.fillText("?", card.x + cardW/2, card.y + cardH/2 + 15);
+                }
+                ctx.restore();
+            });
+        }
+
+        canvas.addEventListener('click', (e) => {
+            if (isLock) return;
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+
+            cards.forEach(card => {
+                if (!card.isFlipped && !card.isMatched && 
+                    mx > card.x && mx < card.x + cardW && 
+                    my > card.y && my < card.y + cardH) {
+                    
+                    card.isFlipped = true;
+                    flipped.push(card);
+                    draw();
+
+                    if (flipped.length === 2) {
+                        moves++;
+                        document.getElementById('moveDisplay').innerText = moves;
+                        checkMatch();
+                    }
+                }
+            });
+        });
+
+        function checkMatch() {
+            isLock = true;
+            if (flipped[0].word === flipped[1].word) {
+                flipped[0].isMatched = true;
+                flipped[1].isMatched = true;
+                matches++;
+                flipped = [];
+                isLock = false;
+                if (matches === 10) setTimeout(() => finish(true), 500);
+            } else {
+                // شرط الخسارة عند تخطي 50 حركة
+                if (moves >= 50) {
+                    setTimeout(() => finish(false), 500);
+                    return;
+                }
+                setTimeout(() => {
+                    flipped[0].isFlipped = false;
+                    flipped[1].isFlipped = false;
+                    flipped = [];
+                    isLock = false;
+                    draw();
+                }, 800);
+            }
+            draw();
+        }
+
+        function finish(success) {
+            const overlay = document.getElementById('overlay');
+            const title = document.getElementById('statusTitle');
+            const detail = document.getElementById('scoreDetail');
+            const btn = document.getElementById('actionBtn');
+            overlay.style.display = 'flex';
+
+            if (success) {
+                // حساب السكور: 100 نقطة لو 20 حركة، وكل حركة زيادة تنقص 10
+                let score = 100;
+                if (moves > 20) score = 100 - ((moves - 20) * 10);
+                if (score < 0) score = 0;
+
+                title.innerText = "Excellent Memory!";
+                title.classList.remove('fail-text');
+                detail.innerText = `Moves: ${moves} | Score: ${score}`;
+                btn.innerText = "Next Level";
+            } else {
+                title.innerText = "Level Failed!";
+                title.classList.add('fail-text');
+                detail.innerText = "You reached 50 moves. Try again!";
+                btn.innerText = "Retry Level";
+            }
+        }
+
+        function handleAction() {
+            const btn = document.getElementById('actionBtn');
+            if (btn.innerText === "Retry Level") {
+                init();
+            } else {
+                currentLevel++;
+                if (currentLevel > 4) {
+                    if (currentSet === 'setA') {
+                        currentSet = 'setB';
+                        currentLevel = 0;
+                        alert("Great Job! Moving to Set B words.");
+                    } else {
+                        alert("Incredible! You completed all 100 words!");
+                        currentSet = 'setA';
+                        currentLevel = 0;
+                    }
+                }
+                init();
+            }
+        }
+
+        // تشغيل اللعبة
+        init();
+    </script>
+</body>
+</html>
