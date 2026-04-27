@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veto Sentence Builder - Click Mode</title>
+    <style>
+        body {
+            background: #050505;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .header { text-align: center; margin-bottom: 20px; }
+        #levelIndicator { color: #ffd700; text-shadow: 0 0 10px #ffd700; font-size: 1.2rem; }
+
+        /* منطقة بناء الجملة (العلوي) */
+        #sentence-zone {
+            display: flex;
+            gap: 10px;
+            padding: 20px;
+            min-height: 80px;
+            border: 2px solid #333;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.02);
+            transition: 0.3s;
+        }
+
+        /* منطقة اختيار الكلمات (السفلي) */
+        #words-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            width: 90%;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        /* ستايل مربعات الكلمات */
+        .word-tile {
+            background: #111;
+            border: 2px solid #ffd700;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.3rem;
+            font-weight: bold;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+            transition: all 0.2s ease;
+            user-select: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .word-tile:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 15px #ffd700;
+            background: #222;
+        }
+
+        /* ستايل خاص للكلمات التي تم اختيارها ووضعها فوق */
+        .word-tile.selected {
+            border-color: #00f2ff;
+            box-shadow: 0 0 10px #00f2ff;
+        }
+
+        #message {
+            height: 30px;
+            margin-top: 15px;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 10px 25px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #nextBtn {
+            background: #ffd700;
+            color: #000;
+            border: none;
+            font-weight: bold;
+            display: none;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .win-glow { border-color: #00ff00 !important; box-shadow: 0 0 25px #00ff00 !important; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div id="levelIndicator">Level 1 / 10</div>
+        <h1 style="color: #fff;">Sentence Builder</h1>
+        <p>Click words in order to build the sentence!</p>
+    </div>
+
+    <div id="sentence-zone"></div>
+
+    <div id="words-pool"></div>
+
+    <div id="message"></div>
+
+    <div class="controls">
+        <button onclick="resetCurrent()">Reset Order</button>
+        <button id="nextBtn" onclick="nextLevel()">Next Sentence</button>
+    </div>
+
+    <script>
+        const sentences = [
+            ["I", "love", "to", "study", "English"],
+            ["The", "sun", "is", "very", "bright"],
+            ["We", "play", "football", "every", "day"],
+            ["She", "can", "speak", "five", "languages"],
+            ["My", "friend", "has", "a", "car"],
+            ["It", "is", "time", "to", "eat"],
+            ["You", "are", "a", "smart", "student"],
+            ["Books", "help", "us", "to", "learn"],
+            ["Water", "is", "good", "for", "health"],
+            ["They", "work", "hard", "every", "week"]
+        ];
+
+        let currentLevel = 0;
+        let selectedWords = [];
+
+        const sentenceZone = document.getElementById('sentence-zone');
+        const wordsPool = document.getElementById('words-pool');
+        const nextBtn = document.getElementById('nextBtn');
+        const message = document.getElementById('message');
+
+        function initLevel() {
+            sentenceZone.innerHTML = '';
+            wordsPool.innerHTML = '';
+            selectedWords = [];
+            message.innerText = '';
+            nextBtn.style.display = 'none';
+            sentenceZone.classList.remove('win-glow');
+            document.getElementById('levelIndicator').innerText = `Level ${currentLevel + 1} / ${sentences.length}`;
+
+            // تجهيز الكلمات مبعثرة
+            let original = sentences[currentLevel];
+            let shuffled = [...original].sort(() => Math.random() - 0.5);
+
+            shuffled.forEach((word) => {
+                const tile = document.createElement('div');
+                tile.className = 'word-tile';
+                tile.innerText = word;
+                tile.onclick = () => selectWord(tile);
+                wordsPool.appendChild(tile);
+            });
+        }
+
+        function selectWord(tile) {
+            // إضافة الكلمة للمنطقة العلوية
+            const word = tile.innerText;
+            
+            // جعل الكلمة تختفي من الأسفل وتظهر فوق
+            tile.style.display = 'none';
+            
+            const newTile = document.createElement('div');
+            newTile.className = 'word-tile selected';
+            newTile.innerText = word;
+            
+            // إذا ضغط فوق يرجعها تحت (إلغاء اختيار)
+            newTile.onclick = () => {
+                newTile.remove();
+                tile.style.display = 'block';
+                checkStatus();
+            };
+
+            sentenceZone.appendChild(newTile);
+            checkStatus();
+        }
+
+        function checkStatus() {
+            const currentOrder = Array.from(sentenceZone.querySelectorAll('.word-tile'))
+                                     .map(t => t.innerText);
+            
+            const correctOrder = sentences[currentLevel];
+
+            // إذا الطالب اختار نفس عدد الكلمات
+            if (currentOrder.length === correctOrder.length) {
+                if (JSON.stringify(currentOrder) === JSON.stringify(correctOrder)) {
+                    message.innerText = "Correct! Well Done! 🌟";
+                    message.style.color = "#00ff00";
+                    sentenceZone.classList.add('win-glow');
+                    nextBtn.style.display = 'block';
+                    // منع الضغط على الكلمات فوق بعد الفوز
+                    Array.from(sentenceZone.querySelectorAll('.word-tile')).forEach(t => t.onclick = null);
+                } else {
+                    message.innerText = "Wrong order, try again!";
+                    message.style.color = "#ff0055";
+                }
+            } else {
+                message.innerText = "";
+            }
+        }
+
+        function resetCurrent() {
+            initLevel();
+        }
+
+        function nextLevel() {
+            currentLevel++;
+            if (currentLevel < sentences.length) {
+                initLevel();
+            } else {
+                message.innerText = "Game Completed! 🏆";
+                nextBtn.innerText = "Restart Game";
+                currentLevel = -1;
+                nextBtn.style.display = 'block';
+            }
+        }
+
+        initLevel();
+    </script>
+</body>
+</html>
