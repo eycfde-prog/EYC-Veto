@@ -2,127 +2,163 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veto Program - Decoder Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Veto Decoder - Mobile Ready</title>
     <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-gold: #ffd700;
+        }
+
         body {
             background: #050505;
             color: #fff;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
             margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+            min-height: 100vh;
         }
 
-        .header { text-align: center; margin-bottom: 20px; }
-        #levelIndicator { color: #ffd700; font-weight: bold; }
+        .header { 
+            text-align: center; 
+            margin-bottom: 10px;
+        }
+        
+        h1 { font-size: 1.4rem; margin: 10px 0; color: #fff; }
 
-        /* لوحة القاموس (الحروف والأرقام) */
+        /* لوحة القاموس - محسنة للموبايل (توفير مساحة) */
         .decoder-key {
-            display: grid;
-            grid-template-columns: repeat(13, 1fr);
-            gap: 5px;
+            display: flex;
+            overflow-x: auto; /* تمرير عرضي بدلاً من شبكة ضخمة */
+            gap: 8px;
             background: #111;
-            padding: 15px;
-            border: 2px solid #333;
-            border-radius: 10px;
-            margin-bottom: 30px;
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 12px;
             width: 95%;
-            max-width: 800px;
+            margin-bottom: 15px;
+            -webkit-overflow-scrolling: touch;
         }
+
+        /* تحسين مظهر شريط التمرير */
+        .decoder-key::-webkit-scrollbar { height: 4px; }
+        .decoder-key::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
+
         .key-item {
+            flex: 0 0 45px; /* عرض ثابت لكل حرف */
             text-align: center;
             border: 1px solid #444;
-            padding: 5px;
-            border-radius: 4px;
+            padding: 8px 0;
+            border-radius: 8px;
             background: #0a0a0a;
         }
-        .key-item span { display: block; }
-        .letter { color: #00f2ff; font-weight: bold; }
-        .number { color: #ffd700; font-size: 0.8rem; }
+        
+        .letter { color: var(--neon-blue); font-weight: bold; font-size: 1.1rem; display: block; }
+        .number { color: var(--neon-gold); font-size: 0.85rem; display: block; margin-top: 4px; }
 
         /* منطقة الشفرة */
         .cipher-box {
             background: #1a1a1a;
-            border-left: 5px solid #00f2ff;
-            padding: 20px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 700px;
+            border-bottom: 3px solid var(--neon-blue);
+            padding: 15px;
+            border-radius: 12px;
+            width: 95%;
+            box-sizing: border-box;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
         }
+        
         #cipherText {
-            font-size: 1.8rem;
-            letter-spacing: 3px;
-            color: #ffd700;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            color: var(--neon-gold);
             word-wrap: break-word;
+            line-height: 1.4;
         }
 
-        /* مدخلات الطالب */
+        /* المدخلات */
+        .input-group {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
         input[type="text"] {
-            width: 80%;
-            max-width: 500px;
+            width: 90%;
             padding: 15px;
             font-size: 1.2rem;
             border: 2px solid #333;
-            border-radius: 8px;
+            border-radius: 12px;
             background: #000;
             color: #fff;
             text-align: center;
+            text-transform: uppercase; /* يظهر الحروف كبيرة دائماً */
             outline: none;
             transition: 0.3s;
         }
-        input[type="text"]:focus { border-color: #00f2ff; box-shadow: 0 0 15px #00f2ff; }
+
+        input[type="text"]:focus { border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(0, 242, 255, 0.3); }
+
+        .controls {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
 
         button {
-            margin-top: 20px;
-            padding: 12px 40px;
-            font-size: 1.1rem;
+            padding: 14px 30px;
+            font-size: 1rem;
             font-weight: bold;
-            cursor: pointer;
-            border-radius: 8px;
+            border-radius: 10px;
             border: none;
-            transition: 0.3s;
+            cursor: pointer;
+            flex: 0 1 200px;
         }
-        .btn-submit { background: #00f2ff; color: #000; }
-        .btn-submit:hover { background: #fff; }
-        
-        #feedback { margin-top: 20px; font-size: 1.2rem; font-weight: bold; }
-        .correct { color: #00ff00; text-shadow: 0 0 10px #00ff00; }
-        .wrong { color: #ff0055; text-shadow: 0 0 10px #ff0055; }
 
-        /* الموبايل */
-        @media (max-width: 600px) {
-            .decoder-key { grid-template-columns: repeat(7, 1fr); }
+        .btn-submit { background: var(--neon-blue); color: #000; }
+        
+        #feedback { 
+            margin-top: 15px; 
+            font-size: 1.1rem; 
+            text-align: center;
+            min-height: 1.5em;
         }
+        .correct { color: #00ff00; }
+        .wrong { color: #ff0055; }
+
+        #nextBtn { background: var(--neon-gold); color: #000; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>Veto Decoder Challenge</h1>
-        <div id="levelIndicator">Level 1 / 5</div>
-        <p>Convert the numbers into letters using the key below!</p>
+        <h1>Veto Decoder</h1>
+        <div id="levelIndicator" style="color: var(--neon-gold); font-weight: bold;">Level 1 / 5</div>
     </div>
 
     <div class="decoder-key" id="keyBoard"></div>
 
     <div class="cipher-box">
-        <div style="color: #888; font-size: 0.9rem; margin-bottom: 10px;">DECODE THIS:</div>
+        <div style="color: #888; font-size: 0.8rem; margin-bottom: 5px;">SHARPEN YOUR MIND:</div>
         <div id="cipherText"></div>
     </div>
 
-    <input type="text" id="userInput" placeholder="Type the full sentence here..." autocomplete="off">
-    
-    <div>
-        <button class="btn-submit" onclick="checkAnswer()">Submit Solution</button>
+    <div class="input-group">
+        <input type="text" id="userInput" placeholder="Decoded sentence..." autocomplete="off" spellcheck="false">
+        <div class="controls">
+            <button class="btn-submit" onclick="checkAnswer()">CHECK</button>
+        </div>
+        <button id="nextBtn" style="display:none;" onclick="nextLevel()">NEXT LEVEL ➔</button>
     </div>
 
     <div id="feedback"></div>
-    <button id="nextBtn" style="display:none; background: #ffd700;" onclick="nextLevel()">Next Level</button>
 
     <script>
         const sentences = [
@@ -136,27 +172,20 @@
         let currentLevel = 0;
         const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-        // توليد لوحة القاموس برمجياً
         function createKey() {
             const keyBoard = document.getElementById('keyBoard');
-            for (let i = 0; i < alphabet.length; i++) {
-                keyBoard.innerHTML += `
-                    <div class="key-item">
-                        <span class="letter">${alphabet[i]}</span>
-                        <span class="number">${i}</span>
-                    </div>
-                `;
-            }
+            keyBoard.innerHTML = alphabet.split('').map((char, i) => `
+                <div class="key-item">
+                    <span class="letter">${char}</span>
+                    <span class="number">${i}</span>
+                </div>
+            `).join('');
         }
 
-        // تشفير الجملة بناءً على القواعد المطلوبة
         function encodeSentence(text) {
-            let encodedWords = text.split(" ").map(word => {
-                return word.split("").map(char => {
-                    return alphabet.indexOf(char.toUpperCase());
-                }).join("."); // نفصل بين حروف الكلمة الواحدة بنقطة لتوضيح الأرقام
-            });
-            return encodedWords.join(" - "); // نفصل بين الكلمات بشرطة
+            return text.split(" ").map(word => 
+                word.split("").map(char => alphabet.indexOf(char.toUpperCase())).join(".")
+            ).join("  /  "); // علامة مائلة أوضح للفصل بين الكلمات على الجوال
         }
 
         function initLevel() {
@@ -164,9 +193,7 @@
             document.getElementById('userInput').value = '';
             document.getElementById('nextBtn').style.display = 'none';
             document.getElementById('levelIndicator').innerText = `Level ${currentLevel + 1} / ${sentences.length}`;
-            
-            const rawText = sentences[currentLevel];
-            document.getElementById('cipherText').innerText = encodeSentence(rawText);
+            document.getElementById('cipherText').innerText = encodeSentence(sentences[currentLevel]);
         }
 
         function checkAnswer() {
@@ -175,11 +202,12 @@
             const feedback = document.getElementById('feedback');
 
             if (input === correct) {
-                feedback.innerText = "Correct! You are a master decoder! 🏆";
+                feedback.innerText = "Correct! 🏆";
                 feedback.className = "correct";
-                document.getElementById('nextBtn').style.display = 'inline-block';
+                document.getElementById('nextBtn').style.display = 'block';
+                document.getElementById('userInput').blur(); // إغلاق الكيبورد لرؤية زر التالي
             } else {
-                feedback.innerText = "Wrong! Check every letter and space.";
+                feedback.innerText = "Check again! ❌";
                 feedback.className = "wrong";
             }
         }
@@ -189,13 +217,12 @@
             if (currentLevel < sentences.length) {
                 initLevel();
             } else {
-                alert("Incredible! All codes decrypted!");
+                alert("Master Decoder! 🏆 All levels cleared.");
                 currentLevel = 0;
                 initLevel();
             }
         }
 
-        // البداية
         createKey();
         initLevel();
     </script>
