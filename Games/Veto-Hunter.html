@@ -3,100 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Veto Speed Matcher - MobiCheck Optimized</title>
+    <title>Veto Speed Matcher - Mobile</title>
     <style>
         :root {
             --neon-gold: #ffd700;
-            --neon-red: #ff0055;
-            --neon-green: #00ff00;
+            --neon-pink: #ff0055;
+            --neon-blue: #00f2ff;
         }
 
         body {
             background: #050505;
             color: #fff;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             margin: 0;
             height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
             overflow: hidden;
-            touch-action: none; /* منع أي حركة للمتصفح أثناء اللعب */
+            touch-action: none;
         }
 
         .header {
-            padding: 20px 10px;
+            padding: 15px;
             text-align: center;
+            width: 100%;
             z-index: 20;
         }
 
-        h1 { font-size: 1.2rem; margin: 0; color: #fff; }
-        #scoreBoard { color: var(--neon-gold); font-size: 1rem; margin-top: 5px; }
+        #scoreBoard { color: var(--neon-gold); font-size: 1.1rem; font-weight: bold; margin-top: 5px; }
 
-        /* منطقة اللعبة الرئيسية - متجاوبة */
-        #game-container {
+        /* منطقة اللعبة المركزية (الكلمة والوقت) */
+        #center-zone {
             position: relative;
-            width: 90vw;
-            height: 90vw;
-            max-width: 500px;
-            max-height: 500px;
+            height: 160px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
+            width: 100%;
+            margin: 10px 0;
         }
 
         #target-word {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 0 0 10px #fff;
-            z-index: 10;
-            text-transform: uppercase;
-            text-align: center;
-            width: 120px;
-        }
-
-        .image-slot {
-            position: absolute;
-            width: 65px; /* حجم أصغر للموبايل */
-            height: 65px;
-            background: #111;
-            border: 2px solid #333;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-size: 2.2rem;
-            cursor: pointer;
-            transition: transform 0.1s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            -webkit-tap-highlight-color: transparent;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            z-index: 10;
         }
-
-        .image-slot:active { transform: scale(0.9); border-color: var(--neon-gold); }
 
         #timer-svg {
             position: absolute;
-            width: 160px;
-            height: 160px;
+            width: 150px;
+            height: 150px;
             transform: rotate(-90deg);
-            z-index: 5;
         }
 
         #timer-circle {
             fill: none;
             stroke: var(--neon-gold);
             stroke-width: 6;
-            stroke-dasharray: 440; /* 2 * pi * 70 */
+            stroke-dasharray: 440; /* 2 * PI * 70 */
             stroke-dashoffset: 0;
+        }
+
+        /* شبكة الصور - الحل الأفضل للموبايل */
+        #grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 أعمدة */
+            gap: 12px;
+            width: 90%;
+            max-width: 400px;
+            padding: 10px;
+            z-index: 5;
+        }
+
+        .image-slot {
+            aspect-ratio: 1/1;
+            background: #111;
+            border: 2px solid #333;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: transform 0.1s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* جعل الكارت العاشر يتوسط السطر الأخير */
+        .image-slot:nth-child(10) {
+            grid-column: 2;
+        }
+
+        .image-slot:active { transform: scale(0.9); border-color: var(--neon-gold); }
+
+        /* الأنميشين */
+        .correct-flash { animation: correctFlash 0.3s ease-out; }
+        .wrong-flash { animation: wrongFlash 0.3s ease-out; }
+
+        @keyframes correctFlash {
+            50% { background: #00ff00; box-shadow: 0 0 20px #00ff00; }
+        }
+        @keyframes wrongFlash {
+            50% { background: var(--neon-pink); box-shadow: 0 0 20px var(--neon-pink); }
         }
 
         #overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.9);
             display: none;
             flex-direction: column;
             align-items: center;
@@ -105,52 +122,32 @@
         }
 
         button {
-            background: var(--neon-gold);
-            color: #000;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 30px;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-        }
-
-        /* Animations */
-        .correct-flash { animation: correctFlash 0.3s ease; }
-        .wrong-flash { animation: wrongFlash 0.3s ease; }
-
-        @keyframes correctFlash {
-            50% { background: var(--neon-green); box-shadow: 0 0 30px var(--neon-green); }
-        }
-        @keyframes wrongFlash {
-            50% { background: var(--neon-red); box-shadow: 0 0 30px var(--neon-red); }
-        }
-
-        @media (min-width: 600px) {
-            .image-slot { width: 80px; height: 80px; font-size: 3rem; }
-            #target-word { font-size: 2rem; }
-            #timer-svg { width: 200px; height: 200px; }
+            background: var(--neon-gold); color: #000; border: none;
+            padding: 15px 40px; font-size: 1.2rem; font-weight: bold;
+            border-radius: 12px; margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>Speed Matcher</h1>
-        <p id="scoreBoard">Score: 0 | Round: <span id="roundDisplay">1</span>/10</p>
+        <h2 style="margin:0; font-size: 1.2rem;">VETO SPEED MATCH</h2>
+        <div id="scoreBoard">Score: 0 | Rounds: <span id="roundDisplay">1</span>/10</div>
     </div>
 
-    <div id="game-container">
+    <div id="center-zone">
         <svg id="timer-svg" viewBox="0 0 160 160">
             <circle id="timer-circle" cx="80" cy="80" r="70"></circle>
         </svg>
-        <div id="target-word">READY?</div>
+        <div id="target-word">READY</div>
     </div>
+
+    <div id="grid-container"></div>
 
     <div id="overlay">
         <h1 id="statusTitle" style="font-size: 2.5rem;">GAME OVER</h1>
-        <p id="finalScore" style="font-size: 1.2rem; margin-bottom: 20px;"></p>
-        <button onclick="startGame()">TRY AGAIN</button>
+        <p id="finalScore" style="font-size: 1.2rem;"></p>
+        <button onclick="startGame()">PLAY AGAIN</button>
     </div>
 
     <script>
@@ -158,56 +155,42 @@
             { word: "Apple", img: "🍎" }, { word: "Car", img: "🚗" },
             { word: "Dog", img: "🐶" }, { word: "Book", img: "📚" },
             { word: "Sun", img: "☀️" }, { word: "Pizza", img: "🍕" },
-            { word: "Clock", img: "⌚" }, { word: "Ball", img: "⚽" },
+            { word: "Watch", img: "⌚" }, { word: "Ball", img: "⚽" },
             { word: "Tree", img: "🌳" }, { word: "House", img: "🏠" }
         ];
 
         let currentRound = 0, score = 0, timer, correctItem, canClick = false;
 
-        const container = document.getElementById('game-container');
+        const grid = document.getElementById('grid-container');
         const wordDisplay = document.getElementById('target-word');
         const circle = document.getElementById('timer-circle');
 
-        function createSlots() {
-            document.querySelectorAll('.image-slot').forEach(el => el.remove());
-            
-            // حساب نصف القطر بناءً على حجم الكانفس المتاح (متجاوب)
-            const rect = container.getBoundingClientRect();
-            const radius = rect.width / 2.6; 
-            
-            items.forEach((item, i) => {
-                const angle = (i / 10) * (Math.PI * 2);
-                const x = Math.cos(angle) * radius;
-                const y = Math.sin(angle) * radius;
-
+        function createGrid() {
+            grid.innerHTML = '';
+            items.forEach((item) => {
                 const slot = document.createElement('div');
                 slot.className = 'image-slot';
                 slot.innerText = item.img;
                 slot.dataset.word = item.word;
-                
-                // التموضع بالنسبة لمركز الحاوية
-                slot.style.left = `calc(50% + ${x}px - 32.5px)`;
-                slot.style.top = `calc(50% + ${y}px - 32.5px)`;
-                
-                slot.addEventListener('touchstart', (e) => { e.preventDefault(); handleChoice(slot); });
-                slot.addEventListener('mousedown', () => handleChoice(slot));
-                container.appendChild(slot);
+                slot.onclick = () => handleChoice(slot);
+                grid.appendChild(slot);
             });
         }
 
         function startGame() {
             currentRound = 0; score = 0;
             document.getElementById('overlay').style.display = 'none';
-            updateStats();
-            createSlots();
-            setTimeout(nextRound, 500);
+            wordDisplay.style.color = "#fff";
+            createGrid();
+            nextRound();
         }
 
         function nextRound() {
-            if (currentRound >= 10) { endGame(true); return; }
+            if (currentRound >= 10) return endGame(true);
             canClick = true;
-            updateStats();
-            wordDisplay.style.color = "#fff";
+            document.getElementById('roundDisplay').innerText = currentRound + 1;
+            document.getElementById('scoreBoard').innerHTML = `Score: ${score} | Rounds: <span id="roundDisplay">${currentRound+1}</span>/10`;
+            
             correctItem = items[Math.floor(Math.random() * items.length)];
             wordDisplay.innerText = correctItem.word;
             startTimer();
@@ -216,11 +199,10 @@
         function startTimer() {
             circle.style.transition = 'none';
             circle.style.strokeDashoffset = '0';
-            
             setTimeout(() => {
-                circle.style.transition = 'stroke-dashoffset 2s linear';
+                circle.style.transition = 'stroke-dashoffset 2000ms linear';
                 circle.style.strokeDashoffset = '440';
-            }, 50);
+            }, 10);
 
             clearTimeout(timer);
             timer = setTimeout(() => { if (canClick) handleChoice(null); }, 2000);
@@ -238,33 +220,27 @@
                     clickedSlot.classList.remove('correct-flash');
                     currentRound++;
                     nextRound();
-                }, 400);
+                }, 300);
             } else {
                 if(clickedSlot) clickedSlot.classList.add('wrong-flash');
                 wordDisplay.innerText = "WRONG!";
-                wordDisplay.style.color = "#ff0055";
+                wordDisplay.style.color = var(--neon-pink);
                 
-                // تمييز الإجابة الصحيحة للمساعدة في التعلم
-                const correctSlot = document.querySelector(`[data-word="${correctItem.word}"]`);
-                correctSlot.style.borderColor = "#00ff00";
+                // تمييز الإجابة الصحيحة للمتعلم
+                const correct = Array.from(document.querySelectorAll('.image-slot')).find(el => el.dataset.word === correctItem.word);
+                correct.style.borderColor = "#00ff00";
                 
-                setTimeout(() => endGame(false), 1200);
+                setTimeout(() => endGame(false), 1000);
             }
         }
 
-        function updateStats() {
-            document.getElementById('scoreBoard').innerHTML = `Score: ${score} | Round: ${currentRound + 1}/10`;
-        }
-
         function endGame(win) {
-            const overlay = document.getElementById('overlay');
-            overlay.style.display = 'flex';
+            document.getElementById('overlay').style.display = 'flex';
             document.getElementById('statusTitle').innerText = win ? "PERFECT!" : "GAME OVER";
-            document.getElementById('statusTitle').style.color = win ? "#00ff00" : "#ff0055";
+            document.getElementById('statusTitle').style.color = win ? "#00ff00" : "var(--neon-pink)";
             document.getElementById('finalScore').innerText = `Final Score: ${score}/100`;
         }
 
-        window.addEventListener('resize', createSlots);
         startGame();
     </script>
 </body>
