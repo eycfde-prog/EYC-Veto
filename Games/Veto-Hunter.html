@@ -31,9 +31,13 @@
             z-index: 20;
         }
 
-        #scoreBoard { color: var(--neon-gold); font-size: 1.1rem; font-weight: bold; margin-top: 5px; }
+        #scoreBoard { 
+            color: var(--neon-gold); 
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            margin-top: 5px; 
+        }
 
-        /* منطقة اللعبة المركزية (الكلمة والوقت) */
         #center-zone {
             position: relative;
             height: 160px;
@@ -63,14 +67,13 @@
             fill: none;
             stroke: var(--neon-gold);
             stroke-width: 6;
-            stroke-dasharray: 440; /* 2 * PI * 70 */
+            stroke-dasharray: 440;
             stroke-dashoffset: 0;
         }
 
-        /* شبكة الصور - الحل الأفضل للموبايل */
         #grid-container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3 أعمدة */
+            grid-template-columns: repeat(3, 1fr);
             gap: 12px;
             width: 90%;
             max-width: 400px;
@@ -92,14 +95,15 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* جعل الكارت العاشر يتوسط السطر الأخير */
         .image-slot:nth-child(10) {
             grid-column: 2;
         }
 
-        .image-slot:active { transform: scale(0.9); border-color: var(--neon-gold); }
+        .image-slot:active { 
+            transform: scale(0.9); 
+            border-color: var(--neon-gold); 
+        }
 
-        /* الأنميشين */
         .correct-flash { animation: correctFlash 0.3s ease-out; }
         .wrong-flash { animation: wrongFlash 0.3s ease-out; }
 
@@ -122,9 +126,14 @@
         }
 
         button {
-            background: var(--neon-gold); color: #000; border: none;
-            padding: 15px 40px; font-size: 1.2rem; font-weight: bold;
-            border-radius: 12px; margin-top: 20px;
+            background: var(--neon-gold); 
+            color: #000; 
+            border: none;
+            padding: 15px 40px; 
+            font-size: 1.2rem; 
+            font-weight: bold;
+            border-radius: 12px; 
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -224,11 +233,10 @@
             } else {
                 if(clickedSlot) clickedSlot.classList.add('wrong-flash');
                 wordDisplay.innerText = "WRONG!";
-                wordDisplay.style.color = var(--neon-pink);
+                wordDisplay.style.color = "var(--neon-pink)";
                 
-                // تمييز الإجابة الصحيحة للمتعلم
                 const correct = Array.from(document.querySelectorAll('.image-slot')).find(el => el.dataset.word === correctItem.word);
-                correct.style.borderColor = "#00ff00";
+                if (correct) correct.style.borderColor = "#00ff00";
                 
                 setTimeout(() => endGame(false), 1000);
             }
