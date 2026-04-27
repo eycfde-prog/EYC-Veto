@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veto Program - Decoder Game</title>
+    <style>
+        body {
+            background: #050505;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .header { text-align: center; margin-bottom: 20px; }
+        #levelIndicator { color: #ffd700; font-weight: bold; }
+
+        /* لوحة القاموس (الحروف والأرقام) */
+        .decoder-key {
+            display: grid;
+            grid-template-columns: repeat(13, 1fr);
+            gap: 5px;
+            background: #111;
+            padding: 15px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            width: 95%;
+            max-width: 800px;
+        }
+        .key-item {
+            text-align: center;
+            border: 1px solid #444;
+            padding: 5px;
+            border-radius: 4px;
+            background: #0a0a0a;
+        }
+        .key-item span { display: block; }
+        .letter { color: #00f2ff; font-weight: bold; }
+        .number { color: #ffd700; font-size: 0.8rem; }
+
+        /* منطقة الشفرة */
+        .cipher-box {
+            background: #1a1a1a;
+            border-left: 5px solid #00f2ff;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 700px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        #cipherText {
+            font-size: 1.8rem;
+            letter-spacing: 3px;
+            color: #ffd700;
+            word-wrap: break-word;
+        }
+
+        /* مدخلات الطالب */
+        input[type="text"] {
+            width: 80%;
+            max-width: 500px;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background: #000;
+            color: #fff;
+            text-align: center;
+            outline: none;
+            transition: 0.3s;
+        }
+        input[type="text"]:focus { border-color: #00f2ff; box-shadow: 0 0 15px #00f2ff; }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            border: none;
+            transition: 0.3s;
+        }
+        .btn-submit { background: #00f2ff; color: #000; }
+        .btn-submit:hover { background: #fff; }
+        
+        #feedback { margin-top: 20px; font-size: 1.2rem; font-weight: bold; }
+        .correct { color: #00ff00; text-shadow: 0 0 10px #00ff00; }
+        .wrong { color: #ff0055; text-shadow: 0 0 10px #ff0055; }
+
+        /* الموبايل */
+        @media (max-width: 600px) {
+            .decoder-key { grid-template-columns: repeat(7, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Veto Decoder Challenge</h1>
+        <div id="levelIndicator">Level 1 / 5</div>
+        <p>Convert the numbers into letters using the key below!</p>
+    </div>
+
+    <div class="decoder-key" id="keyBoard"></div>
+
+    <div class="cipher-box">
+        <div style="color: #888; font-size: 0.9rem; margin-bottom: 10px;">DECODE THIS:</div>
+        <div id="cipherText"></div>
+    </div>
+
+    <input type="text" id="userInput" placeholder="Type the full sentence here..." autocomplete="off">
+    
+    <div>
+        <button class="btn-submit" onclick="checkAnswer()">Submit Solution</button>
+    </div>
+
+    <div id="feedback"></div>
+    <button id="nextBtn" style="display:none; background: #ffd700;" onclick="nextLevel()">Next Level</button>
+
+    <script>
+        const sentences = [
+            "I LOVE ENGLISH",
+            "THE CAT IS BLACK",
+            "WE PLAY EVERY DAY",
+            "LEARNING IS FUN",
+            "SMILE AND LEARN"
+        ];
+
+        let currentLevel = 0;
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        // توليد لوحة القاموس برمجياً
+        function createKey() {
+            const keyBoard = document.getElementById('keyBoard');
+            for (let i = 0; i < alphabet.length; i++) {
+                keyBoard.innerHTML += `
+                    <div class="key-item">
+                        <span class="letter">${alphabet[i]}</span>
+                        <span class="number">${i}</span>
+                    </div>
+                `;
+            }
+        }
+
+        // تشفير الجملة بناءً على القواعد المطلوبة
+        function encodeSentence(text) {
+            let encodedWords = text.split(" ").map(word => {
+                return word.split("").map(char => {
+                    return alphabet.indexOf(char.toUpperCase());
+                }).join("."); // نفصل بين حروف الكلمة الواحدة بنقطة لتوضيح الأرقام
+            });
+            return encodedWords.join(" - "); // نفصل بين الكلمات بشرطة
+        }
+
+        function initLevel() {
+            document.getElementById('feedback').innerText = '';
+            document.getElementById('userInput').value = '';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('levelIndicator').innerText = `Level ${currentLevel + 1} / ${sentences.length}`;
+            
+            const rawText = sentences[currentLevel];
+            document.getElementById('cipherText').innerText = encodeSentence(rawText);
+        }
+
+        function checkAnswer() {
+            const input = document.getElementById('userInput').value.trim().toUpperCase();
+            const correct = sentences[currentLevel].toUpperCase();
+            const feedback = document.getElementById('feedback');
+
+            if (input === correct) {
+                feedback.innerText = "Correct! You are a master decoder! 🏆";
+                feedback.className = "correct";
+                document.getElementById('nextBtn').style.display = 'inline-block';
+            } else {
+                feedback.innerText = "Wrong! Check every letter and space.";
+                feedback.className = "wrong";
+            }
+        }
+
+        function nextLevel() {
+            currentLevel++;
+            if (currentLevel < sentences.length) {
+                initLevel();
+            } else {
+                alert("Incredible! All codes decrypted!");
+                currentLevel = 0;
+                initLevel();
+            }
+        }
+
+        // البداية
+        createKey();
+        initLevel();
+    </script>
+</body>
+</html>
