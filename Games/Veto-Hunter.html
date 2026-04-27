@@ -3,76 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Veto Speed Matcher - Mobile</title>
+    <title>Veto Speed Matcher - MobiCheck Optimized</title>
     <style>
         :root {
             --neon-gold: #ffd700;
             --neon-red: #ff0055;
-            --neon-blue: #00f2ff;
+            --neon-green: #00ff00;
         }
 
         body {
             background: #050505;
             color: #fff;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             margin: 0;
             height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: space-between;
             overflow: hidden;
-            touch-action: none;
+            touch-action: none; /* منع أي حركة للمتصفح أثناء اللعب */
         }
 
         .header {
-            padding-top: 20px;
+            padding: 20px 10px;
             text-align: center;
             z-index: 20;
         }
-        
-        h1 { font-size: 1.2rem; margin: 0; }
+
+        h1 { font-size: 1.2rem; margin: 0; color: #fff; }
         #scoreBoard { color: var(--neon-gold); font-size: 1rem; margin-top: 5px; }
 
         /* منطقة اللعبة الرئيسية - متجاوبة */
-        #game-area {
+        #game-container {
             position: relative;
-            flex: 1;
-            width: 100%;
+            width: 90vw;
+            height: 90vw;
+            max-width: 500px;
+            max-height: 500px;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-bottom: 20px;
         }
 
-        /* الكلمة المستهدفة */
         #target-word {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: bold;
-            text-align: center;
+            color: #fff;
+            text-shadow: 0 0 10px #fff;
             z-index: 10;
             text-transform: uppercase;
-            max-width: 120px;
-            pointer-events: none;
+            text-align: center;
+            width: 120px;
         }
 
-        /* الكروت */
         .image-slot {
             position: absolute;
-            width: 75px;
-            height: 75px;
+            width: 65px; /* حجم أصغر للموبايل */
+            height: 65px;
             background: #111;
             border: 2px solid #333;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             cursor: pointer;
             transition: transform 0.1s;
-            box-shadow: 0 0 10px rgba(0,0,0,0.8);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* شريط الوقت */
+        .image-slot:active { transform: scale(0.9); border-color: var(--neon-gold); }
+
         #timer-svg {
             position: absolute;
             width: 160px;
@@ -80,7 +84,7 @@
             transform: rotate(-90deg);
             z-index: 5;
         }
-        
+
         #timer-circle {
             fill: none;
             stroke: var(--neon-gold);
@@ -89,28 +93,15 @@
             stroke-dashoffset: 0;
         }
 
-        /* تأثيرات الفلاش */
-        .correct-flash { animation: correctFlash 0.3s forwards; }
-        .wrong-flash { animation: wrongFlash 0.3s forwards; }
-
-        @keyframes correctFlash {
-            50% { background: #00ff00; box-shadow: 0 0 30px #00ff00; }
-        }
-        @keyframes wrongFlash {
-            50% { background: var(--neon-red); box-shadow: 0 0 30px var(--neon-red); }
-        }
-
-        /* شاشة النهاية */
         #overlay {
-            position: absolute;
+            position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 100;
-            text-align: center;
         }
 
         button {
@@ -118,10 +109,27 @@
             color: #000;
             border: none;
             padding: 15px 40px;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: bold;
             border-radius: 30px;
-            margin-top: 20px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Animations */
+        .correct-flash { animation: correctFlash 0.3s ease; }
+        .wrong-flash { animation: wrongFlash 0.3s ease; }
+
+        @keyframes correctFlash {
+            50% { background: var(--neon-green); box-shadow: 0 0 30px var(--neon-green); }
+        }
+        @keyframes wrongFlash {
+            50% { background: var(--neon-red); box-shadow: 0 0 30px var(--neon-red); }
+        }
+
+        @media (min-width: 600px) {
+            .image-slot { width: 80px; height: 80px; font-size: 3rem; }
+            #target-word { font-size: 2rem; }
+            #timer-svg { width: 200px; height: 200px; }
         }
     </style>
 </head>
@@ -132,17 +140,17 @@
         <p id="scoreBoard">Score: 0 | Round: <span id="roundDisplay">1</span>/10</p>
     </div>
 
-    <div id="game-area">
-        <svg id="timer-svg">
+    <div id="game-container">
+        <svg id="timer-svg" viewBox="0 0 160 160">
             <circle id="timer-circle" cx="80" cy="80" r="70"></circle>
         </svg>
-        <div id="target-word">START</div>
+        <div id="target-word">READY?</div>
     </div>
 
     <div id="overlay">
         <h1 id="statusTitle" style="font-size: 2.5rem;">GAME OVER</h1>
-        <p id="finalScore" style="font-size: 1.2rem;"></p>
-        <button onclick="startGame()">PLAY AGAIN</button>
+        <p id="finalScore" style="font-size: 1.2rem; margin-bottom: 20px;"></p>
+        <button onclick="startGame()">TRY AGAIN</button>
     </div>
 
     <script>
@@ -156,16 +164,19 @@
 
         let currentRound = 0, score = 0, timer, correctItem, canClick = false;
 
-        function setupBoard() {
+        const container = document.getElementById('game-container');
+        const wordDisplay = document.getElementById('target-word');
+        const circle = document.getElementById('timer-circle');
+
+        function createSlots() {
             document.querySelectorAll('.image-slot').forEach(el => el.remove());
-            const area = document.getElementById('game-area');
             
-            // حساب القطر ديناميكياً بناءً على أصغر بُعد في الشاشة
-            const minDim = Math.min(window.innerWidth, window.innerHeight);
-            const radius = (minDim / 2) - 60; 
+            // حساب نصف القطر بناءً على حجم الكانفس المتاح (متجاوب)
+            const rect = container.getBoundingClientRect();
+            const radius = rect.width / 2.6; 
             
             items.forEach((item, i) => {
-                const angle = (i / items.length) * (Math.PI * 2) - (Math.PI / 2);
+                const angle = (i / 10) * (Math.PI * 2);
                 const x = Math.cos(angle) * radius;
                 const y = Math.sin(angle) * radius;
 
@@ -173,36 +184,36 @@
                 slot.className = 'image-slot';
                 slot.innerText = item.img;
                 slot.dataset.word = item.word;
-                slot.style.transform = `translate(${x}px, ${y}px)`;
                 
-                // أحداث اللمس للسرعة
+                // التموضع بالنسبة لمركز الحاوية
+                slot.style.left = `calc(50% + ${x}px - 32.5px)`;
+                slot.style.top = `calc(50% + ${y}px - 32.5px)`;
+                
                 slot.addEventListener('touchstart', (e) => { e.preventDefault(); handleChoice(slot); });
-                slot.onclick = () => handleChoice(slot);
-                area.appendChild(slot);
+                slot.addEventListener('mousedown', () => handleChoice(slot));
+                container.appendChild(slot);
             });
         }
 
         function startGame() {
             currentRound = 0; score = 0;
             document.getElementById('overlay').style.display = 'none';
-            setupBoard();
-            nextRound();
+            updateStats();
+            createSlots();
+            setTimeout(nextRound, 500);
         }
 
         function nextRound() {
-            if (currentRound >= 10) return endGame(true);
+            if (currentRound >= 10) { endGame(true); return; }
             canClick = true;
-            document.getElementById('roundDisplay').innerText = currentRound + 1;
-            document.getElementById('target-word').style.color = "#fff";
-            
+            updateStats();
+            wordDisplay.style.color = "#fff";
             correctItem = items[Math.floor(Math.random() * items.length)];
-            document.getElementById('target-word').innerText = correctItem.word;
-
+            wordDisplay.innerText = correctItem.word;
             startTimer();
         }
 
         function startTimer() {
-            const circle = document.getElementById('timer-circle');
             circle.style.transition = 'none';
             circle.style.strokeDashoffset = '0';
             
@@ -222,7 +233,6 @@
 
             if (clickedSlot && clickedSlot.dataset.word === correctItem.word) {
                 score += 10;
-                document.getElementById('scoreBoard').innerHTML = `Score: ${score} | Round: ${currentRound+1}/10`;
                 clickedSlot.classList.add('correct-flash');
                 setTimeout(() => {
                     clickedSlot.classList.remove('correct-flash');
@@ -231,26 +241,30 @@
                 }, 400);
             } else {
                 if(clickedSlot) clickedSlot.classList.add('wrong-flash');
-                document.getElementById('target-word').innerText = "WRONG!";
-                document.getElementById('target-word').style.color = "#ff0055";
+                wordDisplay.innerText = "WRONG!";
+                wordDisplay.style.color = "#ff0055";
                 
-                // تمييز الإجابة الصحيحة
-                const correct = document.querySelector(`[data-word="${correctItem.word}"]`);
-                correct.style.borderColor = "#00ff00";
-                correct.style.boxShadow = "0 0 20px #00ff00";
-
-                setTimeout(() => endGame(false), 1000);
+                // تمييز الإجابة الصحيحة للمساعدة في التعلم
+                const correctSlot = document.querySelector(`[data-word="${correctItem.word}"]`);
+                correctSlot.style.borderColor = "#00ff00";
+                
+                setTimeout(() => endGame(false), 1200);
             }
         }
 
-        function endGame(win) {
-            document.getElementById('overlay').style.display = 'flex';
-            document.getElementById('statusTitle').innerText = win ? "WELL DONE!" : "GAME OVER";
-            document.getElementById('statusTitle').style.color = win ? "#00ff00" : "#ff0055";
-            document.getElementById('finalScore').innerText = `Final Score: ${score}`;
+        function updateStats() {
+            document.getElementById('scoreBoard').innerHTML = `Score: ${score} | Round: ${currentRound + 1}/10`;
         }
 
-        window.addEventListener('resize', setupBoard);
+        function endGame(win) {
+            const overlay = document.getElementById('overlay');
+            overlay.style.display = 'flex';
+            document.getElementById('statusTitle').innerText = win ? "PERFECT!" : "GAME OVER";
+            document.getElementById('statusTitle').style.color = win ? "#00ff00" : "#ff0055";
+            document.getElementById('finalScore').innerText = `Final Score: ${score}/100`;
+        }
+
+        window.addEventListener('resize', createSlots);
         startGame();
     </script>
 </body>
