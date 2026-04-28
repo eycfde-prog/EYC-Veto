@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>April A.L Revision - Prep 2</title>
+    <style>
+        :root {
+            --bg-color: #1a2639;
+            --card-bg: #25334a;
+            --text-color: #e0e0e0;
+            --accent-color: #4f86ed;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .score-board {
+            position: sticky;
+            top: 10px;
+            background: var(--accent-color);
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .stage-title {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 5px;
+            margin-top: 40px;
+        }
+
+        .question-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        button.option {
+            background: #34495e;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        button.option:hover:not(:disabled) {
+            background: #465d75;
+        }
+
+        button.correct {
+            background-color: var(--success-color) !important;
+        }
+
+        button.wrong {
+            background-color: var(--error-color) !important;
+        }
+
+        .next-stage-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--success-color);
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: none;
+        }
+
+        #final-result {
+            display: none;
+            text-align: center;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #34495e;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        #progress-fill {
+            height: 100%;
+            background: var(--success-color);
+            width: 0%;
+            transition: width 0.5s;
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            .question-text { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>April A.L Revision</h1>
+        <p>Prep 2 - Interactive Practice</p>
+    </div>
+
+    <div class="score-board">
+        <span>Score: <b id="score">0</b></span>
+        <span id="current-stage-name">Stage 1: Vocabulary</span>
+    </div>
+
+    <div class="progress-bar"><div id="progress-fill"></div></div>
+
+    <div id="quiz-area">
+        </div>
+
+    <button id="next-stage-btn" class="next-stage-btn" onclick="loadNextStage()">Move to Next Stage</button>
+
+    <div id="final-result">
+        <h2>🎉 Well Done!</h2>
+        <p id="final-score-text"></p>
+        <button class="next-stage-btn" style="display:block" onclick="location.reload()">Restart Practice</button>
+    </div>
+</div>
+
+<script>
+// Data extraction from the provided sheet
+const quizData = {
+    vocabulary: [
+        { q: "The school will ________ the exam results tomorrow.", a: ["announce", "announcer", "announcement", "announcing"], c: 0 },
+        { q: "The city ________ voted to build a new park.", a: ["charity", "council", "raise", "packaging"], c: 1 },
+        { q: "She was ________ with her birthday surprise.", a: ["delight", "delighted", "disappoint", "volunteer"], c: 1 },
+        { q: "There's been a sharp ________ in fuel prices recently.", a: ["advertise", "rise", "put out", "product"], c: 1 },
+        { q: "Can you ________ with the school event this weekend?", a: ["help out", "run away", "put out", "produce"], c: 0 },
+        { q: "The ________ plans to improve education in our country.", a: ["govern", "government", "shelter", "accommodation"], c: 1 },
+        { q: "We can ________ paper, glass, and plastic at home.", a: ["packaging", "cycle", "recycle", "recycling"], c: 2 },
+        { q: "They stayed in a ________ spot to avoid the storm.", a: ["shelter", "sheltered", "delighted", "shelter"], c: 1 },
+        { q: "________ is a serious social problem in big cities.", a: ["Homeless", "Homelessness", "Pleasure", "Advertisement"], c: 1 },
+        { q: "Many organizations work to fight ________ around the world.", a: ["poverty", "packaging", "volunteer", "household"], c: 0 },
+        { q: "Factories must reduce air ________ to protect the environment.", a: ["pollute", "pollution", "poverty", "unemployment"], c: 1 },
+        { q: "Try to avoid buying items with too much plastic ________.", a: ["packaging", "council", "accommodation", "environment"], c: 0 },
+        { q: "She works as a ________ at the animal shelter every weekend.", a: ["homeless", "volunteer", "cultural", "social"], c: 1 },
+        { q: "We booked our ________ online before the trip.", a: ["pleasure", "accommodation", "announcement", "recycle"], c: 1 },
+        { q: "The ________ news has shocked the whole community.", a: ["recent", "rise", "raise", "disappointed"], c: 0 },
+        { q: "The ________ gave a speech at the city's anniversary celebration.", a: ["crash", "government", "mayor", "shelter"], c: 2 },
+        { q: "We had a ________ last night during the storm.", a: ["power", "power cut", "dark", "waste"], c: 1 },
+        { q: "The heavy snow ________ train services across the region.", a: ["disrupted", "crept", "hatched", "swarmed"], c: 0 },
+        { q: "The lights grew ________ before going out completely.", a: ["bright", "brightly", "dim", "exhausted"], c: 2 },
+        { q: "Don't ________ the socket, or it might catch fire.", a: ["load", "download", "upload", "overload"], c: 3 },
+        { q: "In case of a/an ________, call 911 immediately.", a: ["emergent", "emergency", "decline", "chance"], c: 1 },
+        { q: "The animal shelter takes care of ________ cats and dogs.", a: ["starry", "stray", "resident", "waste"], c: 1 },
+        { q: "She left her phone at home and ran back in a ________.", a: ["panic", "silvery", "crowdedness", "decline"], c: 0 },
+        { q: "Pollution can harm the delicate balance of the ________.", a: ["ecosystem", "emergency", "silvery", "spot"], c: 0 },
+        { q: "After losing his job, he suffered from ________.", a: ["depress", "depression", "wandering", "disrupting"], c: 1 },
+        { q: "Tourists ________ at the beauty of the ancient monuments.", a: ["spot", "marvel", "resident", "horizon"], c: 1 },
+        { q: "Many birds ________ south for the winter.", a: ["marvel", "migration", "migrate", "affect"], c: 2 },
+        { q: "We lay on the grass and looked at the ________ sky.", a: ["stray", "star", "starry", "disrupted"], c: 2 },
+        { q: "Lack of exercise can lead ________ health problems.", a: ["into", "to", "of", "off"], c: 1 },
+        { q: "Japan has strong buildings to protect people from ________.", a: ["earthquakes", "pollution", "production", "residence"], c: 0 },
+        { q: "The oil ________ caused serious damage to sea animals.", a: ["spill", "spell", "spelling", "split"], c: 0 },
+        { q: "The school is organizing an event to ________ money for charity.", a: ["rise", "raise", "fossil", "hang"], c: 1 },
+        { q: "We need to buy more milk; we've completely ________.", a: ["run into", "run out", "raise", "prevent"], c: 1 },
+        { q: "The small boat ________ in the rough sea.", a: ["capsized", "expanded", "melted", "increased"], c: 0 },
+        { q: "Many species are ________ risk of becoming extinct.", a: ["in", "into", "at", "with"], c: 2 },
+        { q: "They are experimenting ________ animals to test their new product.", a: ["in", "on", "at", "from"], c: 1 },
+        { q: "The children were ________ a panic during the earthquake.", a: ["at", "with", "off", "in"], c: 3 },
+        { q: "The company plans to ________ into international markets.", a: ["expand", "protect", "prevent", "cure"], c: 0 },
+        { q: "Washing your hands can help ________ the spread of germs.", a: ["expand", "prevent", "turn off", "classify"], c: 1 },
+        { q: "The city was covered in thick ________ due to pollution.", a: ["smog", "traffic", "extinction", "conservation"], c: 0 },
+        { q: "She turned ________ my invitation to his party.", a: ["into", "out", "down", "off"], c: 2 }
+    ],
+    grammar: [
+        { q: "Menna ________ me that she would come to hockey practice.", a: ["said", "told", "ordered", "asked"], c: 1 },
+        { q: "Omar said that he ________ his old classmates the day before.", a: ["has seen", "saw", "had seen", "would see"], c: 2 },
+        { q: "My mother asked me if ________ tired.", a: ["were you", "I were", "was I", "I was"], c: 3 },
+        { q: "Maha asked me why ________ so serious the day before.", a: ["I was", "you have been", "I had been", "I have been"], c: 2 },
+        { q: "She asked me if ________ to Ahmed's wedding party.", a: ["I was going", "I am going", "are you going", "they are going"], c: 0 },
+        { q: "Ali wanted to know ________ I was ready for the exam or not.", a: ["why", "whether", "that", "when"], c: 1 },
+        { q: "Heba ________ the lesson had already started when she arrived.", a: ["asked", "said", "told", "wanted to know"], c: 1 },
+        { q: "Nour said that metals ________ in summer.", a: ["expands", "expanded", "expand", "expanding"], c: 2 },
+        { q: "She promised she ________ me as soon as the plane landed.", a: ["will phone", "can phone", "would phone", "phoned"], c: 2 },
+        { q: "The shop assistant asked why I ________ to change the tie.", a: ["want", "wants", "wanted", "have wanted"], c: 2 },
+        { q: "Soha ________ Mariam where she was going.", a: ["wondered", "inquired", "asked", "advised"], c: 2 },
+        { q: "He asks me why the girl ________.", a: ["was coughing", "is coughing", "coughed", "had coughed"], c: 1 },
+        { q: "Adam said that he ________ his classmates the following month.", a: ["is going to see", "was going to see", "is seeing", "will see"], c: 1 },
+        { q: "My mum ordered me ________ my room.", a: ["tidy", "to tidy", "don't tidy", "tidied"], c: 1 },
+        { q: "The teacher ________ us to keep quiet.", a: ["promised", "warned", "ordered", "said"], c: 2 },
+        { q: "He asks when he ________ his dinner.", a: ["would have", "will have", "had had", "had"], c: 1 },
+        { q: "A friend warned me ________ apply for the job.", a: ["if", "not", "not to", "whether"], c: 2 },
+        { q: "Mona said a moment ago that she ________ to the cinema now.", a: ["was going", "went", "is going", "goes"], c: 2 },
+        { q: "The doctor says that the patient ________ very ill.", a: ["must", "is", "was", "had been"], c: 1 }
+    ],
+    rewrite: [
+        { q: "Can you decrease the volume of your music? (turn)", a: ["Can you turn up the volume?", "Can you turn down the volume?", "Can you turn off the volume?", "Can you turn into the volume?"], c: 1 },
+        { q: "He refused my offer. (turned)", a: ["He turned down my offer.", "He turned out my offer.", "He turned off my offer.", "He turned into my offer."], c: 0 },
+        { q: "Can you switch off the TV, please? (turn)", a: ["Can you turn on the TV?", "Can you turn up the TV?", "Can you turn off the TV?", "Can you turn down the TV?"], c: 2 },
+        { q: "It was discovered that Ahmed was telling the truth. (turned)", a: ["Ahmed turned into the truth.", "It turned out that Ahmed was telling the truth.", "Ahmed turned down the truth.", "It turned off that Ahmed was telling the truth."], c: 1 },
+        { q: "His small business became a big business. (turned)", a: ["His business turned down a big one.", "His business turned off a big one.", "His business turned into a big business.", "His business turned out a big business."], c: 2 },
+        { q: "She said, 'I can get home on my own'. (that)", a: ["She said that she can get home.", "She said that she could get home on her own.", "She said that I could get home.", "She said she could get home on my own."], c: 1 },
+        { q: "The police said to me, 'When did you leave the house?' (asked)", a: ["The police asked me when I left the house.", "The police asked me when did I leave the house.", "The police asked me when I had left the house.", "The police asked me when have I left the house."], c: 2 },
+        { q: "He said, 'I'll visit the museum tomorrow'. (would)", a: ["He said he will visit the museum.", "He said he would visit the museum the next day.", "He said I would visit the museum.", "He said he would visit the museum tomorrow."], c: 1 },
+        { q: "My sister said, 'The sun rises in the east'. (that)", a: ["My sister said that the sun rose in the east.", "My sister said that the sun rises in the east.", "My sister said that the sun had risen in the east.", "My sister said the sun will rise in the east."], c: 1 },
+        { q: "Dad said to us, 'Don't touch the fresh paint!' (warned)", a: ["Dad warned us to touch the paint.", "Dad warned us not to touch the fresh paint.", "Dad warned us don't touch the paint.", "Dad warned us that we don't touch the paint."], c: 1 }
+    ]
+};
+
+let currentStage = 'vocabulary';
+let score = 0;
+let answeredInStage = 0;
+
+function loadStage(stageKey) {
+    const quizArea = document.getElementById('quiz-area');
+    quizArea.innerHTML = '';
+    answeredInStage = 0;
+    
+    const stageNames = { vocabulary: "Stage 1: Vocabulary", grammar: "Stage 2: Grammar", rewrite: "Stage 3: Rewrite (MCQ)" };
+    document.getElementById('current-stage-name').innerText = stageNames[stageKey];
+    document.getElementById('next-stage-btn').style.display = 'none';
+
+    quizData[stageKey].forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.innerHTML = `
+            <div class="question-text"><b>${index + 1}.</b> ${item.q}</div>
+            <div class="options-grid" id="q-${stageKey}-${index}">
+                ${item.a.map((opt, i) => `
+                    <button class="option" onclick="checkAnswer('${stageKey}', ${index}, ${i})">${opt}</button>
+                `).join('')}
+            </div>
+        `;
+        quizArea.appendChild(card);
+    });
+    window.scrollTo(0, 0);
+    updateProgress();
+}
+
+function checkAnswer(stage, qIdx, selectedIdx) {
+    const parent = document.getElementById(`q-${stage}-${qIdx}`);
+    const options = parent.querySelectorAll('.option');
+    const correctIdx = quizData[stage][qIdx].c;
+
+    if (options[0].disabled) return; // Prevent double clicking
+
+    options.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === correctIdx) btn.classList.add('correct');
+    });
+
+    if (selectedIdx === correctIdx) {
+        score++;
+    } else {
+        score--;
+        options[selectedIdx].classList.add('wrong');
+    }
+
+    document.getElementById('score').innerText = score;
+    answeredInStage++;
+    updateProgress();
+
+    if (answeredInStage === quizData[stage].length) {
+        document.getElementById('next-stage-btn').style.display = 'block';
+    }
+}
+
+function updateProgress() {
+    const totalQuestions = quizData.vocabulary.length + quizData.grammar.length + quizData.rewrite.length;
+    const currentCompleted = (currentStage === 'grammar' ? quizData.vocabulary.length : currentStage === 'rewrite' ? quizData.vocabulary.length + quizData.grammar.length : 0) + answeredInStage;
+    const percent = (currentCompleted / totalQuestions) * 100;
+    document.getElementById('progress-fill').style.width = percent + '%';
+}
+
+function loadNextStage() {
+    if (currentStage === 'vocabulary') {
+        currentStage = 'grammar';
+        loadStage('grammar');
+    } else if (currentStage === 'grammar') {
+        currentStage = 'rewrite';
+        loadStage('rewrite');
+    } else {
+        showFinalResult();
+    }
+}
+
+function showFinalResult() {
+    document.getElementById('quiz-area').style.display = 'none';
+    document.getElementById('next-stage-btn').style.display = 'none';
+    document.querySelector('.score-board').style.display = 'none';
+    const final = document.getElementById('final-result');
+    final.style.display = 'block';
+    const total = quizData.vocabulary.length + quizData.grammar.length + quizData.rewrite.length;
+    document.getElementById('final-score-text').innerText = `You scored ${score} out of a total weight of ${total} points.`;
+}
+
+// Start the quiz
+loadStage('vocabulary');
+
+</script>
+</body>
+</html>
