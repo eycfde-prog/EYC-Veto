@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>English Practice — Grade 3 Secondary</title>
+<script src="questionBank.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Rajdhani:wght@600;700&display=swap');
+:root{
+  --bg:#0d1117;--s:#161b22;--c:#1c2333;--b:#21262d;
+  --g:#3fb950;--g2:#56d364;--bl:#58a6ff;--pu:#bc8cff;
+  --or:#f0883e;--ye:#e3b341;--re:#f85149;
+  --tx:#e6edf3;--mu:#7d8590;--di:#30363d;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(63,185,80,.12),transparent),
+             radial-gradient(ellipse 60% 40% at 80% 80%,rgba(88,166,255,.08),transparent);
+  pointer-events:none;z-index:0;}
+
+/* ── SCREENS ── */
+.screen{display:none;position:relative;z-index:1;}
+.screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+#quizScreen{justify-content:flex-start;padding:0;}
+
+/* ── LANDING ── */
+.brand{text-align:center;margin-bottom:32px;}
+.brand .pill{display:inline-block;background:linear-gradient(135deg,var(--g),#26a641);color:#fff;font-size:10px;font-weight:900;padding:3px 14px;border-radius:20px;letter-spacing:2px;margin-bottom:12px;font-family:'Rajdhani',sans-serif;}
+.brand h1{font-size:clamp(22px,4vw,38px);font-weight:900;background:linear-gradient(135deg,#fff,var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2;}
+.brand p{color:var(--mu);font-size:13px;margin-top:6px;}
+
+/* ── GATE CARD ── */
+.gate-card{background:var(--c);border:1px solid var(--b);border-radius:20px;padding:30px 26px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.gate-card h2{font-size:19px;font-weight:900;margin-bottom:5px;}
+.gate-card .sub{font-size:13px;color:var(--mu);margin-bottom:22px;line-height:1.5;}
+.lbl{font-size:11px;font-weight:700;color:var(--mu);letter-spacing:1.5px;text-transform:uppercase;font-family:'Rajdhani',sans-serif;margin-bottom:8px;}
+.code-inp{width:100%;padding:14px 16px;background:var(--s);border:1.5px solid var(--b);border-radius:10px;color:var(--tx);font-family:'Outfit',sans-serif;font-size:20px;font-weight:700;letter-spacing:4px;text-align:center;outline:none;transition:border-color .2s;margin-bottom:7px;}
+.code-inp:focus{border-color:var(--g);}
+.code-inp.err{border-color:var(--re);animation:shake .3s;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.err-msg{font-size:13px;color:var(--re);font-weight:600;min-height:18px;text-align:center;margin-bottom:12px;}
+.enter-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--g),#26a641);border:none;border-radius:10px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;letter-spacing:1px;cursor:pointer;box-shadow:0 5px 16px rgba(63,185,80,.4);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px;}
+.enter-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 22px rgba(63,185,80,.55);}
+.enter-btn:disabled{opacity:.55;cursor:not-allowed;transform:none;}
+
+/* sections preview */
+.sections-preview{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:18px;}
+.sp-item{background:var(--s);border:1px solid var(--b);border-radius:9px;padding:9px 12px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--mu);}
+.sp-item .sp-icon{font-size:16px;}
+
+/* ── QUIZ HEADER ── */
+.q-header{width:100%;background:var(--s);border-bottom:1px solid var(--b);padding:10px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;}
+.qh-back{padding:6px 12px;border-radius:8px;background:var(--c);border:1px solid var(--b);color:var(--tx);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.qh-back:hover{border-color:var(--re);color:var(--re);}
+.qh-info{flex:1;min-width:0;}
+.qh-title{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.qh-sub{font-size:11px;color:var(--mu);}
+.qh-score{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:900;color:var(--g);white-space:nowrap;}
+
+/* progress bar */
+.prog-bar-wrap{width:100%;height:4px;background:var(--b);}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--g),var(--bl));transition:width .4s ease;}
+
+/* ── QUIZ CONTENT ── */
+.q-content{width:100%;max-width:760px;margin:0 auto;padding:18px 14px 50px;}
+
+/* counter + section tag */
+.q-meta-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.q-ctr{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--mu);}
+.q-stag{font-size:10px;font-weight:700;padding:2px 9px;border-radius:10px;font-family:'Rajdhani',sans-serif;letter-spacing:.5px;}
+
+/* passage */
+.q-passage{background:rgba(88,166,255,.07);border:1px solid rgba(88,166,255,.2);border-left:4px solid var(--bl);border-radius:10px;padding:14px 16px;font-size:13px;color:#b1bac4;line-height:1.8;margin-bottom:14px;}
+.q-passage-lbl{font-size:10px;font-weight:700;color:var(--bl);letter-spacing:1px;font-family:'Rajdhani',sans-serif;margin-bottom:6px;}
+
+/* question box */
+.q-box{background:var(--c);border:1px solid var(--b);border-left:4px solid var(--bl);border-radius:13px;padding:16px 18px;font-size:clamp(14px,2vw,16px);font-weight:600;line-height:1.85;margin-bottom:18px;animation:slideIn .3s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+
+/* options */
+.options{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px;}
+@media(max-width:500px){.options{grid-template-columns:1fr;}}
+.opt-btn{padding:12px 14px;border-radius:11px;border:2px solid var(--b);background:var(--c);color:var(--tx);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;text-align:left;display:flex;align-items:flex-start;gap:9px;line-height:1.5;}
+.opt-letter{width:26px;height:26px;border-radius:7px;background:var(--s);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;flex-shrink:0;color:var(--g);font-family:'Rajdhani',sans-serif;border:1px solid var(--b);transition:all .2s;margin-top:1px;}
+.opt-btn:hover:not(:disabled){border-color:var(--bl);background:rgba(88,166,255,.08);}
+.opt-btn:hover:not(:disabled) .opt-letter{background:var(--bl);color:#fff;border-color:var(--bl);}
+.opt-btn.correct{border-color:var(--g)!important;background:rgba(63,185,80,.15)!important;animation:cPulse .4s;}
+.opt-btn.correct .opt-letter{background:var(--g);color:#fff;border-color:var(--g);}
+.opt-btn.wrong{border-color:var(--re)!important;background:rgba(248,81,73,.15)!important;animation:wShake .4s;}
+.opt-btn.wrong .opt-letter{background:var(--re);color:#fff;border-color:var(--re);}
+.opt-btn:disabled{cursor:default;}
+@keyframes cPulse{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+@keyframes wShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* next btn */
+.next-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--bl),var(--pu));border:none;border-radius:11px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+.next-btn:hover{opacity:.9;transform:translateY(-2px);}
+
+/* feedback emoji */
+.fb-ov{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:100;}
+.fb-msg{font-size:72px;opacity:0;}
+.fb-msg.pop{animation:fbAnim .7s forwards;}
+@keyframes fbAnim{0%{opacity:0;transform:scale(.5) translateY(20px)}50%{opacity:1;transform:scale(1.2) translateY(-8px)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.8) translateY(-28px)}}
+
+/* ── RESULTS ── */
+#resultsScreen{padding:30px 20px;}
+.res-hero{text-align:center;margin-bottom:28px;}
+.res-trophy{font-size:64px;margin-bottom:10px;}
+.res-title{font-size:clamp(22px,4vw,34px);font-weight:900;background:linear-gradient(135deg,var(--g2),var(--bl));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.res-sub{color:var(--mu);margin-top:6px;font-size:14px;}
+.score-circle{width:130px;height:130px;border-radius:50%;background:conic-gradient(var(--g) calc(var(--pct)*3.6deg),var(--b) 0deg);margin:20px auto;display:flex;align-items:center;justify-content:center;position:relative;}
+.score-inner{width:100px;height:100px;border-radius:50%;background:var(--c);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-big{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:900;color:var(--g);}
+.score-out{font-size:12px;color:var(--mu);}
+.res-card{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:20px;width:100%;max-width:480px;margin-bottom:16px;}
+.res-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--b);font-size:14px;}
+.res-row:last-child{border-bottom:none;}
+.res-row .label{color:var(--mu);}
+.res-row .value{font-weight:700;}
+.res-row .value.green{color:var(--g);}
+.res-row .value.red{color:var(--re);}
+.res-row .value.yellow{color:var(--ye);}
+.res-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;width:100%;max-width:480px;}
+.retry-btn{padding:12px 28px;background:linear-gradient(135deg,var(--g),#26a641);border:none;border-radius:10px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 5px 16px rgba(63,185,80,.35);}
+.retry-btn:hover{transform:translateY(-2px);}
+.home-btn{padding:12px 28px;background:var(--s);border:1px solid var(--b);border-radius:10px;color:var(--tx);font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;}
+.home-btn:hover{border-color:var(--bl);color:var(--bl);}
+
+/* review section */
+.review-toggle{width:100%;max-width:480px;margin-bottom:12px;}
+.rev-btn{width:100%;padding:11px;background:var(--s);border:1px solid var(--b);border-radius:10px;color:var(--bl);font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;}
+.rev-btn:hover{border-color:var(--bl);}
+.review-list{width:100%;max-width:480px;display:none;flex-direction:column;gap:8px;margin-bottom:16px;}
+.rev-item{background:var(--c);border:1px solid var(--b);border-radius:10px;padding:12px 14px;}
+.rev-item.wrong-q{border-color:rgba(248,81,73,.3);}
+.rev-item.correct-q{border-color:rgba(63,185,80,.3);}
+.rev-q{font-size:13px;font-weight:600;margin-bottom:6px;}
+.rev-ans{font-size:12px;color:var(--mu);}
+.rev-ans span.cor{color:var(--g);font-weight:700;}
+.rev-ans span.wr{color:var(--re);}
+
+/* confetti */
+.cp{position:fixed;top:-20px;z-index:400;animation:cFall linear forwards;border-radius:2px;}
+@keyframes cFall{to{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+</style>
+</head>
+<body>
+
+<!-- ── LANDING ── -->
+<div id="landingScreen" class="screen active">
+  <div class="brand">
+    <div class="pill">GRADE 3 SECONDARY</div>
+    <h1>English Practice</h1>
+    <p>Bit by Bit — Final Revision 2026</p>
+  </div>
+
+  <div class="gate-card">
+    <h2>Enter Your Code</h2>
+    <p class="sub">Your teacher will give you a code that unlocks a specific practice section with 25 random questions.</p>
+    <div class="lbl">Practice Code</div>
+    <input id="codeInp" class="code-inp" type="text" placeholder="e.g. ENG-V1"
+      maxlength="15" autocomplete="off" spellcheck="false"
+      onkeydown="if(event.key==='Enter') tryEnter()">
+    <div id="errMsg" class="err-msg"></div>
+    <button id="enterBtn" class="enter-btn" onclick="tryEnter()">
+      <span id="enterLbl">🚀 Start Practice</span>
+    </button>
+
+    <div class="sections-preview">
+      <div class="sp-item"><span class="sp-icon">📚</span>Vocabulary</div>
+      <div class="sp-item"><span class="sp-icon">💡</span>Idioms</div>
+      <div class="sp-item"><span class="sp-icon">📝</span>Grammar</div>
+      <div class="sp-item"><span class="sp-icon">🔡</span>Compound Adj.</div>
+      <div class="sp-item"><span class="sp-icon">🌐</span>Translation</div>
+      <div class="sp-item"><span class="sp-icon">📖</span>Reading</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── QUIZ ── -->
+<div id="quizScreen" class="screen">
+  <div class="q-header">
+    <button class="qh-back" onclick="goHome()">← Home</button>
+    <div class="qh-info">
+      <div class="qh-title" id="qhTitle">—</div>
+      <div class="qh-sub" id="qhSub">—</div>
+    </div>
+    <div class="qh-score" id="qhScore">0 / 0</div>
+  </div>
+  <div class="prog-bar-wrap"><div class="prog-bar" id="progBar" style="width:0%"></div></div>
+
+  <div class="q-content">
+    <div class="q-meta-row">
+      <span class="q-ctr" id="qCtr">Q 1 / 25</span>
+      <span class="q-stag" id="qStag"></span>
+    </div>
+    <div id="qPassage" class="q-passage" style="display:none">
+      <div class="q-passage-lbl">📖 READ THE PASSAGE</div>
+      <div id="qPassageText"></div>
+    </div>
+    <div class="q-box" id="qText">Loading…</div>
+    <div class="options" id="optGrid"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQ()" style="display:none">
+      Next Question →
+    </button>
+  </div>
+</div>
+
+<!-- ── RESULTS ── -->
+<div id="resultsScreen" class="screen">
+  <div class="res-hero">
+    <div class="res-trophy" id="resTrophy">🏆</div>
+    <div class="res-title" id="resTitle">Well done!</div>
+    <div class="res-sub" id="resSub">Here are your results</div>
+  </div>
+
+  <div class="score-circle" id="scoreCircle" style="--pct:0">
+    <div class="score-inner">
+      <div class="score-big" id="scoreBig">0/25</div>
+      <div class="score-out" id="scoreOut">0%</div>
+    </div>
+  </div>
+
+  <div class="res-card" id="resStats"></div>
+
+  <div class="review-toggle">
+    <button class="rev-btn" onclick="toggleReview()">📋 Review My Answers</button>
+  </div>
+  <div class="review-list" id="reviewList"></div>
+
+  <div class="res-btns">
+    <button class="retry-btn" onclick="retryQuiz()">🔄 Try Again</button>
+    <button class="home-btn" onclick="goHome()">🏠 Home</button>
+  </div>
+</div>
+
+<!-- Feedback emoji -->
+<div class="fb-ov"><div class="fb-msg" id="fbMsg"></div></div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────
+let questions = [];
+let currentQ  = 0;
+let score     = 0;
+let answered  = false;
+let section   = '';
+let userAnswers = [];  // {q, chosen, correct, isRight}
+
+// ── ENTRY ──────────────────────────────────────────────────────────
+function tryEnter() {
+  const raw  = document.getElementById('codeInp').value.trim().toUpperCase();
+  const sec  = QB.codes[raw];
+  const inp  = document.getElementById('codeInp');
+  const err  = document.getElementById('errMsg');
+
+  if (!raw)  { err.textContent = 'Please enter your code.';      inp.classList.add('err'); setTimeout(()=>inp.classList.remove('err'),400); return; }
+  if (!sec)  { err.textContent = '❌ Code not found. Check with your teacher.'; inp.classList.add('err'); setTimeout(()=>inp.classList.remove('err'),400); return; }
+
+  err.textContent = '';
+  section   = sec;
+  questions = QB.getRandom(sec, 25);
+  currentQ  = 0;
+  score     = 0;
+  answered  = false;
+  userAnswers = [];
+
+  show('quizScreen');
+  loadQ();
+}
+
+// ── QUIZ ────────────────────────────────────────────────────────────
+function loadQ() {
+  if (currentQ >= questions.length) { showResults(); return; }
+
+  answered = false;
+  const q  = questions[currentQ];
+  const m  = QB.meta[section] || { label: section, icon: '❓', color: '#888' };
+  const pct = ((currentQ) / questions.length) * 100;
+
+  // header
+  document.getElementById('qhTitle').textContent = m.label;
+  document.getElementById('qhSub').textContent   = `Code: ${document.getElementById('codeInp').value.trim().toUpperCase()}`;
+  document.getElementById('qhScore').textContent  = `${score} / ${currentQ}`;
+  document.getElementById('progBar').style.width  = pct + '%';
+  document.getElementById('qCtr').textContent    = `Q ${currentQ + 1} / ${questions.length}`;
+  document.getElementById('qStag').textContent   = `${m.icon} ${m.label.toUpperCase()}`;
+  document.getElementById('qStag').style.cssText = `background:${m.color}22;color:${m.color};border:1px solid ${m.color}44;font-size:10px;font-weight:700;padding:2px 9px;border-radius:10px;font-family:'Rajdhani',sans-serif;letter-spacing:.5px;`;
+
+  // passage
+  const passBox  = document.getElementById('qPassage');
+  const passText = document.getElementById('qPassageText');
+  if (q.passage) {
+    passText.textContent = q.passage;
+    passBox.style.display = 'block';
+  } else {
+    passBox.style.display = 'none';
+  }
+
+  // question
+  const qBox = document.getElementById('qText');
+  qBox.textContent = q.q || q.question || '';
+
+  // animate
+  qBox.style.animation = 'none';
+  void qBox.offsetWidth;
+  qBox.style.animation = 'slideIn .3s ease';
+
+  // options
+  const letters = ['A','B','C','D'];
+  const grid = document.getElementById('optGrid');
+  grid.innerHTML = q.o.map((opt, i) => `
+    <button class="opt-btn" id="opt${i}" onclick="pick(${i})">
+      <span class="opt-letter">${letters[i]}</span>
+      <span>${escHtml(opt)}</span>
+    </button>`).join('');
+
+  document.getElementById('nextBtn').style.display = 'none';
+}
+
+function pick(i) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[currentQ];
+  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+  document.getElementById('opt' + q.a).classList.add('correct');
+
+  const isRight = i === q.a;
+  if (isRight) {
+    score++;
+    document.getElementById('qhScore').textContent = `${score} / ${currentQ + 1}`;
+    showFb('✅');
+  } else {
+    document.getElementById('opt' + i).classList.add('wrong');
+    showFb('❌');
+  }
+
+  userAnswers.push({ q: q.q || q.question || '', chosen: q.o[i], correct: q.o[q.a], isRight });
+  document.getElementById('nextBtn').style.display = 'block';
+}
+
+function nextQ() {
+  currentQ++;
+  loadQ();
+}
+
+function showFb(e) {
+  const m = document.getElementById('fbMsg');
+  m.textContent = e;
+  m.classList.remove('pop');
+  void m.offsetWidth;
+  m.classList.add('pop');
+}
+
+// ── RESULTS ────────────────────────────────────────────────────────
+function showResults() {
+  show('resultsScreen');
+
+  const total  = questions.length;
+  const pct    = Math.round((score / total) * 100);
+  const wrong  = total - score;
+
+  // circle
+  document.getElementById('scoreCircle').style.setProperty('--pct', pct);
+  document.getElementById('scoreBig').textContent = `${score}/${total}`;
+  document.getElementById('scoreOut').textContent  = `${pct}%`;
+
+  // trophy & message
+  let trophy = '🏆', title = 'Excellent!', sub = 'You got a great score!';
+  if      (pct >= 90) { trophy='🥇'; title='Outstanding!'; sub='Perfect performance!'; }
+  else if (pct >= 70) { trophy='🥈'; title='Well Done!';    sub='Great effort!'; }
+  else if (pct >= 50) { trophy='👍'; title='Good Try!';     sub='Keep practising!'; }
+  else                { trophy='📚'; title='Keep Going!';    sub='Study and try again!'; }
+
+  document.getElementById('resTrophy').textContent = trophy;
+  document.getElementById('resTitle').textContent  = title;
+  document.getElementById('resSub').textContent    = sub;
+
+  // stats card
+  const m = QB.meta[section] || { label: section, icon: '❓', color: '#888' };
+  document.getElementById('resStats').innerHTML = `
+    <div class="res-row"><span class="label">Section</span><span class="value">${m.icon} ${m.label}</span></div>
+    <div class="res-row"><span class="label">Questions</span><span class="value">${total}</span></div>
+    <div class="res-row"><span class="label">Correct</span><span class="value green">✅ ${score}</span></div>
+    <div class="res-row"><span class="label">Wrong</span><span class="value red">❌ ${wrong}</span></div>
+    <div class="res-row"><span class="label">Score</span><span class="value yellow">${pct}%</span></div>`;
+
+  // review list
+  const rl = document.getElementById('reviewList');
+  rl.innerHTML = userAnswers.map((a, i) => `
+    <div class="rev-item ${a.isRight ? 'correct-q' : 'wrong-q'}">
+      <div class="rev-q">${i+1}. ${escHtml(a.q)}</div>
+      <div class="rev-ans">
+        Your answer: <span class="${a.isRight?'cor':'wr'}">${escHtml(a.chosen)}</span>
+        ${!a.isRight ? ` &nbsp;|&nbsp; Correct: <span class="cor">${escHtml(a.correct)}</span>` : ''}
+      </div>
+    </div>`).join('');
+
+  if (pct >= 70) spawnConfetti();
+}
+
+function toggleReview() {
+  const rl = document.getElementById('reviewList');
+  rl.style.display = rl.style.display === 'flex' ? 'none' : 'flex';
+}
+
+function retryQuiz() {
+  questions   = QB.getRandom(section, 25);
+  currentQ    = 0;
+  score       = 0;
+  answered    = false;
+  userAnswers = [];
+  show('quizScreen');
+  loadQ();
+}
+
+function goHome() {
+  document.getElementById('codeInp').value = '';
+  show('landingScreen');
+  document.getElementById('codeInp').focus();
+}
+
+// ── CONFETTI ────────────────────────────────────────────────────────
+function spawnConfetti() {
+  const c = ['#3fb950','#58a6ff','#bc8cff','#f0883e','#e3b341','#f85149'];
+  for (let i = 0; i < 70; i++) {
+    const el = document.createElement('div');
+    el.className = 'cp';
+    el.style.cssText = `left:${Math.random()*100}vw;background:${c[~~(Math.random()*c.length)]};animation-duration:${1.4+Math.random()*2}s;animation-delay:${Math.random()*1.2}s;width:${6+Math.random()*9}px;height:${6+Math.random()*9}px;`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  }
+}
+
+// ── UTILS ───────────────────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('codeInp').focus();
+});
+</script>
+</body>
+</html>

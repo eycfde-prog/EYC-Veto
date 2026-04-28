@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Teacher Dashboard — Grade 3 Secondary</title>
+<script src="questionBank.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Rajdhani:wght@600;700&display=swap');
+:root{--bg:#0d1117;--s:#161b22;--c:#1c2333;--b:#21262d;--g:#3fb950;--g2:#56d364;--bl:#58a6ff;--pu:#bc8cff;--or:#f0883e;--ye:#e3b341;--re:#f85149;--tx:#e6edf3;--mu:#7d8590;--di:#30363d;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(63,185,80,.1),transparent);pointer-events:none;z-index:0;}
+
+/* ── TOP BAR ── */
+.topbar{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.95);border-bottom:1px solid var(--b);padding:10px 20px;display:flex;align-items:center;gap:14px;backdrop-filter:blur(10px);}
+.tb-logo{font-size:18px;font-weight:900;background:linear-gradient(135deg,var(--g),var(--bl));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;}
+.tb-sub{font-size:12px;color:var(--mu);flex:1;}
+.print-btn{padding:7px 16px;border-radius:8px;background:linear-gradient(135deg,var(--or),var(--re));border:none;color:#fff;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.5px;}
+.print-btn:hover{transform:translateY(-1px);}
+.reset-btn{padding:7px 14px;border-radius:8px;background:var(--s);border:1px solid var(--b);color:var(--mu);font-family:'Rajdhani',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;}
+.reset-btn:hover{border-color:var(--re);color:var(--re);}
+
+/* ── LAYOUT ── */
+.shell{display:flex;min-height:calc(100vh - 52px);position:relative;z-index:1;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:220px;flex-shrink:0;background:var(--s);border-right:1px solid var(--b);padding:16px 0;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;}
+.sb-label{font-size:10px;font-weight:700;color:var(--mu);letter-spacing:1.5px;padding:0 16px;margin-bottom:8px;font-family:'Rajdhani',sans-serif;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;transition:all .2s;border-left:3px solid transparent;position:relative;}
+.sb-item:hover{background:rgba(255,255,255,.04);}
+.sb-item.active{background:rgba(63,185,80,.1);border-left-color:var(--g);}
+.sb-item .sb-icon{font-size:17px;flex-shrink:0;}
+.sb-item .sb-text{font-size:13px;font-weight:600;flex:1;}
+.sb-item .sb-count{font-family:'Rajdhani',sans-serif;font-size:12px;color:var(--mu);background:var(--c);padding:1px 7px;border-radius:10px;}
+.sb-item.active .sb-count{background:rgba(63,185,80,.2);color:var(--g);}
+.sb-divider{height:1px;background:var(--b);margin:10px 16px;}
+.sb-all{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;transition:all .2s;border-left:3px solid transparent;}
+.sb-all:hover{background:rgba(255,255,255,.04);}
+.sb-all.active{background:rgba(88,166,255,.1);border-left-color:var(--bl);}
+.sb-all .sb-icon{font-size:17px;}
+.sb-all .sb-text{font-size:13px;font-weight:700;color:var(--bl);}
+
+/* ── MAIN CONTENT ── */
+.main{flex:1;padding:20px;overflow:hidden;}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px;}
+.stat-card{background:var(--c);border:1px solid var(--b);border-radius:12px;padding:14px;text-align:center;}
+.stat-icon{font-size:22px;margin-bottom:5px;}
+.stat-num{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:900;color:var(--tx);}
+.stat-lbl{font-size:11px;color:var(--mu);}
+
+/* ── SECTION HEADER ── */
+.sec-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+.sec-icon-big{font-size:28px;}
+.sec-title{font-size:20px;font-weight:900;}
+.sec-badge{padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:1px;}
+.shuffle-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--b);background:var(--s);color:var(--bl);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;margin-left:auto;}
+.shuffle-btn:hover{border-color:var(--bl);background:rgba(88,166,255,.1);}
+
+/* ── SEARCH ── */
+.search-wrap{position:relative;margin-bottom:14px;}
+.search-inp{width:100%;padding:10px 14px 10px 38px;background:var(--s);border:1.5px solid var(--b);border-radius:10px;color:var(--tx);font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+.search-inp:focus{border-color:var(--bl);}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--mu);}
+
+/* ── QUESTIONS LIST ── */
+.q-list{display:flex;flex-direction:column;gap:10px;}
+.q-card{background:var(--c);border:1px solid var(--b);border-radius:12px;overflow:hidden;transition:border-color .2s;}
+.q-card:hover{border-color:var(--di);}
+.q-card.has-passage .q-body{background:var(--s);}
+
+/* passage box */
+.q-passage{background:rgba(88,166,255,.06);border-left:3px solid var(--bl);padding:10px 14px;font-size:13px;color:#b1bac4;line-height:1.7;margin:0;}
+
+.q-body{padding:12px 16px;}
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.q-num{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--mu);}
+.q-section-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;font-family:'Rajdhani',sans-serif;letter-spacing:.5px;}
+.q-text{font-size:14px;font-weight:600;color:var(--tx);line-height:1.7;margin-bottom:10px;}
+.q-options{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+@media(max-width:600px){.q-options{grid-template-columns:1fr;}}
+.q-opt{padding:8px 12px;border-radius:8px;background:var(--s);border:1px solid var(--b);font-size:13px;display:flex;align-items:flex-start;gap:8px;line-height:1.5;}
+.q-opt.correct-ans{border-color:var(--g);background:rgba(63,185,80,.12);}
+.q-opt-letter{font-family:'Rajdhani',sans-serif;font-weight:900;font-size:14px;flex-shrink:0;padding-top:1px;}
+.q-opt.correct-ans .q-opt-letter{color:var(--g);}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:60px 20px;color:var(--mu);}
+.empty-icon{font-size:48px;margin-bottom:12px;}
+.empty-text{font-size:16px;font-weight:600;}
+
+/* ── PAGINATION ── */
+.pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;flex-wrap:wrap;}
+.pg-btn{padding:7px 14px;border-radius:8px;background:var(--s);border:1px solid var(--b);color:var(--tx);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}
+.pg-btn:hover{border-color:var(--bl);color:var(--bl);}
+.pg-btn.active{background:rgba(88,166,255,.15);border-color:var(--bl);color:var(--bl);}
+.pg-btn:disabled{opacity:.4;cursor:default;}
+.pg-info{font-size:13px;color:var(--mu);font-family:'Rajdhani',sans-serif;}
+
+/* ── CODES PANEL ── */
+.codes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:20px;}
+.code-card{background:var(--c);border:1px solid var(--b);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;}
+.code-badge{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:900;letter-spacing:2px;padding:6px 14px;border-radius:8px;background:var(--s);border:1px solid var(--b);}
+.code-arrow{font-size:14px;color:var(--mu);}
+.code-section{font-size:13px;font-weight:600;color:var(--tx);}
+.code-hint{font-size:11px;color:var(--mu);margin-top:2px;}
+
+/* ── PRINT ── */
+@media print{
+  .topbar,.sidebar,.stats-row,.sec-header .shuffle-btn,.search-wrap,.pagination,.print-btn,.reset-btn{display:none!important;}
+  body{background:#fff;color:#000;}
+  .shell{display:block;}
+  .main{padding:0;}
+  .q-card{border:1px solid #ddd;margin-bottom:8px;break-inside:avoid;}
+  .q-body{padding:8px 12px;}
+  .q-text{color:#000;}
+  .q-opt{background:#f9f9f9;border-color:#ddd;color:#000;}
+  .q-opt.correct-ans{border-color:#aaa;background:#f0f0f0;}
+  .q-passage{background:#f5f5f5;border-color:#999;color:#333;}
+  .q-opt-letter{color:#333!important;}
+  .q-opt.correct-ans .q-opt-letter{color:#000!important;}
+  .sec-header{margin-bottom:8px;}
+  .sec-title{color:#000;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-logo">📋 Teacher Dashboard</div>
+  <div class="tb-sub">Grade 3 Secondary — Bit by Bit Final Revision</div>
+  <button class="reset-btn" onclick="resetView()">↺ Reset</button>
+  <button class="print-btn" onclick="window.print()">🖨️ Print Section</button>
+</div>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sb-label">QUESTION TYPES</div>
+    <div class="sb-all active" id="nav-all" onclick="setSection('all')">
+      <span class="sb-icon">🗂️</span>
+      <span class="sb-text">All Questions</span>
+    </div>
+    <div class="sb-divider"></div>
+    <div id="sidebarItems"></div>
+    <div class="sb-divider"></div>
+    <div class="sb-label">TOOLS</div>
+    <div class="sb-item" onclick="setSection('codes')">
+      <span class="sb-icon">🔑</span>
+      <span class="sb-text">Student Codes</span>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main" id="mainArea"></main>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────
+let currentSection = 'all';
+let currentPage    = 1;
+const PER_PAGE     = 25;
+let searchQuery    = '';
+let shuffled       = {};
+
+// ── INIT ───────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  buildSidebar();
+  render();
+});
+
+function buildSidebar() {
+  const container = document.getElementById('sidebarItems');
+  Object.entries(QB.meta).forEach(([key, m]) => {
+    const div = document.createElement('div');
+    div.className = 'sb-item';
+    div.id = 'nav-' + key;
+    div.innerHTML = `
+      <span class="sb-icon">${m.icon}</span>
+      <span class="sb-text">${m.label}</span>
+      <span class="sb-count">${m.count}</span>`;
+    div.onclick = () => setSection(key);
+    container.appendChild(div);
+  });
+}
+
+function setSection(sec) {
+  currentSection = sec;
+  currentPage    = 1;
+  searchQuery    = '';
+  document.querySelectorAll('.sb-item, .sb-all').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('nav-' + sec) || document.getElementById('nav-all');
+  if (el) el.classList.add('active');
+  render();
+}
+
+function resetView() { setSection('all'); }
+
+// ── RENDER ─────────────────────────────────────────────────────────
+function render() {
+  const area = document.getElementById('mainArea');
+  if (currentSection === 'codes') { renderCodes(area); return; }
+  if (currentSection === 'all')   { renderAll(area);   return; }
+  renderSection(area, currentSection);
+}
+
+// ── STATS ──────────────────────────────────────────────────────────
+function statsHTML() {
+  const total = Object.values(QB.meta).reduce((s,m)=>s+m.count,0);
+  const secs  = Object.keys(QB.meta).length;
+  return `<div class="stats-row">
+    <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-num">${total}</div><div class="stat-lbl">Total Questions</div></div>
+    <div class="stat-card"><div class="stat-icon">🗂️</div><div class="stat-num">${secs}</div><div class="stat-lbl">Question Types</div></div>
+    ${Object.entries(QB.meta).map(([k,m])=>`
+    <div class="stat-card" style="cursor:pointer" onclick="setSection('${k}')">
+      <div class="stat-icon">${m.icon}</div>
+      <div class="stat-num" style="color:${m.color}">${m.count}</div>
+      <div class="stat-lbl">${m.label}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+// ── ALL SECTIONS OVERVIEW ──────────────────────────────────────────
+function renderAll(area) {
+  let html = statsHTML();
+  html += `<div class="sec-header"><span class="sec-icon-big">🗂️</span><div class="sec-title">All Questions Overview</div></div>`;
+  html += `<div class="q-list">`;
+  Object.entries(QB.meta).forEach(([key, m]) => {
+    const qs = QB[key] || [];
+    html += `<div class="q-card" style="cursor:pointer;border-left:4px solid ${m.color}" onclick="setSection('${key}')">
+      <div class="q-body" style="display:flex;align-items:center;gap:14px;padding:16px">
+        <span style="font-size:28px">${m.icon}</span>
+        <div style="flex:1">
+          <div style="font-size:16px;font-weight:700">${m.label}</div>
+          <div style="font-size:13px;color:var(--mu);margin-top:2px">${m.count} questions — click to explore</div>
+        </div>
+        <span style="font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:900;color:${m.color}">${m.count}</span>
+        <span style="color:var(--mu);font-size:18px">›</span>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+  area.innerHTML = html;
+}
+
+// ── SINGLE SECTION ─────────────────────────────────────────────────
+function renderSection(area, sec) {
+  const m    = QB.meta[sec];
+  const pool = shuffled[sec] ? shuffled[sec] : [...(QB[sec] || [])];
+  const sq   = searchQuery.toLowerCase();
+  const filtered = sq ? pool.filter(q => {
+    const text = (q.q || '').toLowerCase() + (q.passage||'').toLowerCase() + q.o.join(' ').toLowerCase();
+    return text.includes(sq);
+  }) : pool;
+
+  const total = filtered.length;
+  const pages = Math.max(1, Math.ceil(total / PER_PAGE));
+  const start = (currentPage - 1) * PER_PAGE;
+  const slice = filtered.slice(start, start + PER_PAGE);
+
+  let html = `
+    <div class="sec-header">
+      <span class="sec-icon-big">${m.icon}</span>
+      <div class="sec-title">${m.label}</div>
+      <span class="sec-badge" style="background:${m.color}22;color:${m.color};border:1px solid ${m.color}44">${total} questions</span>
+      <button class="shuffle-btn" onclick="shuffleSection('${sec}')">🔀 Shuffle</button>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-inp" id="searchInp" placeholder="Search questions…" value="${searchQuery}"
+        oninput="doSearch(this.value)">
+    </div>
+    <div class="q-list">`;
+
+  if (slice.length === 0) {
+    html += `<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">No questions found</div></div>`;
+  } else {
+    slice.forEach((q, i) => {
+      const globalIdx = start + i + 1;
+      const hasPass   = !!q.passage;
+      html += `<div class="q-card ${hasPass ? 'has-passage' : ''}">`;
+      if (hasPass) {
+        html += `<div class="q-passage">${escHtml(q.passage)}</div>`;
+      }
+      html += `<div class="q-body">
+        <div class="q-meta">
+          <span class="q-num">#${globalIdx}</span>
+          <span class="q-section-tag" style="background:${m.color}22;color:${m.color}">${m.icon} ${sec.toUpperCase()}</span>
+        </div>
+        <div class="q-text">${escHtml(q.q || q.question || '')}</div>
+        <div class="q-options">`;
+      const letters = ['A','B','C','D'];
+      q.o.forEach((opt, oi) => {
+        const isCorrect = oi === q.a;
+        html += `<div class="q-opt ${isCorrect ? 'correct-ans' : ''}">
+          <span class="q-opt-letter">${letters[oi]}.</span>
+          <span>${escHtml(opt)}</span>
+        </div>`;
+      });
+      html += `</div></div></div>`;
+    });
+  }
+
+  html += `</div>`;
+
+  // pagination
+  if (pages > 1) {
+    html += `<div class="pagination">`;
+    html += `<button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>← Prev</button>`;
+    for (let p = Math.max(1, currentPage-2); p <= Math.min(pages, currentPage+2); p++) {
+      html += `<button class="pg-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+    }
+    html += `<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>Next →</button>`;
+    html += `<span class="pg-info">Page ${currentPage} / ${pages} &nbsp;(${total} questions)</span>`;
+    html += `</div>`;
+  }
+
+  area.innerHTML = html;
+}
+
+// ── CODES PANEL ────────────────────────────────────────────────────
+function renderCodes(area) {
+  let html = `
+    <div class="sec-header">
+      <span class="sec-icon-big">🔑</span>
+      <div class="sec-title">Student Access Codes</div>
+      <span class="sec-badge" style="background:rgba(63,185,80,.15);color:var(--g);border:1px solid rgba(63,185,80,.3)">${Object.keys(QB.codes).length} codes</span>
+    </div>
+    <div style="background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.2);border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:#b1bac4;line-height:1.7">
+      💡 <strong style="color:var(--bl)">How it works:</strong> Give students their code before class. Each code opens a specific question type in the student app. Codes can be reused. To add or change codes, edit <code style="color:var(--or)">questionBank.js</code> → <code style="color:var(--or)">QB.codes</code>.
+    </div>
+    <div class="codes-grid">`;
+  Object.entries(QB.codes).forEach(([code, sec]) => {
+    const m = QB.meta[sec] || { label: sec, icon: '❓', color: '#888' };
+    html += `<div class="code-card">
+      <div>
+        <div class="code-badge" style="color:${m.color};border-color:${m.color}44">${code}</div>
+      </div>
+      <span class="code-arrow">→</span>
+      <div>
+        <div class="code-section">${m.icon} ${m.label}</div>
+        <div class="code-hint">25 random questions</div>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+  area.innerHTML = html;
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────
+function shuffleSection(sec) {
+  const arr = [...(QB[sec] || [])];
+  for (let i = arr.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  shuffled[sec] = arr;
+  currentPage = 1;
+  render();
+}
+
+function doSearch(val) {
+  searchQuery = val;
+  currentPage = 1;
+  render();
+  // keep focus
+  setTimeout(() => {
+    const inp = document.getElementById('searchInp');
+    if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+  }, 10);
+}
+
+function goPage(p) {
+  currentPage = p;
+  render();
+  window.scrollTo(0, 0);
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+</script>
+</body>
+</html>
