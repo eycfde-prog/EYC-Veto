@@ -40,14 +40,6 @@
   </div>
 </div>
 
-<!-- GRAMMAR EXAM OVERLAY -->
-<div id="grammarExamOverlay" class="grammar-exam-overlay hidden">
-  <div class="grammar-exam-overlay-inner">
-    <button class="grammar-exam-close" id="grammarExamClose">✕ CLOSE</button>
-    <div id="grammarExamContainer"></div>
-  </div>
-</div>
-
 <div id="app">
 
   <!-- TOP BAR -->
@@ -221,11 +213,9 @@
 
 <script src="OnlineLevels.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="grammar-engine-student.js"></script>
 <script src="Vetoojava.js"></script>
 
 <script>
-  // ── Sync sidebar stats every second ──
   function syncSideStats() {
     const setS = (id, srcId) => {
       const el = document.getElementById(id);
@@ -238,7 +228,6 @@
   }
   setInterval(syncSideStats, 1000);
 
-  // ── Week badge ──
   function setWeekBadge(id) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -249,37 +238,6 @@
   }
   setWeekBadge("weekBadge");
   setWeekBadge("weekBadge2");
-
-  // ── Grammar Exam Overlay ──
-  document.getElementById("grammarExamClose").addEventListener("click", () => {
-    document.getElementById("grammarExamOverlay").classList.add("hidden");
-    document.getElementById("grammarExamContainer").innerHTML = "";
-  });
-
-  // Close overlay on background click
-  document.getElementById("grammarExamOverlay").addEventListener("click", function(e) {
-    if (e.target === this) {
-      this.classList.add("hidden");
-      document.getElementById("grammarExamContainer").innerHTML = "";
-    }
-  });
-
-  // ── Global: open grammar exam from anywhere ──
-  window.openGrammarExam = function(lessonId) {
-    if (!window.currentUser) {
-      showLogin("grammar");
-      return;
-    }
-    const overlay = document.getElementById("grammarExamOverlay");
-    const container = document.getElementById("grammarExamContainer");
-    overlay.classList.remove("hidden");
-    container.innerHTML = "";
-    if (typeof GrammarExam !== "undefined") {
-      GrammarExam.start(lessonId, container, window.currentUser.email);
-    } else {
-      container.innerHTML = `<div style="color:#ff4757;padding:40px;text-align:center;font-family:monospace;">Grammar engine not loaded.</div>`;
-    }
-  };
 </script>
 
 </body>
