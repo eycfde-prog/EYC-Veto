@@ -1,6 +1,7 @@
 /**
  * VETO ONLINE — Student Portal JavaScript
  * EYC Academy | Mr. Ezz
+ * Updated: Grammar Exam Integration
  */
 
 // ─── CONFIG ─────────────────────────────────────────────────
@@ -45,6 +46,28 @@ function getActivityTK(name) {
   return null;
 }
 
+// ─── GRAMMAR LESSON ID MAPPING ────────────────────────────
+// Maps Level-Session keys to grammar lesson IDs in the engine
+const GRAMMAR_LESSON_MAP = {
+  "1-1": "1-1",   // Level 1 Session 1 → PRONOUNS
+  "1-2": "1-2",   // Level 1 Session 2 → POSSESSIVES & VERB TO BE
+  "1-3": "1-3",   // Level 1 Session 3 → INDEFINITE ARTICLES
+  "1-4": "1-4",   // Level 1 Session 4 → PLURAL NOUNS
+  "2-1": "2-1",   // Level 2 Session 1 → TELLING THE TIME
+  "2-4": "2-4",   // Level 2 Session 4 → THE DATE
+  "3-1": "3-1",   // Level 3 Session 1 → PRESENT CONTINUOUS
+  "3-4": "3-4",   // Level 3 Session 4 → PRESENT SIMPLE
+  "4-1": "4-1",   // Level 4 Session 1 → PAST SIMPLE
+  "4-4": "4-4",   // Level 4 Session 4 → PAST CONTINUOUS
+  "5-1": "5-1",   // Level 5 Session 1 → FUTURE SIMPLE
+  "5-4": "5-4",   // Level 5 Session 4 → FUTURE CONTINUOUS
+  "6-1": "6-1",   // Level 6 Session 1 → PRESENT PERFECT SIMPLE
+  "6-4": "6-4",   // Level 6 Session 4 → PRESENT PERFECT CONTINUOUS
+  "7-1": "7-1",   // Level 7 Session 1 → PAST PERFECT SIMPLE
+  "7-4": "7-4",   // Level 7 Session 4 → IF CONDITIONS
+  "8-1": "8-1",   // Level 8 Session 1 → THE PASSIVE VOICE
+};
+
 // ─── PORTAL DATA ────────────────────────────────────────────
 const PORTAL_DATA = {
   games: {
@@ -64,7 +87,7 @@ const PORTAL_DATA = {
     color: "rgba(0,212,255,0.9)",
     items: [
       { icon: "🤖", label: "Create your English Friend", sub: "AI conversation partner", url: "studyp.html", cls: "study-ico" },
-      { icon: "📝", label: "Summarize your lesson",          sub: "AI-powered summary",    url: "studyp.html", cls: "study-ico" },
+      { icon: "📝", label: "Summarize your lesson",      sub: "AI-powered summary",      url: "studyp.html", cls: "study-ico" },
     ]
   },
   business: {
@@ -72,7 +95,7 @@ const PORTAL_DATA = {
     sub: "BUILD YOUR FUTURE",
     color: "rgba(245,200,66,0.9)",
     items: [
-      { icon: "📄", label: "Make your HTML CV",    sub: "Build your resume",    url: "business.html", cls: "business-ico" },
+      { icon: "📄", label: "Make your HTML CV",      sub: "Build your resume",     url: "business.html", cls: "business-ico" },
       { icon: "🪪", label: "Create your digital ID", sub: "Your digital identity", url: "business.html", cls: "business-ico" },
     ]
   }
@@ -124,6 +147,8 @@ function tryAutoLogin() {
   if (stored) {
     try {
       currentUser = JSON.parse(stored);
+      // expose globally for grammarExamOverlay
+      window.currentUser = currentUser;
       renderProfile(currentUser);
       hideLogin();
       initProgressGallery();
@@ -147,6 +172,7 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
     const data = await res.json();
     if (data.status === "success") {
       currentUser = data.profile;
+      window.currentUser = currentUser;
       localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(currentUser));
       renderProfile(currentUser);
       hideLogin();
@@ -165,6 +191,7 @@ document.getElementById("forgotLink").addEventListener("click", () => {
 
 document.getElementById("logoutBtn").addEventListener("click", () => {
   currentUser = null;
+  window.currentUser = null;
   localStorage.removeItem(CONFIG.STORAGE_KEY);
   clearProfile();
   showView("levels");
@@ -260,71 +287,158 @@ function handleSessionClick(lvl, sess, btn) {
 
 function executePendingAction() {
   if (!pendingAction) return;
-  if (pendingAction.type === "session") {
+  if (pendingAction === "grammar") {
+    // do nothing — user will retry
+  } else if (pendingAction.type === "session") {
     const btn = document.getElementById(`sess-${pendingAction.lvl}-${pendingAction.sess}`);
     openSession(pendingAction.lvl, pendingAction.sess, btn);
   }
   pendingAction = null;
 }
 
+// ─── OPEN SESSION ─────────────────────────────────────────────
 function openSession(lvl, sess, btn) {
   document.querySelectorAll(".session-btn.active").forEach(b => b.classList.remove("active"));
   if (btn) btn.classList.add("active");
+
   const key        = `${lvl}-${sess}`;
   const activities = (typeof sessionData !== "undefined" && sessionData[key]) || [];
+
   setEl("sessionTitle",    `LEVEL ${lvl}  ·  SESSION ${sess}`);
   setEl("sessionSubtitle", LEVEL_NAMES[lvl] || "");
+
   const list = document.getElementById("sessionActivityList");
   list.innerHTML = "";
+
   if (activities.length === 0) {
     list.innerHTML = `<div class="no-content">No content found for this session.</div>`;
   } else {
     activities.forEach(name => {
-      const isTest   = name.toLowerCase().includes("test");
-      const filename = getActivityFilename(lvl, sess, name);
-      const { icon, iconClass } = getActivityIcon(name);
-      const badge      = isTest?"test":name.toLowerCase().includes("intro")?"intro":name.toLowerCase().includes("review")?"review":"special";
-      const badgeLabel = isTest?"TEST":name.toLowerCase().includes("intro")?"INTRO":name.toLowerCase().includes("review")?"REVIEW":"★";
-      let imgName = "";
-      const n = name.toLowerCase();
-      if (n.includes("grammar"))           imgName = "Grammar";
-      else if (n.includes("vocab"))        imgName = "Vocabulary";
-      else if (n.includes("reading"))      imgName = "Reading";
-      else if (n.includes("listening"))    imgName = "Listening";
-      else if (n.includes("tongue twister")) imgName = "Tongue-twister";
-      else if (n.includes("one shot"))     imgName = "One-shot";
-      else if (n.includes("squeezer"))     imgName = "Squeezer";
-      else if (n.includes("dmt"))          imgName = "DMT";
-      else if (n.includes("wish"))         imgName = "Wish";
-      else if (n.includes("graduation"))   imgName = "Graduation-project";
-      else if (n.includes("project"))      imgName = "Project";
-      else if (n.includes("interview"))    imgName = "Interview";
-      else imgName = "default";
-      const imgPath = `${CONFIG.ACTIROBO_PATH}${imgName}.png`;
-      const tkVal   = getActivityTK(name);
-      const tkHTML  = tkVal ? `<div class="activity-tk-badge">${tkVal.toLocaleString()} TK</div>` : "";
-
-      const item = document.createElement("div");
-      item.className = `activity-card ${isTest?"test-card":""}`;
-      item.innerHTML = `
-        <div class="activity-card-img">
-          <img src="${imgPath}" alt="${name}"
-               onerror="this.parentElement.innerHTML='<div class=\\'act-icon-fallback ${iconClass}\\'>${icon}</div>'" />
-        </div>
-        <div class="activity-card-body">
-          <div class="activity-card-name">${name}</div>
-        </div>
-        ${tkHTML}
-        <span class="activity-badge ${badge}">${badgeLabel}</span>`;
-      item.addEventListener("click", () => loadActivityFile(lvl, sess, filename, name));
-      list.appendChild(item);
+      const card = buildActivityCard(lvl, sess, name, key);
+      list.appendChild(card);
     });
   }
+
   showView("session");
   const main = document.getElementById("mainContent");
   if (main) main.scrollTop = 0;
 }
 
+// ─── BUILD ACTIVITY CARD ──────────────────────────────────────
+function buildActivityCard(lvl, sess, name, sessionKey) {
+  const n          = name.toLowerCase();
+  const isGrammar  = n.includes("grammar");
+  const isTest     = n.includes("test");
+  const filename   = getActivityFilename(lvl, sess, name);
+  const { icon, iconClass } = getActivityIcon(name);
+
+  // Badge
+  let badge, badgeLabel;
+  if (isGrammar) {
+    badge = "grammar-badge"; badgeLabel = "GRAMMAR EXAM";
+  } else if (isTest) {
+    badge = "test"; badgeLabel = "TEST";
+  } else if (n.includes("intro")) {
+    badge = "intro"; badgeLabel = "INTRO";
+  } else if (n.includes("review")) {
+    badge = "review"; badgeLabel = "REVIEW";
+  } else {
+    badge = "special"; badgeLabel = "★";
+  }
+
+  // Image
+  let imgName = "default";
+  if (n.includes("grammar"))             imgName = "Grammar";
+  else if (n.includes("vocab"))          imgName = "Vocabulary";
+  else if (n.includes("reading"))        imgName = "Reading";
+  else if (n.includes("listening"))      imgName = "Listening";
+  else if (n.includes("tongue twister")) imgName = "Tongue-twister";
+  else if (n.includes("one shot"))       imgName = "One-shot";
+  else if (n.includes("squeezer"))       imgName = "Squeezer";
+  else if (n.includes("dmt"))            imgName = "DMT";
+  else if (n.includes("wish"))           imgName = "Wish";
+  else if (n.includes("graduation"))     imgName = "Graduation-project";
+  else if (n.includes("project"))        imgName = "Project";
+  else if (n.includes("interview"))      imgName = "Interview";
+
+  const imgPath = `${CONFIG.ACTIROBO_PATH}${imgName}.png`;
+  const tkVal   = getActivityTK(name);
+  const tkHTML  = tkVal ? `<div class="activity-tk-badge">${tkVal.toLocaleString()} TK</div>` : "";
+
+  const item = document.createElement("div");
+  item.className = `activity-card${isTest ? " test-card" : ""}${isGrammar ? " grammar-exam-card" : ""}`;
+
+  item.innerHTML = `
+    <div class="activity-card-img">
+      <img src="${imgPath}" alt="${name}"
+           onerror="this.parentElement.innerHTML='<div class=\\'act-icon-fallback ${iconClass}\\'>${icon}</div>'" />
+    </div>
+    <div class="activity-card-body">
+      <div class="activity-card-name">${name}</div>
+    </div>
+    ${tkHTML}
+    <span class="activity-badge ${badge}">${badgeLabel}</span>`;
+
+  // Click handler: grammar → open exam, others → load file
+  if (isGrammar) {
+    item.addEventListener("click", () => handleGrammarCardClick(lvl, sess, sessionKey, name));
+  } else {
+    item.addEventListener("click", () => loadActivityFile(lvl, sess, filename, name));
+  }
+
+  return item;
+}
+
+// ─── GRAMMAR CARD CLICK ───────────────────────────────────────
+function handleGrammarCardClick(lvl, sess, sessionKey, actName) {
+  // Check login
+  if (!currentUser) {
+    pendingAction = { type: "session", lvl, sess };
+    showLogin("grammar");
+    return;
+  }
+
+  // Find grammar lesson ID from map
+  const grammarLessonId = GRAMMAR_LESSON_MAP[sessionKey];
+
+  if (!grammarLessonId) {
+    // No exam mapped → fall back to file load
+    const filename = getActivityFilename(lvl, sess, actName);
+    loadActivityFile(lvl, sess, filename, actName);
+    return;
+  }
+
+  // Check if GrammarExam engine is available
+  if (typeof GrammarExam === "undefined" || !window.STUDENT_QUESTION_BANK) {
+    showToast("Grammar exam engine not loaded.", "error");
+    return;
+  }
+
+  // Check if questions exist for this lesson
+  if (!window.STUDENT_QUESTION_BANK[grammarLessonId]) {
+    showToast(`No exam available for this grammar lesson yet.`, "error");
+    // Fall back to file load
+    const filename = getActivityFilename(lvl, sess, actName);
+    loadActivityFile(lvl, sess, filename, actName);
+    return;
+  }
+
+  // Open grammar exam overlay
+  const overlay   = document.getElementById("grammarExamOverlay");
+  const container = document.getElementById("grammarExamContainer");
+
+  if (!overlay || !container) {
+    showToast("Exam overlay not found.", "error");
+    return;
+  }
+
+  overlay.classList.remove("hidden");
+  container.innerHTML = "";
+  GrammarExam.start(grammarLessonId, container, currentUser.email);
+  showToast(`Grammar Exam: ${actName} — Good luck! 🎯`);
+}
+
+// ─── ACTIVITY FILE LOADER ─────────────────────────────────────
 function getActivityIcon(name) {
   const n = name.toLowerCase();
   if (n.includes("grammar"))        return { icon:"📖", iconClass:"study" };
@@ -393,7 +507,6 @@ function closePortalFlash() {
   if (flash) flash.classList.add("hidden");
 }
 
-// إغلاق بالضغط على الخلفية
 document.getElementById("portalFlash")?.addEventListener("click", function(e) {
   if (e.target === this) closePortalFlash();
 });
