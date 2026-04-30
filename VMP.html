@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EYC Academy — Veto Main Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Barlow:wght@300;400;600;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   VARIABLES
+═══════════════════════════════════════════ */
+:root {
+  --orange:     #E8630A;
+  --orange-dim: rgba(232,99,10,0.18);
+  --orange-glow:rgba(232,99,10,0.5);
+  --dark:       #0a0a0f;
+  --dark2:      #0d0d15;
+  --text:       #e8e8f0;
+  --text-dim:   rgba(232,232,240,0.4);
+  --white-glow: rgba(255,255,255,0.06);
+}
+
+/* ═══════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{
+  width:100%;min-height:100vh;
+  background:var(--dark);
+  color:var(--text);
+  font-family:'Barlow',sans-serif;
+  overflow-x:hidden;
+}
+
+/* ═══════════════════════════════════════════
+   STAR FIELD CANVAS
+═══════════════════════════════════════════ */
+#starfield{
+  position:fixed;inset:0;z-index:0;
+  pointer-events:none;
+}
+
+/* ═══════════════════════════════════════════
+   NEBULA LAYERS
+═══════════════════════════════════════════ */
+.nebula{
+  position:fixed;border-radius:50%;
+  filter:blur(120px);pointer-events:none;z-index:0;
+  animation:nebula-drift 40s ease-in-out infinite alternate;
+}
+.nebula-1{
+  width:70vw;height:70vw;
+  background:radial-gradient(circle,rgba(232,99,10,0.07) 0%,transparent 70%);
+  top:-20%;left:-20%;
+  animation-duration:55s;
+}
+.nebula-2{
+  width:60vw;height:60vw;
+  background:radial-gradient(circle,rgba(60,40,120,0.09) 0%,transparent 70%);
+  bottom:-10%;right:-15%;
+  animation-duration:45s;animation-delay:-20s;
+}
+.nebula-3{
+  width:40vw;height:40vw;
+  background:radial-gradient(circle,rgba(232,99,10,0.05) 0%,transparent 70%);
+  top:40%;left:40%;
+  animation-duration:60s;animation-delay:-30s;
+}
+@keyframes nebula-drift{
+  from{transform:translate(0,0) scale(1);}
+  to{transform:translate(3vw,2vh) scale(1.08);}
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.vmp-wrapper{
+  position:relative;z-index:1;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;
+}
+
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+.vmp-header{
+  width:100%;padding:28px 48px 0;
+  display:flex;align-items:center;justify-content:space-between;
+  position:relative;
+}
+.vmp-header::after{
+  content:'';position:absolute;bottom:-16px;left:48px;right:48px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(232,99,10,0.4),transparent);
+}
+.vmp-logo{
+  height:64px;filter:drop-shadow(0 0 16px var(--orange-glow));
+  transition:filter 0.3s;
+}
+.vmp-logo:hover{filter:drop-shadow(0 0 28px var(--orange-glow));}
+
+.vmp-header-right{
+  display:flex;flex-direction:column;align-items:flex-end;gap:4px;
+}
+.vmp-title-small{
+  font-family:'Orbitron',sans-serif;font-size:.5rem;
+  letter-spacing:5px;color:var(--orange);opacity:0.7;
+}
+.vmp-header-title{
+  font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;
+  letter-spacing:4px;color:#fff;
+}
+.vmp-header-title span{color:var(--orange);}
+
+/* ═══════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════ */
+.vmp-hero{
+  margin-top:72px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+}
+.vmp-hero-eyebrow{
+  font-family:'Orbitron',sans-serif;font-size:.55rem;
+  letter-spacing:6px;color:rgba(232,99,10,0.6);text-transform:uppercase;
+}
+.vmp-hero-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(2rem,5vw,4rem);
+  font-weight:900;line-height:1;color:#fff;letter-spacing:3px;
+  text-shadow:0 0 60px rgba(232,99,10,0.2),0 0 120px rgba(232,99,10,0.1);
+}
+.vmp-hero-title em{
+  font-style:normal;color:var(--orange);
+  text-shadow:0 0 40px var(--orange-glow);
+}
+.vmp-hero-sub{
+  font-size:clamp(.8rem,1.5vw,1rem);
+  color:var(--text-dim);letter-spacing:3px;
+  font-family:'Rajdhani',sans-serif;font-weight:400;
+  text-transform:uppercase;
+}
+
+/* ═══════════════════════════════════════════
+   PORTALS GRID
+═══════════════════════════════════════════ */
+.vmp-portals{
+  margin-top:80px;margin-bottom:80px;
+  width:100%;max-width:1300px;padding:0 40px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:32px;
+}
+
+/* ═══════════════════════════════════════════
+   BLACK HOLE CARD
+═══════════════════════════════════════════ */
+.bh-card{
+  position:relative;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;
+  padding:40px 24px 32px;
+  border-radius:24px;
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.06);
+  transition:transform 0.4s cubic-bezier(.23,1,.32,1),
+             border-color 0.3s,background 0.3s;
+  overflow:hidden;
+  text-decoration:none;color:inherit;
+}
+.bh-card::before{
+  content:'';position:absolute;inset:0;border-radius:24px;
+  background:radial-gradient(ellipse at 50% 40%,
+    rgba(232,99,10,0.06) 0%,transparent 65%);
+  opacity:0;transition:opacity 0.4s;
+}
+.bh-card:hover{
+  transform:translateY(-8px) scale(1.02);
+  border-color:rgba(232,99,10,0.35);
+  background:rgba(232,99,10,0.04);
+}
+.bh-card:hover::before{opacity:1;}
+
+/* Black hole canvas */
+.bh-canvas-wrap{
+  position:relative;width:180px;height:180px;margin-bottom:24px;flex-shrink:0;
+}
+.bh-canvas{
+  width:180px;height:180px;border-radius:50%;
+}
+
+/* Card label */
+.bh-code{
+  font-family:'Orbitron',sans-serif;font-size:.42rem;
+  letter-spacing:4px;color:var(--orange);opacity:0.6;
+  margin-bottom:6px;
+}
+.bh-name{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(.7rem,1.4vw,1rem);
+  font-weight:900;color:#fff;letter-spacing:2px;
+  text-align:center;margin-bottom:8px;
+  transition:color 0.3s;
+}
+.bh-card:hover .bh-name{color:var(--orange);}
+.bh-desc{
+  font-size:clamp(.65rem,1.1vw,.85rem);
+  color:var(--text-dim);text-align:center;line-height:1.5;
+  font-family:'Rajdhani',sans-serif;letter-spacing:1px;
+}
+
+/* Enter arrow */
+.bh-enter{
+  margin-top:20px;
+  display:flex;align-items:center;gap:8px;
+  font-family:'Orbitron',sans-serif;font-size:.45rem;
+  letter-spacing:3px;color:rgba(232,99,10,0.4);
+  transition:color 0.3s,gap 0.3s;
+}
+.bh-card:hover .bh-enter{color:var(--orange);gap:12px;}
+.bh-enter-arrow{font-size:.8rem;}
+
+/* ── FEATURED card (VSP — Student Portal) ── */
+.bh-card.featured{
+  grid-column:span 1;
+  border-color:rgba(232,99,10,0.25);
+  background:rgba(232,99,10,0.04);
+}
+.bh-card.featured .bh-code{opacity:1;}
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+.vmp-footer{
+  width:100%;padding:20px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid rgba(255,255,255,0.05);
+  position:relative;z-index:1;
+}
+.vmp-footer-copy{
+  font-size:.6rem;letter-spacing:3px;
+  color:rgba(255,255,255,0.15);
+  font-family:'Orbitron',sans-serif;
+}
+.vmp-footer-badge{
+  font-family:'Orbitron',sans-serif;font-size:.45rem;
+  letter-spacing:3px;color:rgba(232,99,10,0.35);
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media(max-width:900px){
+  .vmp-portals{grid-template-columns:repeat(2,1fr);gap:20px;padding:0 20px;}
+  .vmp-header{padding:20px 20px 0;}
+  .vmp-header::after{left:20px;right:20px;}
+}
+@media(max-width:600px){
+  .vmp-portals{grid-template-columns:1fr;max-width:420px;}
+  .bh-canvas-wrap{width:140px;height:140px;}
+  .bh-canvas{width:140px;height:140px;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
+<div class="nebula nebula-3"></div>
+
+<div class="vmp-wrapper">
+
+  <!-- HEADER -->
+  <header class="vmp-header">
+    <img src="https://raw.githubusercontent.com/eycfde-prog/EYCVetoProgram/main/logo.png"
+         class="vmp-logo" alt="EYC" onerror="this.style.opacity='0'">
+    <div class="vmp-header-right">
+      <div class="vmp-title-small">EYC ACADEMY</div>
+      <div class="vmp-header-title">VETO <span>MAIN</span> PORTAL</div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="vmp-hero">
+    <div class="vmp-hero-eyebrow">Select Your Destination</div>
+    <h1 class="vmp-hero-title">CHOOSE YOUR <em>PORTAL</em></h1>
+    <p class="vmp-hero-sub">Each gateway leads to a different dimension of your journey</p>
+  </section>
+
+  <!-- PORTALS GRID -->
+  <div class="vmp-portals" id="portals-grid">
+
+    <a class="bh-card featured" href="VSP.html">
+      <div class="bh-canvas-wrap">
+        <canvas class="bh-canvas" data-color="#E8630A" data-ring="#ff8c42"></canvas>
+      </div>
+      <div class="bh-code">VSP — 01</div>
+      <div class="bh-name">VETO STUDENT PORTAL</div>
+      <div class="bh-desc">Track your progress, view grades & complete your weekly missions</div>
+      <div class="bh-enter"><span>ENTER</span><span class="bh-enter-arrow">→</span></div>
+    </a>
+
+    <a class="bh-card" href="games.html">
+      <div class="bh-canvas-wrap">
+        <canvas class="bh-canvas" data-color="#00c9ff" data-ring="#4ae8ff"></canvas>
+      </div>
+      <div class="bh-code">GP — 02</div>
+      <div class="bh-name">GAMES PORTAL</div>
+      <div class="bh-desc">Interactive learning games designed to reinforce your English skills</div>
+      <div class="bh-enter"><span>ENTER</span><span class="bh-enter-arrow">→</span></div>
+    </a>
+
+    <a class="bh-card" href="hunter.html">
+      <div class="bh-canvas-wrap">
+        <canvas class="bh-canvas" data-color="#a855f7" data-ring="#d08fff"></canvas>
+      </div>
+      <div class="bh-code">VH — 03</div>
+      <div class="bh-name">VETO HUNTER</div>
+      <div class="bh-desc">Challenge yourself with timed quests and vocabulary hunts</div>
+      <div class="bh-enter"><span>ENTER</span><span class="bh-enter-arrow">→</span></div>
+    </a>
+
+    <a class="bh-card" href="service.html">
+      <div class="bh-canvas-wrap">
+        <canvas class="bh-canvas" data-color="#10b981" data-ring="#34d399"></canvas>
+      </div>
+      <div class="bh-code">SP — 04</div>
+      <div class="bh-name">SERVICE PORTAL</div>
+      <div class="bh-desc">Support, resources and student services all in one place</div>
+      <div class="bh-enter"><span>ENTER</span><span class="bh-enter-arrow">→</span></div>
+    </a>
+
+    <a class="bh-card" href="courses.html">
+      <div class="bh-canvas-wrap">
+        <canvas class="bh-canvas" data-color="#f59e0b" data-ring="#fbbf24"></canvas>
+      </div>
+      <div class="bh-code">CP — 05</div>
+      <div class="bh-name">COURSES PORTAL</div>
+      <div class="bh-desc">Browse all EYC programs and enroll in your next level</div>
+      <div class="bh-enter"><span>ENTER</span><span class="bh-enter-arrow">→</span></div>
+    </a>
+
+    <a class="bh-card" href="ai.html">
+      <div class="bh-canvas-wrap">
+        <canvas class="bh-canvas" data-color="#ec4899" data-ring="#f472b6"></canvas>
+      </div>
+      <div class="bh-code">AI — 06</div>
+      <div class="bh-name">AI COURSE</div>
+      <div class="bh-desc">Learn English with AI-powered personalized sessions and feedback</div>
+      <div class="bh-enter"><span>ENTER</span><span class="bh-enter-arrow">→</span></div>
+    </a>
+
+    <a class="bh-card" href="VTP.html" style="grid-column:1/-1;max-width:400px;margin:0 auto;width:100%">
+      <div class="bh-canvas-wrap">
+        <canvas class="bh-canvas" data-color="#c5a059" data-ring="#e8c87a"></canvas>
+      </div>
+      <div class="bh-code">VTP — 07</div>
+      <div class="bh-name">VETO TEACHER PORTAL</div>
+      <div class="bh-desc">Instructor access — Smart Board, grades and session management</div>
+      <div class="bh-enter"><span>ENTER</span><span class="bh-enter-arrow">→</span></div>
+    </a>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="vmp-footer">
+    <div class="vmp-footer-copy">© 2026 EYC ACADEMY. ALL RIGHTS RESERVED.</div>
+    <div class="vmp-footer-badge">VETO PROGRAM — SYSTEM ONLINE</div>
+  </footer>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   STARFIELD
+═══════════════════════════════════════════ */
+(function(){
+  const cvs = document.getElementById('starfield');
+  const ctx = cvs.getContext('2d');
+  let W, H, stars=[];
+
+  function resize(){
+    W = cvs.width  = window.innerWidth;
+    H = cvs.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Build stars
+  for(let i=0; i<280; i++){
+    stars.push({
+      x: Math.random()*2-1,
+      y: Math.random()*2-1,
+      z: Math.random(),
+      size: Math.random()*1.8+0.3,
+      twinkle: Math.random()*Math.PI*2
+    });
+  }
+
+  let t=0;
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    t += 0.004;
+    stars.forEach(s=>{
+      const tw = 0.55+0.45*Math.sin(s.twinkle+t*s.z*1.5);
+      const sx = (s.x+1)/2*W;
+      const sy = (s.y+1)/2*H;
+      const r  = s.size*tw;
+      ctx.beginPath();
+      ctx.arc(sx,sy,r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,255,${0.3*tw+0.1*s.z})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ═══════════════════════════════════════════
+   BLACK HOLE ENGINE
+═══════════════════════════════════════════ */
+(function(){
+  const canvases = document.querySelectorAll('.bh-canvas');
+
+  canvases.forEach(cvs => {
+    const color = cvs.dataset.color || '#E8630A';
+    const ring  = cvs.dataset.ring  || '#ff8c42';
+    const ctx   = cvs.getContext('2d');
+    const W     = cvs.width  = cvs.offsetWidth;
+    const H     = cvs.height = cvs.offsetHeight;
+    const cx    = W/2, cy = H/2;
+    const R     = Math.min(W,H)*0.28; // black hole radius
+
+    // Particles orbiting
+    const PARTICLES = 180;
+    const particles = [];
+    for(let i=0;i<PARTICLES;i++){
+      const angle  = Math.random()*Math.PI*2;
+      const dist   = R*(1.2 + Math.random()*2.2);
+      const speed  = (0.0006 + Math.random()*0.0012) * (Math.random()<0.5?1:-1);
+      const life   = Math.random();
+      particles.push({ angle, dist, speed, life,
+        size:  Math.random()*1.8+0.4,
+        alpha: Math.random()*0.7+0.2,
+        hue:   Math.random()*30-15 });
+    }
+
+    // Lensing arcs config
+    const ARCS = 4;
+
+    let t=0;
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+
+      /* ── Accretion disk glow ── */
+      const diskGrad = ctx.createRadialGradient(cx,cy,R*0.8,cx,cy,R*2.8);
+      diskGrad.addColorStop(0,  hexA(color,0.22));
+      diskGrad.addColorStop(0.4,hexA(color,0.08));
+      diskGrad.addColorStop(1,  'transparent');
+      ctx.beginPath();
+      ctx.arc(cx,cy,R*2.8,0,Math.PI*2);
+      ctx.fillStyle=diskGrad;
+      ctx.fill();
+
+      /* ── Lensing rings (gravitational distortion arcs) ── */
+      for(let a=0;a<ARCS;a++){
+        const frac  = (a+1)/(ARCS+1);
+        const rr    = R*(1.05+frac*0.6);
+        const alpha = 0.18-frac*0.12;
+        const tilt  = (a%2===0?1:-1)*frac*0.35;
+
+        ctx.save();
+        ctx.translate(cx,cy);
+        ctx.rotate(t*0.15*(a%2===0?1:-0.7)+tilt);
+        ctx.scale(1, 0.28+frac*0.15);
+        ctx.beginPath();
+        ctx.arc(0,0,rr,0,Math.PI*2);
+        ctx.strokeStyle=hexA(ring,alpha);
+        ctx.lineWidth=2.5-frac*1.2;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      /* ── Orbital particles ── */
+      particles.forEach(p=>{
+        p.angle += p.speed * (1 + (R*1.4)/(p.dist+0.001)*0.4);
+        p.life  += 0.002;
+        if(p.life>1) p.life=0;
+
+        const fade  = Math.sin(p.life*Math.PI);
+        const scale = 1 - Math.max(0, (R*1.05-p.dist)/(R*0.5));
+        const px = cx + Math.cos(p.angle)*p.dist;
+        const py = cy + Math.sin(p.angle)*p.dist*0.35;
+
+        if(scale<=0) return;
+        ctx.beginPath();
+        ctx.arc(px,py,p.size*scale,0,Math.PI*2);
+        ctx.fillStyle=hexA(color, p.alpha*fade*scale*0.85);
+        ctx.fill();
+      });
+
+      /* ── Bright hot ring ── */
+      ctx.save();
+      ctx.translate(cx,cy);
+      ctx.rotate(t*0.08);
+      ctx.scale(1,0.32);
+      const hotGrad = ctx.createRadialGradient(0,0,R*0.9,0,0,R*1.25);
+      hotGrad.addColorStop(0,   hexA(ring,0.55));
+      hotGrad.addColorStop(0.5, hexA(ring,0.18));
+      hotGrad.addColorStop(1,   'transparent');
+      ctx.beginPath();
+      ctx.arc(0,0,R*1.25,0,Math.PI*2);
+      ctx.fillStyle=hotGrad;
+      ctx.fill();
+      ctx.restore();
+
+      /* ── Singularity (black hole) ── */
+      const singGrad = ctx.createRadialGradient(cx,cy,0,cx,cy,R);
+      singGrad.addColorStop(0,   '#000');
+      singGrad.addColorStop(0.75,'#000');
+      singGrad.addColorStop(0.9, hexA(color,0.12));
+      singGrad.addColorStop(1,   'transparent');
+      ctx.beginPath();
+      ctx.arc(cx,cy,R,0,Math.PI*2);
+      ctx.fillStyle=singGrad;
+      ctx.fill();
+
+      /* ── Event horizon ring ── */
+      ctx.beginPath();
+      ctx.arc(cx,cy,R,0,Math.PI*2);
+      ctx.strokeStyle=hexA(ring,0.4+0.2*Math.sin(t*1.5));
+      ctx.lineWidth=1.5;
+      ctx.stroke();
+
+      t+=0.012;
+      requestAnimationFrame(draw);
+    }
+    draw();
+  });
+
+  function hexA(hex,a){
+    const r=parseInt(hex.slice(1,3),16);
+    const g=parseInt(hex.slice(3,5),16);
+    const b=parseInt(hex.slice(5,7),16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+})();
+</script>
+</body>
+</html>
