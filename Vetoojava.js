@@ -18,7 +18,7 @@ const CONFIG = {
 // ─── قيم TK الثابتة لكل نشاط ─────────────────────────────
 const ACTIVITY_TK = {
   "listening":         100,
-  "grammar":           100,
+  "grammar":           1000,
   "vocab":             1000,
   "vocabulary":        1000,
   "one shot":          100,
