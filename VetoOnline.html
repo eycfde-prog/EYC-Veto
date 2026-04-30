@@ -264,22 +264,7 @@
     }
   });
 
-  // ── Global: open grammar exam from anywhere ──
-  window.openGrammarExam = function(lessonId) {
-    if (!window.currentUser) {
-      showLogin("grammar");
-      return;
-    }
-    const overlay = document.getElementById("grammarExamOverlay");
-    const container = document.getElementById("grammarExamContainer");
-    overlay.classList.remove("hidden");
-    container.innerHTML = "";
-    if (typeof GrammarExam !== "undefined") {
-      GrammarExam.start(lessonId, container, window.currentUser.email);
-    } else {
-      container.innerHTML = `<div style="color:#ff4757;padding:40px;text-align:center;font-family:monospace;">Grammar engine not loaded.</div>`;
-    }
-  };
+  // openGrammarExam is handled by Vetoojava.js
 </script>
 
 </body>
